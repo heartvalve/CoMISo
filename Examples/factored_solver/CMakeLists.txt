@@ -17,30 +17,24 @@ set (directories
   . 
 )
 
-# collect all header,source and ui files
+# collect all header and source files
 acg_append_files (headers "*.hh" ${directories})
 acg_append_files (sources "*.cc" ${directories})
-acg_append_files (ui "*.ui" ${directories})
 
 # remove template cc files from source file list
 acg_drop_templates (sources)
 
-# genereate uic and moc targets
-acg_qt4_autouic (uic_targets ${ui})
-acg_qt4_automoc (moc_targets ${headers})
-
 if (WIN32)
-  acg_add_executable (factored_solver WIN32 ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (factored_solver WIN32 ${sources} ${headers} )
 elseif (APPLE)
   # generate bundle on mac
-  acg_add_executable (factored_solver MACOSX_BUNDLE ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (factored_solver MACOSX_BUNDLE ${sources} ${headers} )
 else ()
-  acg_add_executable (factored_solver ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (factored_solver ${sources} ${headers} )
 endif ()
 
 target_link_libraries (factored_solver
   CoMISo
-  ${QT_LIBRARIES}
 )
 
 if (APPLE)

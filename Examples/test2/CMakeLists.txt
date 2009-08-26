@@ -8,7 +8,6 @@ include_directories (
 )
 
 link_directories (
-/data/home1/zimmer/projects/ConstrainedSolver/package/CoMISo/build/Build/lib/CoMISo
 )
 
 # source code directories
@@ -19,22 +18,19 @@ set (directories
 # collect all header,source and ui files
 acg_append_files (headers "*.hh" ${directories})
 acg_append_files (sources "*.cc" ${directories})
-acg_append_files (ui "*.ui" ${directories})
 
 # remove template cc files from source file list
 acg_drop_templates (sources)
 
 # genereate uic and moc targets
-acg_qt4_autouic (uic_targets ${ui})
-acg_qt4_automoc (moc_targets ${headers})
 
 if (WIN32)
-  acg_add_executable (test2 WIN32 ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (test2 WIN32 ${sources} ${headers} )
 elseif (APPLE)
   # generate bundle on mac
-  acg_add_executable (test2 MACOSX_BUNDLE ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (test2 MACOSX_BUNDLE ${sources} ${headers} )
 else ()
-  acg_add_executable (test2 ${uic_targets} ${sources} ${headers} ${moc_targets})
+  acg_add_executable (test2  ${sources} ${headers} )
 endif ()
 
 target_link_libraries (test2
