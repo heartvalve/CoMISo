@@ -12,6 +12,7 @@
 //== INCLUDES =================================================================
 
 // qmake users have to include
+#ifdef QT4_FOUND 
 #include "ui_QtMISolverDialogBase.hh"
 
 // ACGMake users have to include
@@ -80,3 +81,4 @@ private:
 #endif // ACG_MISOLVERDIALOG_HH defined
 //=============================================================================
 
+#endif
