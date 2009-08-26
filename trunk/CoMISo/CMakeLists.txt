@@ -125,10 +125,11 @@ of_list_filter  ( sources )
 # remove template cc files from source file list
 acg_drop_templates (sources)
 
+if( QT4_FOUND)
 # genereate uic and moc targets
 acg_qt4_autouic (uic_targets ${ui})
 acg_qt4_automoc (moc_targets ${headers})
-
+endif()
 message( WARNING ${uic_targets})
 acg_add_library (CoMISo SHARED ${uic_targets} ${sources} ${headers} ${moc_targets})
 
