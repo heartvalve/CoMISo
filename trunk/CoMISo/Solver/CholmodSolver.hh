@@ -11,7 +11,7 @@
 //== INCLUDES =================================================================
 
 
-#include <Config/CoMISoDefines.hh>
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include "GMM_Tools.hh"
 
 #include <iostream>
