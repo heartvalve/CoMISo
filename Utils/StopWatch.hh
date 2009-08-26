@@ -56,7 +56,7 @@
 
 #endif
 
-#include <Config/CoMISoDefines.hh>
+#include <CoMISo/Config/CoMISoDefines.hh>
 
 
 //== NAMESPACES ===============================================================

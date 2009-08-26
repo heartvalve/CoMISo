@@ -10,7 +10,7 @@
 #include "ConstrainedSolver.hh"
 #include <gmm/gmm.h>
 #include <float.h>
-#include <Utils/StopWatch.hh>
+#include <CoMISo/Utils/StopWatch.hh>
 
 //== NAMESPACES ===============================================================
 
