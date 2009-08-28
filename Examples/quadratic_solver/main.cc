@@ -1,9 +1,9 @@
-#include <Utils/StopWatch.hh>
+#include <CoMISo/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
 #include <vector>
-#include <Solver/ConstrainedSolver.hh>
-#include <Solver/MISolver.hh>
-#include <Solver/GMM_Tools.hh>
+#include <CoMISo/Solver/ConstrainedSolver.hh>
+#include <CoMISo/Solver/MISolver.hh>
+#include <CoMISo/Solver/GMM_Tools.hh>
 
 /// function to setup a random sparse row matrix of dimension _m x _n
 /// for the simplicity of this example only integer valued entries are used
