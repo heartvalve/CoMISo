@@ -1,15 +1,15 @@
 include (ACGCommon)
+find_package(CoMISo)
 
 include_directories (
   ..
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${COMISO_INCLUDE_DIR}
 )
 
 link_directories (
- # ${CMAKE_CURRENT_BINARY_DIR}/Build/lib/CoMISo
-#/data/home1/zimmer/projects/ConstrainedSolver/package/CoMISo/build/Build/lib/CoMISo
 )
 
 # source code directories

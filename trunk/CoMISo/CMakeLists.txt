@@ -106,7 +106,6 @@ acg_append_files (headers "*.hh" ${directories})
 acg_append_files (sources "*.cc" ${directories})
 acg_append_files (ui "*.ui" ${directories})
 
-message( WARNING ${ui})
 
 macro (of_list_filter _list)
   if (WIN32)
@@ -130,7 +129,6 @@ if( QT4_FOUND)
 acg_qt4_autouic (uic_targets ${ui})
 acg_qt4_automoc (moc_targets ${headers})
 endif()
-message( WARNING ${uic_targets})
 acg_add_library (CoMISo SHARED ${uic_targets} ${sources} ${headers} ${moc_targets})
 
 if (NOT APPLE)

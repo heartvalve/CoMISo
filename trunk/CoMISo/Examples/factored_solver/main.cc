@@ -1,9 +1,29 @@
-#include <Utils/StopWatch.hh>
+/*===========================================================================*\
+ *                                                                           *
+ *                              CoMISo                                       *
+ *      Copyright (C) 2008-2009 by Computer Graphics Group, RWTH Aachen      *
+ *                      www.graphics.rwth-aachen.de                          *
+ *                                                                           *
+ *---------------------------------------------------------------------------*
+ *  This file is a part of CoMISo.                                          *
+ *                                                                           *
+\*===========================================================================*/
+
+/*===========================================================================*\
+ *                                                                           *
+ *   $Revision: 1    $                                                       *
+ *   $Author: zimmer $                                                       *
+ *   $Date: 2009-08-05 16:35:37 +0200 (Wed, 05 Aug 2009) $                   *
+ *                                                                           *
+\*===========================================================================*/
+
+
+#include <CoMISo/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
 #include <vector>
-#include <Solver/ConstrainedSolver.hh>
-#include <Solver/MISolver.hh>
-#include <Solver/GMM_Tools.hh>
+#include <CoMISo/Solver/ConstrainedSolver.hh>
+#include <CoMISo/Solver/MISolver.hh>
+#include <CoMISo/Solver/GMM_Tools.hh>
 
 /// function to setup a random sparse row matrix of dimension _m x _n
 /// for the simplicity of this example only integer valued entries are used
