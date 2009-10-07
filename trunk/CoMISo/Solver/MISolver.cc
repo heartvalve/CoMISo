@@ -103,7 +103,7 @@ MISolver::solve(
     ++n_full;
   }
 
-  if( no_rounding_)
+ if( no_rounding_)
     return;
 
   // preconditioner for CG
@@ -252,6 +252,7 @@ MISolver::solve(
   }
 
   // final full solution?
+  if( _to_round.size() != 0)
   if( final_full_solution_ || direct_rounding_)
   {
     if( noisy_ > 2) std::cerr << "final full solution" << std::endl;
