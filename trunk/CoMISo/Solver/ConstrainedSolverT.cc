@@ -226,6 +226,7 @@ make_constraints_independent(
     RIter row_it    = gmm::vect_const_begin( row);
     RIter row_end   = gmm::vect_const_end( row);
     double elim_val = FLT_MAX;
+    double max_elim_val = -FLT_MAX;
 
     for(; row_it != row_end; ++row_it)
     {
@@ -233,11 +234,15 @@ make_constraints_independent(
       // do not use the constant part
       if(  cur_j != n_vars - 1 )
       {
-        // found real valued var? -> finished
+        // found real valued var? -> finished (UPDATE: no not any more, find biggest real value to avoid x/1e-13)
         if( !roundmap[ cur_j ])
         {
-          elim_j = cur_j;
-          break;
+          if( fabs(*row_it) > max_elim_val)
+          {
+            elim_j = cur_j;
+            max_elim_val = fabs(*row_it);
+          }
+          //break;
         }
         else
           // store smallest integer
