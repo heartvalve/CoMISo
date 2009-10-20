@@ -211,6 +211,7 @@ make_constraints_independent(
   {
     // get elimination variable
     int elim_j = -1;
+    int elim_int_j = -1;
 
     // iterate over current row, until variable found
     // first search for real valued variable
@@ -245,14 +246,24 @@ make_constraints_independent(
           //break;
         }
         else
-          // store smallest integer
-          if( fabs(*row_it) < elim_val)
+        {
+          // store integer closest to 1
+          if( fabs(fabs(*row_it)-1.0) < elim_val)
           {
-            elim_j   = cur_j;
-            elim_val = fabs(*row_it);
+            elim_int_j   = cur_j;
+            elim_val     = fabs(fabs(*row_it)-1.0);
           }
+        }
       }
     }
+
+    // first try to eliminate a valid (>epsilon_) real valued variable (safer)
+    if( max_elim_val > epsilon_)
+    {}
+    else // use the best found integer
+      elim_j = elim_int_j;
+
+
 
     // store result
     _c_elim[i] = elim_j;
@@ -260,13 +271,13 @@ make_constraints_independent(
     if( elim_j == -1)
     {
       // redundant or incompatible?
-      if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > 1e-6 )
+      if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
         std::cerr << "Warning: incompatible condition:\n";
       else
         std::cerr << "Warning: redundant condition:\n";
     }
     else
-      if(roundmap[elim_j] && fabs(elim_val-1.0) > 1e-6)
+      if(roundmap[elim_j] && elim_val > 1e-6) 
         std::cerr << "Warning: eliminate non +-1 integer -> correct rounding cannot be guaranteed:\n" 
           << gmm::mat_const_row(_constraints, i) << std::endl;
 
@@ -274,7 +285,7 @@ make_constraints_independent(
     if( elim_j != -1 )
     {
       // get elim variable value
-      double elim_val = _constraints(i, elim_j);
+      double elim_val_cur = _constraints(i, elim_j);
 
       // copy col
       CVector col = constraints_c.col(elim_j);
@@ -287,7 +298,7 @@ make_constraints_independent(
         if( c_it.index() > i)
         {
           sw.start();
-          add_row_simultaneously( c_it.index(), -(*c_it)/elim_val, gmm::mat_row(_constraints, i), _constraints, constraints_c);
+          add_row_simultaneously( c_it.index(), -(*c_it)/elim_val_cur, gmm::mat_row(_constraints, i), _constraints, constraints_c);
           // make sure the eliminated entry is 0 on all other rows and not 1e-17
           _constraints( c_it.index(), elim_j) = 0;
           constraints_c(c_it.index(), elim_j) = 0;

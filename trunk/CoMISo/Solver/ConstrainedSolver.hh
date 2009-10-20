@@ -62,7 +62,7 @@ public:
 
 
   /// default Constructor
-  ConstrainedSolver()  { }
+  ConstrainedSolver()  { epsilon_ = 1e-6; }
 
   /// Destructor
   ~ConstrainedSolver() { }
@@ -203,6 +203,8 @@ public:
 
 /*@}*/
 
+  /// Set numerical epsilon for valid constraint coefficient
+  void set_epsilon( double _epsilon) { epsilon_ = _epsilon;}
 
 /** @name Verify the result.
  * Functions to verify the result of the constrained solver. Are the constraints met, are the correct variables correctly rounded ...
@@ -268,6 +270,8 @@ private:
 
   /// Assignment operator (not used)
   ConstrainedSolver& operator=(const ConstrainedSolver& _rhs);
+
+  double epsilon_;
 };
 
 
