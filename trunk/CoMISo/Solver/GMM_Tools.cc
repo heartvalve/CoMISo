@@ -909,10 +909,11 @@ void inspect_matrix( const MatrixT& _A)
   int n = gmm::mat_ncols(_A);
 
   std::cerr << "################### INSPECT MATRIX ##################\n";
-  std::cerr << "#rows    : " << m << std::endl;
-  std::cerr << "#cols    : " << n << std::endl;
-  std::cerr << "#nonzeros: " << gmm::nnz(_A) << std::endl;
-  std::cerr << "symmetric: " << gmm::is_symmetric(_A) << std::endl;
+  std::cerr << "#rows        : " << m << std::endl;
+  std::cerr << "#cols        : " << n << std::endl;
+  std::cerr << "#nonzeros    : " << gmm::nnz(_A) << std::endl;
+  std::cerr << "#nonzeros/row: " << (double(gmm::nnz(_A))/double(m)) << std::endl;
+  std::cerr << "symmetric    : " << gmm::is_symmetric(_A) << std::endl;
 
   gmm::col_matrix<gmm::wsvector<VType> > Acol( m, n);
   gmm::row_matrix<gmm::wsvector<VType> > Arow( m, n);
@@ -929,8 +930,8 @@ void inspect_matrix( const MatrixT& _A)
   for(int i=0; i<n; ++i)
     if( Acol.col(i).size() == 0) ++zero_cols;
 
-  std::cerr << "zero rows: " << zero_rows << std::endl;
-  std::cerr << "zero cols: " << zero_cols << std::endl;
+  std::cerr << "zero rows    : " << zero_rows << std::endl;
+  std::cerr << "zero cols    : " << zero_cols << std::endl;
 
   VType vmin     = std::numeric_limits<VType>::max();
   VType vmax     = std::numeric_limits<VType>::min();
@@ -963,17 +964,17 @@ void inspect_matrix( const MatrixT& _A)
     }
   }
   
-  std::cerr << "min  val : " << vmin << std::endl;
-  std::cerr << "max  val : " << vmax << std::endl;
-  std::cerr << "min |val|: " << vmin_abs << std::endl;
-  std::cerr << "max |val|: " << vmax_abs << std::endl;
-  std::cerr << "#nan     : " << n_nan << std::endl;
-  std::cerr << "#inf     : " << n_inf << std::endl;
+  std::cerr << "min  val     : " << vmin << std::endl;
+  std::cerr << "max  val     : " << vmax << std::endl;
+  std::cerr << "min |val|    : " << vmin_abs << std::endl;
+  std::cerr << "max |val|    : " << vmax_abs << std::endl;
+  std::cerr << "#nan         : " << n_nan << std::endl;
+  std::cerr << "#inf         : " << n_inf << std::endl;
   
-  std::cerr << "min eval : " << "..." << std::endl;
-  std::cerr << "max eval : " << "..." << std::endl;
-  std::cerr << "min|eval|: " << "..." << std::endl;
-  std::cerr << "max|eval|: " << "..." << std::endl;
+  std::cerr << "min eval     : " << "..." << std::endl;
+  std::cerr << "max eval     : " << "..." << std::endl;
+  std::cerr << "min|eval|    : " << "..." << std::endl;
+  std::cerr << "max|eval|    : " << "..." << std::endl;
 }
 
 
