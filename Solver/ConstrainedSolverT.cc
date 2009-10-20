@@ -268,18 +268,21 @@ make_constraints_independent(
     // store result
     _c_elim[i] = elim_j;
     // error check result
-    if( elim_j == -1)
+    if( noisy_ > 0)
     {
-      // redundant or incompatible?
-      if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
-        std::cerr << "Warning: incompatible condition:\n";
+      if( elim_j == -1)
+      {
+        // redundant or incompatible?
+        if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
+          std::cerr << "Warning: incompatible condition:\n";
+        else
+          std::cerr << "Warning: redundant condition:\n";
+      }
       else
-        std::cerr << "Warning: redundant condition:\n";
+        if(roundmap[elim_j] && elim_val > 1e-6) 
+          std::cerr << "Warning: eliminate non +-1 integer -> correct rounding cannot be guaranteed:\n" 
+            << gmm::mat_const_row(_constraints, i) << std::endl;
     }
-    else
-      if(roundmap[elim_j] && elim_val > 1e-6) 
-        std::cerr << "Warning: eliminate non +-1 integer -> correct rounding cannot be guaranteed:\n" 
-          << gmm::mat_const_row(_constraints, i) << std::endl;
 
     // is this condition dependent?
     if( elim_j != -1 )
@@ -322,7 +325,6 @@ eliminate_constraints(
     std::vector<int>&           _new_idx,
     gmm::col_matrix<SVector3T>& _Bcol)
 {
-  std::cerr << __FUNCTION__ << std::endl;
   // copy into column matrix
   gmm::resize(_Bcol, gmm::mat_nrows(_B), gmm::mat_ncols(_B));
   gmm::copy( _B, _Bcol);
@@ -384,9 +386,13 @@ eliminate_constraints(
   std::sort(_idx_to_round.begin(), _idx_to_round.end());
   _idx_to_round.resize( std::unique(_idx_to_round.begin(), _idx_to_round.end()) -_idx_to_round.begin());
 
-  std::cerr << "remaining         variables: " << gmm::mat_ncols(_Bcol) << std::endl;
-  std::cerr << "remaining integer variables: " << _idx_to_round.size() << std::endl;
-  std::cerr << std::endl;
+
+  if( noisy_ > 2 )
+  {
+    std::cerr << __FUNCTION__ << "remaining         variables: " << gmm::mat_ncols(_Bcol) << std::endl;
+    std::cerr << __FUNCTION__ << "remaining integer variables: " << _idx_to_round.size() << std::endl;
+    std::cerr << __FUNCTION__ << std::endl;
+  }
 }
 
 
@@ -406,8 +412,6 @@ eliminate_constraints(
     std::vector<int>&           _new_idx,
     CSCMatrixT&                 _Acsc)
 {
-  std::cerr << __FUNCTION__ << std::endl;
-
   ACG::StopWatch sw;
   sw.start();
   // define iterator on matrix A and on constraints C
@@ -486,7 +490,8 @@ eliminate_constraints(
       constraint[ constraint.size()-1] = constraint_rhs;
     }
   }
-  std::cerr << "Constraints integrated " << sw.stop()/1000.0 << std::endl;
+  if( noisy_ > 2)
+    std::cerr << __FUNCTION__ << " Constraints integrated " << sw.stop()/1000.0 << std::endl;
 
   // eliminate vars
   _Acsc.init_with_good_format(_A);
@@ -494,7 +499,8 @@ eliminate_constraints(
   std::vector< double > elim_varvals( elim_varids.size(), 0);
   gmm::eliminate_csc_vars2( elim_varids, elim_varvals, _Acsc, _x, _rhs);
 
-  std::cerr << "Constraints eliminated " << sw.stop()/1000.0 << std::endl;
+  if( noisy_ > 2)
+    std::cerr << __FUNCTION__ << " Constraints eliminated " << sw.stop()/1000.0 << std::endl;
   sw.start();
   // init _new_idx vector
   _new_idx.resize( mat_ncols(_constraints));
@@ -520,7 +526,9 @@ eliminate_constraints(
 
   std::sort(_idx_to_round.begin(), _idx_to_round.end());
   _idx_to_round.resize( std::unique(_idx_to_round.begin(), _idx_to_round.end()) -_idx_to_round.begin());
-  std::cerr << "Indices reindexed " << sw.stop()/1000.0 << std::endl << std::endl;
+
+  if( noisy_ > 2)
+    std::cerr << __FUNCTION__ << "Indices reindexed " << sw.stop()/1000.0 << std::endl << std::endl;
 }
 
 
@@ -579,7 +587,6 @@ setup_and_solve_system( CMatrixT& _B,
 			double    _reg_factor,
 			bool      _show_miso_settings)
 {
-  std::cerr << __FUNCTION__ << std::endl;
   ACG::StopWatch s1;
   ACG::StopWatch sw; sw.start();
   unsigned int m = gmm::mat_nrows(_B);
@@ -590,30 +597,36 @@ setup_and_solve_system( CMatrixT& _B,
   CMatrixT Bt;
   gmm::resize( Bt, n, m);
   gmm::copy( gmm::transposed( _B), Bt);
-  std::cerr << "Bt took " << s1.stop()/1000.0 << std::endl;
+  if( noisy_ > 1 )
+    std::cerr << __FUNCTION__ << " Bt took " << s1.stop()/1000.0 << std::endl;
   s1.start();
 
   // setup BtB
   CMatrixT BtB;
   gmm::resize( BtB, n, n);
   gmm::mult( Bt, _B, BtB);
-  std::cerr << "BtB took " << s1.stop()/1000.0 << std::endl;
-
+  if( noisy_ > 1 )
+    std::cerr << __FUNCTION__ << " BtB took " << s1.stop()/1000.0 << std::endl;
   s1.start();
+
   // extract rhs
   std::vector< double > rhs( n);
   gmm::copy( gmm::scaled(gmm::mat_const_col( BtB, n - 1),-1.0), rhs);
   rhs.resize( n - 1);
 
-  std::cerr << "rhs extract resize " << s1.stop()/1000.0 << std::endl;
+  if( noisy_ > 1)
+    std::cerr << __FUNCTION__ << " rhs extract resize " << s1.stop()/1000.0 << std::endl;
   s1.start();
+
   // resize BtB to only contain the actual system matrix (and not the rhs)
   gmm::resize( BtB, n - 1, n - 1);
 
-  std::cerr << "BtB resize took " << s1.stop()/1000.0 << std::endl;
+  if( noisy_ > 1)
+    std::cerr << __FUNCTION__ << " BtB resize took " << s1.stop()/1000.0 << std::endl;
   s1.start();
   _x.resize( n - 1);
-  std::cerr << "x resize took " << s1.stop()/1000.0 << std::endl;
+  if( noisy_ > 1)
+    std::cerr << __FUNCTION__ << " x resize took " << s1.stop()/1000.0 << std::endl;
 
   // regularize if necessary
   if(_reg_factor != 0.0)
@@ -624,7 +637,8 @@ setup_and_solve_system( CMatrixT& _B,
   CSCMatrix BtBCSC;
   BtBCSC.init_with_good_format( BtB);
 
-  std::cerr << "CSC init " << s1.stop()/1000.0 << std::endl;
+  if( noisy_ > 1)
+    std::cerr << __FUNCTION__ << " CSC init " << s1.stop()/1000.0 << std::endl;
   double setup_time = sw.stop()/1000.0;
   
   // create solver
@@ -637,7 +651,8 @@ setup_and_solve_system( CMatrixT& _B,
   misw.start();
   // miso solve
   miso.solve( BtBCSC, _x, rhs, _idx_to_round);
-  std::cerr << "Miso Time " << misw.stop()/1000.0 << "s." << std::endl << std::endl;
+  if( noisy_ > 1)
+  std::cerr << __FUNCTION__ << " Miso Time " << misw.stop()/1000.0 << "s." << std::endl << std::endl;
   return setup_time;
 }
 
@@ -664,7 +679,7 @@ restore_eliminated_vars( RMatrixT&         _constraints,
     if( _new_idx[i] != -1)
     {
       // error handling
-      if( i < _new_idx[i]) std::cerr << "Warning: UNSAVE Ordering!!!\n";
+      if( i < _new_idx[i] && noisy_ > 0) std::cerr << "Warning: UNSAFE Ordering!!!\n";
 
       _x[i] = _x[_new_idx[i]];
     }

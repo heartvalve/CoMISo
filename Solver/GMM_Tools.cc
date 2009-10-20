@@ -566,8 +566,6 @@ void eliminate_vars( const std::vector<IntegerT>&     _evar,
   typedef typename gmm::linalg_traits<MatrixT>::const_sub_col_type ColT;
   typedef typename gmm::linalg_traits<ColT>::const_iterator CIter;
 
-  ACG::StopWatch sw;
-  sw.start();
   //  unsigned int m = gmm::mat_nrows( _A);
   unsigned int n = gmm::mat_ncols( _A );
 
@@ -613,8 +611,6 @@ void eliminate_vars( const std::vector<IntegerT>&     _evar,
     }
   }
 
-  std::cerr << " before matrix took " << sw.stop()/1000.0 << std::endl;
-  sw.start();
   // delete last element
   _rhs.resize( n_new );
   _x.resize( n_new );
@@ -724,7 +720,6 @@ void eliminate_vars( const std::vector<IntegerT>&     _evar,
      gmm::copy( Atmp, _A);
    */
 
-  std::cerr << " after matrix took " << sw.stop()/1000.0 << std::endl;
 }
 
 
