@@ -62,7 +62,7 @@ public:
 
 
   /// default Constructor
-  ConstrainedSolver()  { epsilon_ = 1e-6; }
+  ConstrainedSolver()  { epsilon_ = 1e-6; noisy_ = 1; }
 
   /// Destructor
   ~ConstrainedSolver() { }
@@ -206,6 +206,9 @@ public:
   /// Set numerical epsilon for valid constraint coefficient
   void set_epsilon( double _epsilon) { epsilon_ = _epsilon;}
 
+  /// Set noise-level (how much std output is given) 0 basically none, 1 important stuff (warning/timing, is default), 2+ not so important
+  void set_noisy( int _noisy) { noisy_ = _noisy;}
+
 /** @name Verify the result.
  * Functions to verify the result of the constrained solver. Are the constraints met, are the correct variables correctly rounded ...
  */
@@ -272,6 +275,7 @@ private:
   ConstrainedSolver& operator=(const ConstrainedSolver& _rhs);
 
   double epsilon_;
+  int    noisy_;
 };
 
 
