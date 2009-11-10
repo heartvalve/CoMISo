@@ -247,8 +247,9 @@ make_constraints_independent(
         }
         else
         {
-          // store integer closest to 1
-          if( fabs(fabs(*row_it)-1.0) < elim_val)
+          double cur_row_val(fabs(*row_it));
+          // store integer closest to 1, must be greater than epsilon_
+          if( fabs(cur_row_val-1.0) < elim_val && cur_row_val > epsilon_)
           {
             elim_int_j   = cur_j;
             elim_val     = fabs(fabs(*row_it)-1.0);
@@ -262,6 +263,9 @@ make_constraints_independent(
     {}
     else // use the best found integer
       elim_j = elim_int_j;
+
+    // if no integer or real valued variable greater than epsilon_ existed, then
+    // elim_j is now -1 and this row is not considered as a valid constraint
 
 
 
