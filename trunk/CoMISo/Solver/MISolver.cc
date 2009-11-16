@@ -27,7 +27,7 @@
 #include "MISolver.hh"
 
 #ifdef QT4_FOUND
-#include <CoMISo/QtWidgets/MISolverDialog.hh>
+#include <CoMISo/QtWidgets/MISolverDialogUI.hh>
 #endif
 
 #include <gmm/gmm.h>
