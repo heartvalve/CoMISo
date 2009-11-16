@@ -32,7 +32,7 @@
 
 //== INCLUDES =================================================================
 
-#include "MISolverDialog.hh"
+#include "MISolverDialogUI.hh"
 
 #ifdef QT4_FOUND
 #include <QtGui>
