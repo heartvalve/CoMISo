@@ -30,8 +30,8 @@
 //=============================================================================
 
 
-#ifndef ACG_CONSTRAINEDSOLVER_HH
-#define ACG_CONSTRAINEDSOLVER_HH
+#ifndef COMISO_CONSTRAINEDSOLVER_HH
+#define COMISO_CONSTRAINEDSOLVER_HH
 
 
 //== INCLUDES =================================================================
@@ -47,7 +47,7 @@
 #define ROUND(x) ((x)<0?int((x)-0.5):int((x)+0.5))
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 //== CLASS DEFINITION =========================================================
 
 /** \class ConstrainedSolver ConstrainedSolver.hh <ACG/.../ConstrainedSolver.hh>
@@ -62,7 +62,7 @@ public:
 
 
   /// default Constructor
-  ConstrainedSolver()  { epsilon_ = 1e-6; noisy_ = 1; }
+  ConstrainedSolver()  { epsilon_ = 1e-8; epsilon_squared_ = 1e-16; noisy_ = 1; }
 
   /// Destructor
   ~ConstrainedSolver() { }
@@ -204,7 +204,7 @@ public:
 /*@}*/
 
   /// Set numerical epsilon for valid constraint coefficient
-  void set_epsilon( double _epsilon) { epsilon_ = _epsilon;}
+  void set_epsilon( double _epsilon) { epsilon_ = _epsilon; epsilon_squared_ = epsilon_*epsilon_;}
 
   /// Set noise-level (how much std output is given) 0 basically none, 1 important stuff (warning/timing, is default), 2+ not so important
   void set_noisy( int _noisy) { noisy_ = _noisy;}
@@ -275,18 +275,19 @@ private:
   ConstrainedSolver& operator=(const ConstrainedSolver& _rhs);
 
   double epsilon_;
+  double epsilon_squared_;
   int    noisy_;
 };
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(ACG_CONSTRAINEDSOLVER_C)
-#define ACG_CONSTRAINEDSOLVER_TEMPLATES
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_CONSTRAINEDSOLVER_C)
+#define COMISO_CONSTRAINEDSOLVER_TEMPLATES
 #include "ConstrainedSolverT.cc"
 #endif
 //=============================================================================
-#endif // ACG_CONSTRAINEDSOLVER_HH defined
+#endif // COMISO_CONSTRAINEDSOLVER_HH defined
 //=============================================================================
 

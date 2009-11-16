@@ -29,8 +29,8 @@
 //
 //=============================================================================
 
-#ifndef ACG_CHOLMOD_SOLVER_HH
-#define ACG_CHOLMOD_SOLVER_HH
+#ifndef COMISO_CHOLMOD_SOLVER_HH
+#define COMISO_CHOLMOD_SOLVER_HH
 
 
 //== INCLUDES =================================================================
@@ -48,7 +48,7 @@ typedef struct cholmod_factor_struct cholmod_factor;
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 class COMISODLLEXPORT CholmodSolver
@@ -96,12 +96,12 @@ private:
 };
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(ACG_CHOLMOD_SOLVER_TEMPLATES_C)
-#define ACG_CHOLMOD_SOLVER_TEMPLATES
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_CHOLMOD_SOLVER_TEMPLATES_C)
+#define COMISO_CHOLMOD_SOLVER_TEMPLATES
 #include "CholmodSolverT.cc"
 #endif
 //=============================================================================
-#endif // ACG_CHOLMOD_SOLVER_HH defined
+#endif // COMISO_CHOLMOD_SOLVER_HH defined
 //=============================================================================

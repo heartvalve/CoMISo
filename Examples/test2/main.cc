@@ -106,7 +106,7 @@ int main(void)
 
   // make conditions independent
   std::vector< int > idx_to_round, c_elim(gmm::mat_nrows(C));
-  ACG::ConstrainedSolver cs;
+  COMISO::ConstrainedSolver cs;
   cs.make_constraints_independent( C, idx_to_round, c_elim);
   //std::cerr << "C indep " << C << std::endl;
   //c_elim[0]=1;
@@ -178,7 +178,7 @@ int main(void)
 
   // test quadratic elimination
   //std::cerr << " A " << A << std::endl;
-  ACG::StopWatch sw;
+  COMISO::StopWatch sw;
   sw.start();
   gmm::eliminate_constraints(C, A, x, rhs, idx_to_round, c_elim, new_idx);
 
@@ -197,9 +197,9 @@ int main(void)
   //std::cerr << " C " << C << std::endl;
   gmm::row_matrix< gmm::wsvector<double> > Brow(gmm::mat_nrows(B), gmm::mat_ncols(B));
   gmm::copy(B,Brow);
-  ACG::StopWatch sw1;
-  ACG::StopWatch sw2;
-  ACG::StopWatch sw3;
+  COMISO::StopWatch sw1;
+  COMISO::StopWatch sw2;
+  COMISO::StopWatch sw3;
   double time1=0.0, time2=0.0, time3=0.0;
   gmm::col_matrix< gmm::wsvector<double > > Btt;
   sw.start();

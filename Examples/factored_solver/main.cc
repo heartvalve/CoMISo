@@ -111,7 +111,7 @@ int main(void)
   gmm::row_matrix< gmm::wsvector< double > > Ccpy( C );
 
   // create a constrained solver
-  ACG::ConstrainedSolver cs;
+  COMISO::ConstrainedSolver cs;
   // vector of indices to round (this is the mixed-integer part)
   std::vector< int > ids_to_round;
   // lets say we want to round the third variable
@@ -172,7 +172,7 @@ int main(void)
 
   std::cout << "---------- ---------- 3.4) solve the system using the mixed-integer solver..." << std::endl;
   // create solver
-  ACG::MISolver miso;
+  COMISO::MISolver miso;
   // miso solve
   miso.solve( BtBCSC, x, rhs, ids_to_round);
   std::cout << "                      solution vector x is\n" << x << std::endl << std::endl;

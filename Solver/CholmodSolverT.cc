@@ -24,12 +24,12 @@
 
 
 
-#define ACG_CHOLMOD_SOLVER_TEMPLATES_C
+#define COMISO_CHOLMOD_SOLVER_TEMPLATES_C
 
 #include "CholmodSolver.hh"
 
 
-namespace ACG {
+namespace COMISO {
 
 
 template< class GMM_MatrixT>

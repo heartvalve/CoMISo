@@ -83,7 +83,7 @@ int main(void)
 
   std::cout << "---------- 2) The original solution to this system is..." << std::endl;
 
-  ACG::ConstrainedSolver cs;
+  COMISO::ConstrainedSolver cs;
   //  void solve( RMatrixT& _constraints, RMatrixT& _B, VectorT&  _x, VectorIT& _idx_to_round, double    _reg_factor = 0.0, bool      _show_miso_settings = true, bool      _show_timings = true );
   //_show_miso_settings requires a QT context and hence must be false in this example
   cs.solve( constraints, B, x, ids_to_round, 0.0, false, true);  

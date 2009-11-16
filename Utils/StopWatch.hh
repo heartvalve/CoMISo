@@ -39,8 +39,8 @@
 //=============================================================================
 
 
-#ifndef ACG_STOPWATCH_HH
-#define ACG_STOPWATCH_HH
+#ifndef COMISO_STOPWATCH_HH
+#define COMISO_STOPWATCH_HH
 
 
 //== INCLUDES =================================================================
@@ -62,18 +62,18 @@
 //== NAMESPACES ===============================================================
 
 
-namespace ACG {
+namespace COMISO {
 
 
 //== CLASS DEFINITION =========================================================
 
 
 
-/** \class StopWatch StopWatch.hh <ACG/Utils/StopWatch.hh>
+/** \class StopWatch StopWatch.hh <COMISO/Utils/StopWatch.hh>
 
     This class can be used for measuring time, providing milli-second
     precision by using the gettimeofday() funtion.  It is e.g. used in
-    the class ACG::TimedTracing.
+    the class COMISO::TimedTracing.
 **/
 
 class COMISODLLEXPORT StopWatch
@@ -154,8 +154,8 @@ private:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#endif // ACG_STOPWATCH_HH defined
+#endif // COMISO_STOPWATCH_HH defined
 //=============================================================================
 
