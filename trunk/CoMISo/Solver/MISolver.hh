@@ -30,8 +30,8 @@
 //=============================================================================
 
 
-#ifndef ACG_MISOLVER_HH
-#define ACG_MISOLVER_HH
+#ifndef COMISO_MISOLVER_HH
+#define COMISO_MISOLVER_HH
 
 
 //== INCLUDES =================================================================
@@ -48,13 +48,13 @@
 //== FORWARDDECLARATIONS ======================================================
 
 
-namespace ACG {
+namespace COMISO {
 class MISolverDialog;
 }
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -209,18 +209,18 @@ private:
   unsigned int noisy_;
   bool         stats_;
 
-  friend class ACG::MISolverDialog;
+  friend class COMISO::MISolverDialog;
 };
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(ACG_MISOLVER_C)
-#define ACG_MISOLVER_TEMPLATES
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_MISOLVER_C)
+#define COMISO_MISOLVER_TEMPLATES
 #include "MISolverT.cc"
 #endif
 //=============================================================================
-#endif // ACG_MISOLVER_HH defined
+#endif // COMISO_MISOLVER_HH defined
 //=============================================================================
 

@@ -29,7 +29,7 @@
 //
 //=============================================================================
 
-#define ACG_CONSTRAINEDSOLVER_C
+#define COMISO_CONSTRAINEDSOLVER_C
 //== INCLUDES =================================================================
 
 #include "ConstrainedSolver.hh"
@@ -39,7 +39,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== IMPLEMENTATION ==========================================================
 
@@ -66,7 +66,7 @@ solve(
   if( _show_timings) std::cerr << __FUNCTION__ << "\n Initial dimension: " << nrows << " x " << ncols << ", number of constraints: " << ncons << std::endl;
  
   // StopWatch for Timings
-  ACG::StopWatch sw, sw2; sw.start(); sw2.start();
+  COMISO::StopWatch sw, sw2; sw.start(); sw2.start();
 
   // c_elim[i] = index of variable which is eliminated in condition i
   // or -1 if condition is invalid
@@ -132,7 +132,7 @@ solve(
   if( _show_timings) std::cerr << __FUNCTION__ << "\n Initital dimension: " << nrows << " x " << ncols << ", number of constraints: " << ncons << std::endl;
 
   // StopWatch for Timings
-  ACG::StopWatch sw, sw2; sw.start(); sw2.start();
+  COMISO::StopWatch sw, sw2; sw.start(); sw2.start();
 
   // c_elim[i] = index of variable which is eliminated in condition i
   // or -1 if condition is invalid
@@ -152,7 +152,7 @@ solve(
   if( _show_timings) std::cerr << "Eliminated dimension: " << Acsc.nr << " x " << Acsc.nc << std::endl;
 
   // create MISO solver
-  ACG::MISolver miso;
+  COMISO::MISolver miso;
   // show options dialog
   if( _show_miso_settings)
     miso.show_options_dialog();
@@ -186,7 +186,7 @@ make_constraints_independent(
 		VectorIT&         _idx_to_round,
 		std::vector<int>& _c_elim)
 {
-  ACG::StopWatch sw;
+  COMISO::StopWatch sw;
   // number of variables
   int n_vars = gmm::mat_ncols(_constraints);
 
@@ -416,7 +416,7 @@ eliminate_constraints(
     std::vector<int>&           _new_idx,
     CSCMatrixT&                 _Acsc)
 {
-  ACG::StopWatch sw;
+  COMISO::StopWatch sw;
   sw.start();
   // define iterator on matrix A and on constraints C
   typedef typename gmm::linalg_traits<SVector2T>::const_iterator  AIter;
@@ -575,6 +575,11 @@ add_row_simultaneously(	int       _row_i,
   {
     _rmat(_row_i, r_it.index()) += _coeff*(*r_it);
     _cmat(_row_i, r_it.index()) += _coeff*(*r_it);
+    if( _rmat(_row_i, r_it.index())*_rmat(_row_i, r_it.index()) < epsilon_squared_ )
+    {
+      _rmat(_row_i, r_it.index()) = 0.0;
+      _cmat(_row_i, r_it.index()) = 0.0;
+    }
   }
 }
 
@@ -591,8 +596,8 @@ setup_and_solve_system( CMatrixT& _B,
 			double    _reg_factor,
 			bool      _show_miso_settings)
 {
-  ACG::StopWatch s1;
-  ACG::StopWatch sw; sw.start();
+  COMISO::StopWatch s1;
+  COMISO::StopWatch sw; sw.start();
   unsigned int m = gmm::mat_nrows(_B);
   unsigned int n = gmm::mat_ncols(_B);
 
@@ -646,12 +651,12 @@ setup_and_solve_system( CMatrixT& _B,
   double setup_time = sw.stop()/1000.0;
   
   // create solver
-  ACG::MISolver miso;
+  COMISO::MISolver miso;
   // show options dialog
   if( _show_miso_settings)
     miso.show_options_dialog();
 
-  ACG::StopWatch misw;
+  COMISO::StopWatch misw;
   misw.start();
   // miso solve
   miso.solve( BtBCSC, _x, rhs, _idx_to_round);
@@ -899,5 +904,5 @@ ConstrainedSolver::eliminate_columns( CMatrixT& _M,
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================

@@ -211,7 +211,7 @@ void inspect_matrix( const MatrixT& _A);
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace gmm
 //=============================================================================
 #if defined(INCLUDE_TEMPLATES) && !defined(GMM_GMM_TOOLS_C)
 #define GMM_GMM_TOOLS_TEMPLATES

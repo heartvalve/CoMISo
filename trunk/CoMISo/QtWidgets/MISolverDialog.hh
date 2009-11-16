@@ -30,8 +30,8 @@
 //=============================================================================
 
 
-#ifndef ACG_MISOLVERDIALOG_HH
-#define ACG_MISOLVERDIALOG_HH
+#ifndef COMISO_MISOLVERDIALOG_HH
+#define COMISO_MISOLVERDIALOG_HH
 
 
 //== INCLUDES =================================================================
@@ -50,14 +50,14 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG
+namespace COMISO
 {
 
 //== CLASS DEFINITION =========================================================
 
 
 
-/** \class MISolverDialog MISolverDialog.hh <ACG/.../MISolverDialog.hh>
+/** \class MISolverDialog MISolverDialog.hh <COMISO/.../MISolverDialog.hh>
 
     Brief Description.
 
@@ -101,9 +101,9 @@ private:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#endif // ACG_MISOLVERDIALOG_HH defined
+#endif // COMISO_MISOLVERDIALOG_HH defined
 //=============================================================================
 
 #endif

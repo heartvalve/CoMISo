@@ -35,7 +35,7 @@
 
 #define ROUND(x) ((x)<0?int((x)-0.5):int((x)+0.5))
 
-namespace ACG {
+namespace COMISO {
 
 
 
@@ -92,7 +92,7 @@ MISolver::solve(
     old_idx[i] = i;
 
   // Setup Cholmod solver used for full solution
-  ACG::CholmodSolver chol;
+  COMISO::CholmodSolver chol;
 
   if( initial_full_solution_ || direct_rounding_)
   {
@@ -298,6 +298,5 @@ show_options_dialog()
 }
 
 
-// end namespace ACG
+// end namespace COMISO
 }// ----------------------
-// end namespace ACG

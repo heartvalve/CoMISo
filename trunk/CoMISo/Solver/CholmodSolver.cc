@@ -29,7 +29,7 @@
 #include "CholmodSolver.hh"
 
 
-namespace ACG {
+namespace COMISO {
 
 CholmodSolver::CholmodSolver()
 {
