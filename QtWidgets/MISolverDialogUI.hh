@@ -38,7 +38,7 @@
 
 // qmake users have to include
 #ifdef QT4_FOUND 
-#include "ui_QtMISolverDialogBase.hh"
+#include "ui_QtMISolverDialogBaseUI.hh"
 
 // ACGMake users have to include
 // #include "QtMISolverDialogBase.hh"
@@ -64,7 +64,7 @@ namespace COMISO
     A more elaborate description follows.
 */
 class MISolverDialog
-         : public QDialog, public Ui::QtMISolverDialogBase
+         : public QDialog, public Ui::QtMISolverDialogBaseUI
 {
    Q_OBJECT
 public:
@@ -73,7 +73,7 @@ public:
    MISolverDialog( MISolver&   _misolver,
                    QWidget*    _parent = 0 ):
          QDialog( _parent ),
-         Ui::QtMISolverDialogBase(),
+         Ui::QtMISolverDialogBaseUI(),
          misolver_( _misolver )
    {
       setupUi( this );

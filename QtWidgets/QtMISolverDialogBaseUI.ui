@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>QtMISolverDialogBase</class>
- <widget class="QDialog" name="QtMISolverDialogBase" >
+ <class>QtMISolverDialogBaseUI</class>
+ <widget class="QDialog" name="QtMISolverDialogBaseUI" >
   <property name="windowModality" >
    <enum>Qt::ApplicationModal</enum>
   </property>
