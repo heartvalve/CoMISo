@@ -97,6 +97,18 @@ public:
       bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
+  // const version of above function
+  template<class RMatrixT, class CMatrixT, class VectorT, class VectorIT >
+  void solve_const(
+      const RMatrixT& _constraints,
+      const CMatrixT& _A, 
+            VectorT&  _x,
+      const VectorT&  _rhs,
+      const VectorIT& _idx_to_round,
+            double    _reg_factor = 0.0,
+            bool      _show_miso_settings = true,
+            bool      _show_timings = true );
+
 
 /// Non-Quadratic matrix constrained solver
 /**  
@@ -220,7 +232,8 @@ public:
 				   const RMatrixT& _conditions,
 				   const CMatrixT& _A,
 				   const VectorT&  _x,
-				   const VectorT&  _rhs);
+				   const VectorT&  _rhs,
+				   double          _eps = 1e-9);
 
   template<class RMatrixT, class CMatrixT, class VectorT, class VectorIT>
   double verify_constrained_system_round( 
@@ -228,7 +241,8 @@ public:
 					 const CMatrixT& _A,
 					 const VectorT&  _x,
 					 const VectorT&  _rhs,
-					 const VectorIT& _idx_to_round);
+					 const VectorIT& _idx_to_round,
+					 double          _eps = 1e-9);
 
   template<class RMatrixT, class VectorT, class VectorIT>
   void verify_mi_factored( const RMatrixT& _conditions,

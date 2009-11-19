@@ -44,6 +44,43 @@ namespace COMISO {
 //== IMPLEMENTATION ==========================================================
 
 
+// const version of above function
+template<class RMatrixT, class CMatrixT, class VectorT, class VectorIT >
+void 
+ConstrainedSolver::
+solve_const(
+		 const RMatrixT& _constraints,
+		 const CMatrixT& _A, 
+		 VectorT&  _x,
+		 const VectorT&  _rhs,
+		 const VectorIT& _idx_to_round,
+		 double    _reg_factor,
+		 bool      _show_miso_settings,
+		 bool      _show_timings )
+{
+  // copy matrices
+  RMatrixT constraints( gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
+  gmm::copy(_constraints, constraints);
+
+  CMatrixT A( gmm::mat_nrows(_A), gmm::mat_ncols(_A));
+  gmm::copy(_A, A);
+
+  // ... and vectors
+  VectorT  rhs(_rhs);
+  VectorIT idx_to_round(_idx_to_round);
+
+  // call non-const function
+  solve(constraints,
+	A,
+	_x,
+	rhs,
+	idx_to_round,
+	_reg_factor,
+	_show_miso_settings,
+	_show_timings);
+}
+
+
 //-----------------------------------------------------------------------------
 
 
@@ -279,8 +316,8 @@ make_constraints_independent(
         // redundant or incompatible?
         if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
           std::cerr << "Warning: incompatible condition:\n";
-        else
-          std::cerr << "Warning: redundant condition:\n";
+//         else
+//           std::cerr << "Warning: redundant condition:\n";
       }
       else
         if(roundmap[elim_j] && elim_val > 1e-6) 
@@ -784,16 +821,12 @@ ConstrainedSolver::verify_constrained_system(
     const RMatrixT& _conditions,
     const CMatrixT& _A,
     const VectorT&  _x,
-    const VectorT&  _rhs)
+    const VectorT&  _rhs,
+    double          _eps)
 {
   typedef typename gmm::linalg_traits<RMatrixT>::const_sub_row_type RowT;
   typedef typename gmm::linalg_traits<RowT>::const_iterator RIter;
 
-  // Residual
-  std::cerr << "MATRIX " << _A << std::endl;
-  std::cerr << "X " << _x << std::endl;
-  std::cerr << "RHS " << _rhs << std::endl;
-  std::cerr << "CONDITIONS" << _conditions << std::endl;
   VectorT Ax( _x.size());
   gmm::mult(_A, _x, Ax);
 
@@ -823,7 +856,7 @@ ConstrainedSolver::verify_constrained_system(
     }
     //std::cerr << "\t Value is : " << cond_value << std::endl;
     //std::cerr << "--- --- --- --- ---\n";
-    if( cond_value != 0.0)
+    if( fabs(cond_value) > _eps)
     {
       std::cerr << "\t Error on row " << r << " with vector " << row << " and condition value " << cond_value << std::endl;
       all_conditions_ok = false;
@@ -844,19 +877,15 @@ verify_constrained_system_round(
               const CMatrixT& _A,
               const VectorT&  _x,
               const VectorT&  _rhs,
-              const VectorIT& _idx_to_round)
+              const VectorIT& _idx_to_round,
+	      double          _eps)
 {
- std::cerr << "MATRIX " << _A << std::endl;
-  std::cerr << "X " << _x << std::endl;
-  std::cerr << "RHS " << _rhs << std::endl;
-  std::cerr << "CONDITIONS" << _conditions << std::endl;
-  
   // test integer roundings
   std::cerr << __FUNCTION__ << ": Testing integer roundings..." << std::endl;
   bool all_roundings_ok = true;
 
   for( unsigned int i = 0; i < _idx_to_round.size(); ++i)
-    if(fabs(ROUND(_x[_idx_to_round[i]])-_x[_idx_to_round[i]]) > 1e-10)
+    if(fabs(ROUND(_x[_idx_to_round[i]])-_x[_idx_to_round[i]]) != 0.0)
     {
       std::cerr << "\t Warning: variable " << _idx_to_round[i] << " was not rounded!" << " Value is = " << _x[_idx_to_round[i]] << std::endl;
       all_roundings_ok = false;
@@ -864,7 +893,7 @@ verify_constrained_system_round(
   std::cerr << __FUNCTION__ << (all_roundings_ok? ": All roundings ok!" : ": Some roundings not ok!") << std::endl;
 
   // also test other stuff
-  return verify_constrained_system(_conditions, _A, _x, _rhs);
+  return verify_constrained_system(_conditions, _A, _x, _rhs, _eps);
 }
 
 //-----------------------------------------------------------------------------
