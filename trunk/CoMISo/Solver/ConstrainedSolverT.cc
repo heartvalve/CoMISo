@@ -44,12 +44,10 @@ namespace COMISO {
 //== IMPLEMENTATION ==========================================================
 
 
-// const version of above function
 template<class RMatrixT, class CMatrixT, class VectorT, class VectorIT >
 void 
 ConstrainedSolver::
-solve_const(
-		 const RMatrixT& _constraints,
+solve_const(	 const RMatrixT& _constraints,
 		 const CMatrixT& _A, 
 		 VectorT&  _x,
 		 const VectorT&  _rhs,
@@ -74,6 +72,41 @@ solve_const(
 	A,
 	_x,
 	rhs,
+	idx_to_round,
+	_reg_factor,
+	_show_miso_settings,
+	_show_timings);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorT, class VectorIT >
+void 
+ConstrainedSolver::
+solve_const( RMatrixT& _constraints,
+	     RMatrixT& _B, 
+	     VectorT&  _x,
+	     VectorIT& _idx_to_round,
+	     double    _reg_factor,
+	     bool      _show_miso_settings,
+	     bool      _show_timings )
+{
+  // copy matrices
+  RMatrixT constraints( gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
+  gmm::copy(_constraints, constraints);
+
+  RMatrixT B( gmm::mat_nrows(_B), gmm::mat_ncols(_B));
+  gmm::copy(_B, B);
+
+  // ... and vectors
+  VectorIT idx_to_round(_idx_to_round);
+
+  // call non-const function
+  solve(constraints,
+	B,
+	_x,
 	idx_to_round,
 	_reg_factor,
 	_show_miso_settings,

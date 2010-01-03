@@ -131,6 +131,18 @@ public:
       double    _reg_factor = 0.0,
       bool      _show_miso_settings = true,
       bool      _show_timings = true );
+
+  // const version of above function
+  template<class RMatrixT, class VectorT, class VectorIT >
+  void solve_const(
+      RMatrixT& _constraints,
+      RMatrixT& _B, 
+      VectorT&  _x,
+      VectorIT& _idx_to_round,
+      double    _reg_factor = 0.0,
+      bool      _show_miso_settings = true,
+      bool      _show_timings = true );
+
 /*@}*/
 
 /** @name Eliminate constraints
