@@ -69,6 +69,10 @@ MISolver::solve(
     Veci&      _to_round,
     bool       _fixed_order )
 {
+  // nothing to solve?
+  if( gmm::mat_ncols(_A) == 0 || gmm::mat_nrows(_A) == 0)
+    return;
+
   // some statistics
   int n_local = 0;
   int n_cg    = 0;
