@@ -62,7 +62,9 @@ public:
 
 
   /// default Constructor
-  ConstrainedSolver()  { epsilon_ = 1e-8; epsilon_squared_ = 1e-16; noisy_ = 1; }
+  /** _do_gcd specifies if a greatest common devisor correction should be used when no (+-)1-coefficient is found*/
+  ConstrainedSolver( bool _do_gcd = true): do_gcd_(_do_gcd)
+  { epsilon_ = 1e-8; epsilon_squared_ = 1e-16; noisy_ = 1; }
 
   /// Destructor
   ~ConstrainedSolver() { }
@@ -292,6 +294,26 @@ private:
   void eliminate_columns( CMatrixT& _M,
 			  const std::vector< int >& _columns);
 
+  inline int gcd( int _a, int _b)
+  {
+    while( _b != 0)
+    {
+      int t(_b);
+      _b = _a%_b;
+      _a = t;
+    }
+    return _a;
+  }
+
+  int find_gcd(std::vector<int>& _v_gcd, int& _n_ints);
+  // TODO if no gcd correction was possible, at least use a variable divisible by 2 as new elim_j (to avoid in-exactness e.g. 1/3)
+  template<class RMatrixT>
+  bool update_constraint_gcd( RMatrixT& _constraints, 
+                              int _row_i,
+                              int& _elim_j,
+                              std::vector<int>& _v_gcd,
+                              int& _n_ints);
+
 private:
 
   /// Copy constructor (not used)
@@ -303,6 +325,7 @@ private:
   double epsilon_;
   double epsilon_squared_;
   int    noisy_;
+  bool   do_gcd_;
 };
 
 

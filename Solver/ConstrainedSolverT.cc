@@ -299,6 +299,11 @@ make_constraints_independent(
     double elim_val = FLT_MAX;
     double max_elim_val = -FLT_MAX;
 
+    // new: gcd
+    std::vector<int> v_gcd;
+    v_gcd.resize(gmm::nnz(row),-1);
+    int n_ints(0);
+
     for(; row_it != row_end; ++row_it)
     {
       int cur_j = row_it.index();
@@ -318,11 +323,20 @@ make_constraints_independent(
         else
         {
           double cur_row_val(fabs(*row_it));
+          // gcd
+          // if the coefficient of an integer variable is not an integer, then
+          // the variable most problably will not be (expect if all coeffs are the same, e.g. 0.5)
+          if( (double(int(cur_row_val))- cur_row_val) != 0.0)
+              std::cerr << __FUNCTION__ << " Warning: coefficient of integer variable is NOT integer!" << std::endl;
+
+          v_gcd[n_ints] = cur_row_val;
+          ++n_ints;
+
           // store integer closest to 1, must be greater than epsilon_
           if( fabs(cur_row_val-1.0) < elim_val && cur_row_val > epsilon_)
           {
             elim_int_j   = cur_j;
-            elim_val     = fabs(fabs(*row_it)-1.0);
+            elim_val     = fabs(cur_row_val-1.0);
           }
         }
       }
@@ -339,24 +353,37 @@ make_constraints_independent(
 
 
 
+
     // store result
     _c_elim[i] = elim_j;
     // error check result
-    if( noisy_ > 0)
+    if( elim_j == -1)
     {
-      if( elim_j == -1)
-      {
-        // redundant or incompatible?
+      // redundant or incompatible?
+      if( noisy_ > 0)
         if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
           std::cerr << "Warning: incompatible condition:\n";
-//         else
-//           std::cerr << "Warning: redundant condition:\n";
-      }
-      else
-        if(roundmap[elim_j] && elim_val > 1e-6) 
-          std::cerr << "Warning: eliminate non +-1 integer -> correct rounding cannot be guaranteed:\n" 
-            << gmm::mat_const_row(_constraints, i) << std::endl;
+      //         else
+      //           std::cerr << "Warning: redundant condition:\n";
     }
+    else
+      if(roundmap[elim_j] && elim_val > 1e-6) 
+      {
+        if( do_gcd_)
+        {
+          // perform gcd update
+          bool gcd_ok = update_constraint_gcd( _constraints, i, elim_j, v_gcd, n_ints);
+          if( !gcd_ok)
+            if( noisy_ > 0)
+              std::cerr << __FUNCTION__ << " Warning: GCD update failed! " << gmm::mat_const_row(_constraints, i) << std::endl;
+        }
+        else
+        {
+          if( noisy_ > 0)
+            std::cerr << __FUNCTION__ << " Warning: NO +-1 coefficient found, integer rounding cannot be guaranteed. Try using the GCD option! " << gmm::mat_const_row(_constraints, i) << std::endl;
+        }
+      }
+
 
     // is this condition dependent?
     if( elim_j != -1 )
@@ -384,9 +411,43 @@ make_constraints_independent(
   }
 }
 
-
 //-----------------------------------------------------------------------------
 
+template<class RMatrixT>
+bool
+ConstrainedSolver::
+update_constraint_gcd( RMatrixT& _constraints, 
+                       int _row_i, 
+                       int& _elim_j,
+                       std::vector<int>& _v_gcd,
+                       int& _n_ints)
+{
+  // find gcd
+  double i_gcd = find_gcd(_v_gcd, _n_ints);
+
+  if( fabs(i_gcd) == 1.0)
+    return false;
+  
+  // divide by gcd
+  typedef typename gmm::linalg_traits<RMatrixT>::const_sub_row_type CRowT;
+  typedef typename gmm::linalg_traits<CRowT>::const_iterator        RIter;
+
+  // get current constraint row
+  RIter row_it    = gmm::vect_const_begin( gmm::mat_const_row( _constraints, _row_i));
+  RIter row_end   = gmm::vect_const_end( gmm::mat_const_row( _constraints, _row_i));
+
+  for( ; row_it!=row_end; ++row_it)
+  {
+    int cur_j = row_it.index();
+    _constraints(_row_i, cur_j) = (*row_it)/i_gcd;
+  }
+  int elim_coeff = abs(_constraints(_row_i, _elim_j));
+  if( elim_coeff != 1)
+    std::cerr << __FUNCTION__ << " Error: elimination coefficient " << elim_coeff << " will (most probably) NOT lead to an integer solution!" << std::endl;
+  return true;
+}
+
+//-----------------------------------------------------------------------------
 
 template<class SVector1T, class SVector2T, class VectorIT, class SVector3T>
 void 
