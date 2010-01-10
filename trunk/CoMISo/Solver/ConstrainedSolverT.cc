@@ -303,6 +303,7 @@ make_constraints_independent(
     std::vector<int> v_gcd;
     v_gcd.resize(gmm::nnz(row),-1);
     int n_ints(0);
+    bool gcd_update_valid(true);
 
     for(; row_it != row_end; ++row_it)
     {
@@ -327,7 +328,11 @@ make_constraints_independent(
           // if the coefficient of an integer variable is not an integer, then
           // the variable most problably will not be (expect if all coeffs are the same, e.g. 0.5)
           if( (double(int(cur_row_val))- cur_row_val) != 0.0)
-              std::cerr << __FUNCTION__ << " Warning: coefficient of integer variable is NOT integer!" << std::endl;
+	  {
+// 	    std::cerr << __FUNCTION__ << " Warning: coefficient of integer variable is NOT integer: " 
+// 		      << cur_row_val << std::endl;
+	    gcd_update_valid = false;
+	  }
 
           v_gcd[n_ints] = cur_row_val;
           ++n_ints;
@@ -362,14 +367,15 @@ make_constraints_independent(
       // redundant or incompatible?
       if( noisy_ > 0)
         if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
-          std::cerr << "Warning: incompatible condition:\n";
+          std::cerr << "Warning: incompatible condition: "
+		    << fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) << std::endl;
       //         else
       //           std::cerr << "Warning: redundant condition:\n";
     }
     else
       if(roundmap[elim_j] && elim_val > 1e-6) 
       {
-        if( do_gcd_)
+        if( do_gcd_ && gcd_update_valid)
         {
           // perform gcd update
           bool gcd_ok = update_constraint_gcd( _constraints, i, elim_j, v_gcd, n_ints);
@@ -380,7 +386,13 @@ make_constraints_independent(
         else
         {
           if( noisy_ > 0)
-            std::cerr << __FUNCTION__ << " Warning: NO +-1 coefficient found, integer rounding cannot be guaranteed. Try using the GCD option! " << gmm::mat_const_row(_constraints, i) << std::endl;
+	  {
+	    if( !do_gcd_)
+	      std::cerr << __FUNCTION__ << " Warning: NO +-1 coefficient found, integer rounding cannot be guaranteed. Try using the GCD option! " << gmm::mat_const_row(_constraints, i) << std::endl;
+	    else
+	      std::cerr << __FUNCTION__ << " Warning: GCD of non-integer cannot be computed! " << gmm::mat_const_row(_constraints, i) << std::endl;
+
+	  }
         }
       }
 
