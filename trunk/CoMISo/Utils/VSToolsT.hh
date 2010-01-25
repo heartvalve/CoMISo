@@ -58,13 +58,13 @@
 
  inline double nearbyint(double x) {
    if( x >= 0.0 )
-     return int(trunc( x + 0.5));
+     return int( x + 0.5 );
    else
-     return int(trunc( x - 0.5));
+     return int( x - 0.5 );
  }
 
  inline double round ( double _value ) {
-   return nearbyint(_value);//floor( _value + 0.5 );
+   return nearbyint(_value);
  }
 
 
