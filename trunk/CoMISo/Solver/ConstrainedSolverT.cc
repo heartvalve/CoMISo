@@ -153,12 +153,13 @@ solve(
   std::vector<int>                          new_idx;
 
   eliminate_constraints( _constraints, _B, _idx_to_round, c_elim, new_idx, Bcol);
-  double time_eliminate = sw.stop()/1000.0; sw.start();
+  double time_eliminate = sw.stop()/1000.0; 
 
   if( _show_timings) std::cerr << "Eliminated dimension: " << gmm::mat_nrows(Bcol) << " x " << gmm::mat_ncols(Bcol) << std::endl;
 
   // setup and solve system
   double time_setup = setup_and_solve_system( Bcol, _x, _idx_to_round, _reg_factor, _show_miso_settings);
+  sw.start();
 
   //  double time_setup_solve = sw.stop()/1000.0; sw.start();
   
