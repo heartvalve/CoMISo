@@ -51,6 +51,8 @@ CholmodSolver::~CholmodSolver()
     }
 
     cholmod_finish( mp_cholmodCommon );
+    delete mp_cholmodCommon;
+    mp_cholmodCommon = NULL;
 }
   
 
