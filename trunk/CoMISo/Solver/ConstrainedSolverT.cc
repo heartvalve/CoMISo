@@ -34,8 +34,10 @@
 
 #include "ConstrainedSolver.hh"
 #include <gmm/gmm.h>
+#include "GMM_Tools.hh"
 #include <float.h>
 #include <CoMISo/Utils/StopWatch.hh>
+#include <CoMISo/Utils/MutablePriorityQueueT.hh>
 
 //== NAMESPACES ===============================================================
 
@@ -129,54 +131,65 @@ solve(
     bool      _show_miso_settings,
     bool      _show_timings )
 {
-  int nrows = gmm::mat_nrows(_B);
-  int ncols = gmm::mat_ncols(_B);
-  int ncons = gmm::mat_nrows(_constraints);
+  // convert into quadratic system
+  VectorT rhs;
+  gmm::col_matrix< gmm::rsvector< double > > A;
+  factored_to_quadratic(_B, A, rhs);
 
-  if( _show_timings) std::cerr << __FUNCTION__ << "\n Initial dimension: " << nrows << " x " << ncols << ", number of constraints: " << ncons << std::endl;
+  // solve
+  solve( _constraints, A, _x, rhs, 
+	 _idx_to_round, _reg_factor, 
+	 _show_miso_settings,
+	 _show_timings);
+
+//   int nrows = gmm::mat_nrows(_B);
+//   int ncols = gmm::mat_ncols(_B);
+//   int ncons = gmm::mat_nrows(_constraints);
+
+//   if( _show_timings) std::cerr << __FUNCTION__ << "\n Initial dimension: " << nrows << " x " << ncols << ", number of constraints: " << ncons << std::endl;
  
-  // StopWatch for Timings
-  COMISO::StopWatch sw, sw2; sw.start(); sw2.start();
+//   // StopWatch for Timings
+//   COMISO::StopWatch sw, sw2; sw.start(); sw2.start();
 
-  // c_elim[i] = index of variable which is eliminated in condition i
-  // or -1 if condition is invalid
-  std::vector<int> c_elim( ncons);
+//   // c_elim[i] = index of variable which is eliminated in condition i
+//   // or -1 if condition is invalid
+//   std::vector<int> c_elim( ncons);
 
-  // apply sparse gauss elimination to make subsequent _constraints independent
-  make_constraints_independent( _constraints, _idx_to_round, c_elim);
-  double time_gauss = sw.stop()/1000.0; sw.start();
+//   // apply sparse gauss elimination to make subsequent _constraints independent
+//   make_constraints_independent( _constraints, _idx_to_round, c_elim);
+//   double time_gauss = sw.stop()/1000.0; sw.start();
 
-  // eliminate conditions and return column matrix Bcol
-  gmm::col_matrix< gmm::rsvector< double > > Bcol( nrows, ncols);
+//   // eliminate conditions and return column matrix Bcol
+//   gmm::col_matrix< gmm::rsvector< double > > Bcol( nrows, ncols);
 
-  // reindexing vector
-  std::vector<int>                          new_idx;
+//   // reindexing vector
+//   std::vector<int>                          new_idx;
 
-  eliminate_constraints( _constraints, _B, _idx_to_round, c_elim, new_idx, Bcol);
-  double time_eliminate = sw.stop()/1000.0; 
+//   eliminate_constraints( _constraints, _B, _idx_to_round, c_elim, new_idx, Bcol);
+//   double time_eliminate = sw.stop()/1000.0; 
 
-  if( _show_timings) std::cerr << "Eliminated dimension: " << gmm::mat_nrows(Bcol) << " x " << gmm::mat_ncols(Bcol) << std::endl;
+//   if( _show_timings) std::cerr << "Eliminated dimension: " << gmm::mat_nrows(Bcol) << " x " << gmm::mat_ncols(Bcol) << std::endl;
 
-  // setup and solve system
-  double time_setup = setup_and_solve_system( Bcol, _x, _idx_to_round, _reg_factor, _show_miso_settings);
-  sw.start();
+//   // setup and solve system
+//   double time_setup = setup_and_solve_system( Bcol, _x, _idx_to_round, _reg_factor, _show_miso_settings);
+//   sw.start();
 
-  //  double time_setup_solve = sw.stop()/1000.0; sw.start();
+//   //  double time_setup_solve = sw.stop()/1000.0; sw.start();
   
-  // restore eliminated vars to fulfill the given conditions
-  restore_eliminated_vars( _constraints, _x, c_elim, new_idx);
+//   // restore eliminated vars to fulfill the given conditions
+//   restore_eliminated_vars( _constraints, _x, c_elim, new_idx);
 
-  double time_resubstitute = sw.stop()/1000.0; sw.start();
+//   double time_resubstitute = sw.stop()/1000.0; sw.start();
 
-  //  double time_total = sw2.stop()/1000.0;
+//   //  double time_total = sw2.stop()/1000.0;
 
-  if( _show_timings) std::cerr << "Timings: \n\t" <<
-    "Gauss Elimination  " << time_gauss          << " s\n\t" <<
-    "System Elimination " << time_eliminate      << " s\n\t" <<
-    "Setup              " << time_setup          << " s\n\t" <<
-   // "Setup + Mi-Solver  " << time_setup_solve    << " s\n\t" <<
-    "Resubstitution     " << time_resubstitute   << " s\n\t" << std::endl << std::endl;
-    //"Total              " << time_total          << std::endl;
+//   if( _show_timings) std::cerr << "Timings: \n\t" <<
+//     "Gauss Elimination  " << time_gauss          << " s\n\t" <<
+//     "System Elimination " << time_eliminate      << " s\n\t" <<
+//     "Setup              " << time_setup          << " s\n\t" <<
+//    // "Setup + Mi-Solver  " << time_setup_solve    << " s\n\t" <<
+//     "Resubstitution     " << time_resubstitute   << " s\n\t" << std::endl << std::endl;
+//     //"Total              " << time_total          << std::endl;
 }
 
 
@@ -210,7 +223,8 @@ solve(
   std::vector<int> c_elim( ncons);
 
   // apply sparse gauss elimination to make subsequent _conditions independent
-  make_constraints_independent( _constraints, _idx_to_round, c_elim);
+  //make_constraints_independent( _constraints, _idx_to_round, c_elim);
+  make_constraints_independent_reordering( _constraints, _idx_to_round, c_elim);
   double time_gauss = sw.stop()/1000.0; sw.start();
 
   // re-indexing vector
@@ -220,16 +234,18 @@ solve(
   eliminate_constraints( _constraints, _A, _x, _rhs, _idx_to_round, c_elim, new_idx, Acsc);
   double time_eliminate = sw.stop()/1000.0;
 
-  if( _show_timings) std::cerr << "Eliminated dimension: " << Acsc.nr << " x " << Acsc.nc << std::endl;
+  if( _show_timings)
+  {
+    std::cerr << "Eliminated dimension: " << Acsc.nr << " x " << Acsc.nc << std::endl;
+    std::cerr << "#nonzeros: " << gmm::nnz(Acsc) << std::endl;
+  }
 
-  // create MISO solver
-  COMISO::MISolver miso;
   // show options dialog
   if( _show_miso_settings)
-    miso.show_options_dialog();
+    miso_.show_options_dialog();
 
   sw.start();
-  miso.solve( Acsc, _x, _rhs, _idx_to_round);
+  miso_.solve( Acsc, _x, _rhs, _idx_to_round);
   double time_miso = sw.stop()/1000.0; sw.start();
 
   // restore eliminated vars to fulfill the given conditions
@@ -257,7 +273,7 @@ make_constraints_independent(
 		VectorIT&         _idx_to_round,
 		std::vector<int>& _c_elim)
 {
-  COMISO::StopWatch sw;
+  //  COMISO::StopWatch sw;
   // number of variables
   int n_vars = gmm::mat_ncols(_constraints);
 
@@ -414,7 +430,7 @@ make_constraints_independent(
       for(; c_it != c_end; ++c_it)
         if( c_it.index() > i)
         {
-          sw.start();
+	  //          sw.start();
           add_row_simultaneously( c_it.index(), -(*c_it)/elim_val_cur, gmm::mat_row(_constraints, i), _constraints, constraints_c);
           // make sure the eliminated entry is 0 on all other rows and not 1e-17
           _constraints( c_it.index(), elim_j) = 0;
@@ -423,6 +439,248 @@ make_constraints_independent(
     }
   }
 }
+
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorIT >
+void 
+ConstrainedSolver::
+make_constraints_independent_reordering(
+    RMatrixT&         _constraints,
+		VectorIT&         _idx_to_round,
+		std::vector<int>& _c_elim)
+{
+  //  COMISO::StopWatch sw;
+  // number of variables
+  int n_vars = gmm::mat_ncols(_constraints);
+
+  // TODO Check: HZ added 14.08.09 
+  _c_elim.clear();
+  _c_elim.resize( gmm::mat_nrows(_constraints), -1);
+
+  // build round map
+  std::vector<bool> roundmap( n_vars, false);
+  for(unsigned int i=0; i<_idx_to_round.size(); ++i)
+    roundmap[_idx_to_round[i]] = true;
+
+  // copy constraints into column matrix (for faster update via iterators)
+  typedef gmm::wsvector<double>      CVector;
+  typedef gmm::col_matrix< CVector > CMatrix;
+  CMatrix constraints_c;
+  gmm::resize(constraints_c, gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
+  gmm::copy(_constraints, constraints_c);
+
+  // init priority queue
+  unsigned int nr = gmm::mat_nrows(_constraints);
+  MutablePriorityQueueT<unsigned int, unsigned int> queue;
+  queue.clear( nr );
+  for(unsigned int i=0; i<nr; ++i)
+  {
+    int cur_nnz = gmm::nnz( gmm::mat_row(_constraints,i));
+    if( _constraints(i,n_vars-1) != 0.0) --cur_nnz;
+
+    queue.update(i, cur_nnz);
+  }
+  
+  std::vector<bool> row_visited(nr, false);
+  std::vector<unsigned int> row_ordering; row_ordering.reserve(nr);
+
+
+  // for all conditions
+  //  for(unsigned int i=0; i<gmm::mat_nrows(_constraints); ++i)
+  while(!queue.empty())
+  {
+    // get next row
+    unsigned int i = queue.get_next();
+    row_ordering.push_back(i);
+    row_visited[i] = true;
+
+    // get elimination variable
+    int elim_j = -1;
+    int elim_int_j = -1;
+
+    // iterate over current row, until variable found
+    // first search for real valued variable
+    // if not found for integers with value +-1
+    // and finally take the smallest integer variable
+
+    typedef typename gmm::linalg_traits<RMatrixT>::const_sub_row_type CRowT;
+    typedef typename gmm::linalg_traits<RMatrixT>::sub_row_type       RowT;
+    typedef typename gmm::linalg_traits<CRowT>::const_iterator        RIter;
+
+    // get current condition row
+    CRowT row       = gmm::mat_const_row( _constraints, i);
+    RIter row_it    = gmm::vect_const_begin( row);
+    RIter row_end   = gmm::vect_const_end( row);
+    double elim_val = FLT_MAX;
+    double max_elim_val = -FLT_MAX;
+
+    // new: gcd
+    std::vector<int> v_gcd;
+    v_gcd.resize(gmm::nnz(row),-1);
+    int n_ints(0);
+    bool gcd_update_valid(true);
+
+    for(; row_it != row_end; ++row_it)
+    {
+      int cur_j = row_it.index();
+      // do not use the constant part
+      if(  cur_j != n_vars - 1 )
+      {
+        // found real valued var? -> finished (UPDATE: no not any more, find biggest real value to avoid x/1e-13)
+        if( !roundmap[ cur_j ])
+        {
+          if( fabs(*row_it) > max_elim_val)
+          {
+            elim_j = cur_j;
+            max_elim_val = fabs(*row_it);
+          }
+          //break;
+        }
+        else
+        {
+          double cur_row_val(fabs(*row_it));
+          // gcd
+          // if the coefficient of an integer variable is not an integer, then
+          // the variable most problably will not be (expect if all coeffs are the same, e.g. 0.5)
+          if( (double(int(cur_row_val))- cur_row_val) != 0.0)
+	  {
+// 	    std::cerr << __FUNCTION__ << " Warning: coefficient of integer variable is NOT integer: " 
+// 		      << cur_row_val << std::endl;
+	    gcd_update_valid = false;
+	  }
+
+          v_gcd[n_ints] = cur_row_val;
+          ++n_ints;
+
+          // store integer closest to 1, must be greater than epsilon_
+          if( fabs(cur_row_val-1.0) < elim_val && cur_row_val > epsilon_)
+          {
+            elim_int_j   = cur_j;
+            elim_val     = fabs(cur_row_val-1.0);
+          }
+        }
+      }
+    }
+
+    // first try to eliminate a valid (>epsilon_) real valued variable (safer)
+    if( max_elim_val > epsilon_)
+    {}
+    else // use the best found integer
+      elim_j = elim_int_j;
+
+    // if no integer or real valued variable greater than epsilon_ existed, then
+    // elim_j is now -1 and this row is not considered as a valid constraint
+
+
+
+
+    // store result
+    _c_elim[i] = elim_j;
+    // error check result
+    if( elim_j == -1)
+    {
+      // redundant or incompatible?
+      if( noisy_ > 0)
+        if( fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) > epsilon_ )
+          std::cerr << "Warning: incompatible condition: "
+		    << fabs(gmm::mat_const_row(_constraints, i)[n_vars-1]) << std::endl;
+      //         else
+      //           std::cerr << "Warning: redundant condition:\n";
+    }
+    else
+      if(roundmap[elim_j] && elim_val > 1e-6) 
+      {
+        if( do_gcd_ && gcd_update_valid)
+        {
+          // perform gcd update
+          bool gcd_ok = update_constraint_gcd( _constraints, i, elim_j, v_gcd, n_ints);
+          if( !gcd_ok)
+            if( noisy_ > 0)
+              std::cerr << __FUNCTION__ << " Warning: GCD update failed! " << gmm::mat_const_row(_constraints, i) << std::endl;
+        }
+        else
+        {
+          if( noisy_ > 0)
+	  {
+	    if( !do_gcd_)
+	      std::cerr << __FUNCTION__ << " Warning: NO +-1 coefficient found, integer rounding cannot be guaranteed. Try using the GCD option! " << gmm::mat_const_row(_constraints, i) << std::endl;
+	    else
+	      std::cerr << __FUNCTION__ << " Warning: GCD of non-integer cannot be computed! " << gmm::mat_const_row(_constraints, i) << std::endl;
+
+	  }
+        }
+      }
+
+
+    // is this condition dependent?
+    if( elim_j != -1 )
+    {
+      // get elim variable value
+      double elim_val_cur = _constraints(i, elim_j);
+
+      // copy col
+      CVector col = constraints_c.col(elim_j);
+
+      // iterate over column
+      typename gmm::linalg_traits<CVector>::const_iterator c_it   = gmm::vect_const_begin(col);
+      typename gmm::linalg_traits<CVector>::const_iterator c_end  = gmm::vect_const_end(col);
+
+      for(; c_it != c_end; ++c_it)
+	//        if( c_it.index() > i)
+	if( !row_visited[c_it.index()])
+        {
+	  //          sw.start();
+          add_row_simultaneously( c_it.index(), -(*c_it)/elim_val_cur, gmm::mat_row(_constraints, i), _constraints, constraints_c);
+          // make sure the eliminated entry is 0 on all other rows and not 1e-17
+          _constraints( c_it.index(), elim_j) = 0;
+          constraints_c(c_it.index(), elim_j) = 0;
+
+	  int cur_idx = c_it.index();
+	  int cur_nnz = gmm::nnz( gmm::mat_row(_constraints,cur_idx));
+	  if( _constraints(cur_idx,n_vars-1) != 0.0) --cur_nnz;
+
+	  queue.update(cur_idx, cur_nnz);
+        }
+    }
+  }
+  // // check result
+  // for(unsigned int i=0; i<row_visited.size(); ++i)
+  //   if( !row_visited[i])
+  //     std::cerr <<"FAT ERROR: row " << i << " not visited...\n";
+  
+
+
+  // correct ordering
+  RMatrixT c_tmp(gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
+  gmm::copy(_constraints,c_tmp);
+
+  // std::vector<int> elim_temp2(_c_elim);
+  // std::sort(elim_temp2.begin(), elim_temp2.end());
+  // std::cerr << elim_temp2 << std::endl;
+
+
+  std::vector<int> elim_temp(_c_elim);
+  _c_elim.resize(0); _c_elim.resize( elim_temp.size(),-1);
+
+  for(unsigned int i=0; i<nr; ++i)
+  {
+    gmm::copy(gmm::mat_row(c_tmp,row_ordering[i]), gmm::mat_row(_constraints,i));
+    _c_elim[i] = elim_temp[row_ordering[i]];
+  }
+
+  // // hack
+  // elim_temp = _c_elim;
+  // std::sort(elim_temp.begin(), elim_temp.end());
+  // std::cerr << elim_temp << std::endl;
+
+  // std::sort(row_ordering.begin(), row_ordering.end());
+  // std::cerr << "row ordering: " << row_ordering << std::endl;
+}
+
 
 //-----------------------------------------------------------------------------
 
@@ -514,7 +772,7 @@ eliminate_constraints(
     _new_idx[i] = i;
 
   // update _new_idx w.r.t. eliminated cols
-  gmm::eliminate_vars_idx( elim_cols, _new_idx, -1);
+  COMISO_GMM::eliminate_vars_idx( elim_cols, _new_idx, -1);
 
   // update _idx_to_round (in place)
   std::vector<int> round_old(_idx_to_round);
@@ -645,7 +903,7 @@ eliminate_constraints(
   _Acsc.init_with_good_format(_A);
   sw.start();
   std::vector< double > elim_varvals( elim_varids.size(), 0);
-  gmm::eliminate_csc_vars2( elim_varids, elim_varvals, _Acsc, _x, _rhs);
+  COMISO_GMM::eliminate_csc_vars2( elim_varids, elim_varvals, _Acsc, _x, _rhs);
 
   if( noisy_ > 2)
     std::cerr << __FUNCTION__ << " Constraints eliminated " << sw.stop()/1000.0 << std::endl;
@@ -656,7 +914,7 @@ eliminate_constraints(
     _new_idx[i] = i;
 
   // update _new_idx w.r.t. eliminated cols
-  gmm::eliminate_vars_idx( elim_varids, _new_idx, -1);
+  COMISO_GMM::eliminate_vars_idx( elim_varids, _new_idx, -1);
 
   // update _idx_to_round (in place)
   unsigned int wi = 0;
@@ -699,6 +957,7 @@ add_row( int       _row_i,
     _mat(_row_i, r_it.index()) += _coeff*(*r_it);
 }
 
+
 //-----------------------------------------------------------------------------
 
 
@@ -719,7 +978,8 @@ add_row_simultaneously(	int       _row_i,
   {
     _rmat(_row_i, r_it.index()) += _coeff*(*r_it);
     _cmat(_row_i, r_it.index()) += _coeff*(*r_it);
-    if( _rmat(_row_i, r_it.index())*_rmat(_row_i, r_it.index()) < epsilon_squared_ )
+    //    if( _rmat(_row_i, r_it.index())*_rmat(_row_i, r_it.index()) < epsilon_squared_ )
+    if( fabs(_rmat(_row_i, r_it.index())) < epsilon_ )
     {
       _rmat(_row_i, r_it.index()) = 0.0;
       _cmat(_row_i, r_it.index()) = 0.0;
@@ -783,7 +1043,7 @@ setup_and_solve_system( CMatrixT& _B,
 
   // regularize if necessary
   if(_reg_factor != 0.0)
-    gmm::regularize_hack(BtB, _reg_factor);
+    COMISO_GMM::regularize_hack(BtB, _reg_factor);
   s1.start();
 
   // BtB -> CSC
@@ -794,16 +1054,14 @@ setup_and_solve_system( CMatrixT& _B,
     std::cerr << __FUNCTION__ << " CSC init " << s1.stop()/1000.0 << std::endl;
   double setup_time = sw.stop()/1000.0;
   
-  // create solver
-  COMISO::MISolver miso;
   // show options dialog
   if( _show_miso_settings)
-    miso.show_options_dialog();
+    miso_.show_options_dialog();
 
   COMISO::StopWatch misw;
   misw.start();
   // miso solve
-  miso.solve( BtBCSC, _x, rhs, _idx_to_round);
+  miso_.solve( BtBCSC, _x, rhs, _idx_to_round);
   if( noisy_ > 1)
   std::cerr << __FUNCTION__ << " Miso Time " << misw.stop()/1000.0 << "s." << std::endl << std::endl;
   return setup_time;

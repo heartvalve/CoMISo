@@ -61,10 +61,12 @@ get_parameters()
 //     QSpinBox *infoSB;
 //     QCheckBox *directRoundingCB;
 
-  initialFullCB  ->setChecked( misolver_.get_inital_full());
-  finalFullCB    ->setChecked( misolver_.get_final_full());
-  directRoundingCB->setChecked( misolver_.get_direct_rounding());
-  noRoundingCB    ->setChecked( misolver_.get_no_rounding());
+  initialFullCB     ->setChecked( misolver_.get_inital_full());
+  iterFullCB        ->setChecked( misolver_.get_iter_full());
+  finalFullCB       ->setChecked( misolver_.get_final_full());
+  directRoundingCB  ->setChecked( misolver_.get_direct_rounding());
+  noRoundingCB      ->setChecked( misolver_.get_no_rounding());
+  multipleRoundingCB->setChecked( misolver_.get_multiple_rounding());
 
   localItersSB ->setValue( misolver_.get_local_iters());
   localErrorDSB->setValue( log(misolver_.get_local_error())/log(10.0f));
@@ -72,7 +74,7 @@ get_parameters()
   cgItersSB ->setValue( misolver_.get_cg_iters());
   cgErrorDSB->setValue( log(misolver_.get_cg_error())/log(10.0f));
   
-  fullErrorDSB->setValue( log(misolver_.get_full_error())/log(10.0f));
+  multipleRoundingDSB->setValue( misolver_.get_multiple_rounding_threshold());
 
   infoSB->setValue( misolver_.get_noise());
   solverStatsCheckBox->setChecked( misolver_.get_stats( ));
@@ -87,9 +89,11 @@ MISolverDialog::
 set_parameters()
 {
   misolver_.set_inital_full   ( initialFullCB  ->isChecked() );
+  misolver_.set_iter_full     ( iterFullCB     ->isChecked() );
   misolver_.set_final_full    ( finalFullCB    ->isChecked() );
   misolver_.set_direct_rounding( directRoundingCB->isChecked());
   misolver_.set_no_rounding( noRoundingCB->isChecked());
+  misolver_.set_multiple_rounding( multipleRoundingCB->isChecked());
 
   misolver_.set_local_iters( localItersSB ->value());
   misolver_.set_local_error( pow(10, localErrorDSB->value()));
@@ -97,7 +101,7 @@ set_parameters()
   misolver_.set_cg_iters( cgItersSB ->value());
   misolver_.set_cg_error( pow(10, cgErrorDSB->value()));
 
-  misolver_.set_full_error( pow(10, fullErrorDSB->value()));
+  misolver_.set_multiple_rounding_threshold( multipleRoundingDSB->value());
 
   misolver_.set_noise( infoSB->value());
   misolver_.set_stats( solverStatsCheckBox->isChecked());

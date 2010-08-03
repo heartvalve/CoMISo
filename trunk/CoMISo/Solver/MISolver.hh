@@ -39,6 +39,7 @@
 
 #include "GMM_Tools.hh"
 #include "CholmodSolver.hh"
+#include "IterativeSolverT.hh"
 
 #include <vector>
 
@@ -106,7 +107,6 @@ public:
     Veci&      _to_round,
     bool       _fixed_order = false );
 
-
   /// Compute greedy approximation to a mixed integer problem.
 	/** @param _B mx(n+1) matrix with (still non-squared) equations of the energy,
    * including the right hand side (Will be \b destroyed!)
@@ -135,6 +135,11 @@ public:
 	/// Will an initial full solution be computed?
   bool get_inital_full()         { return initial_full_solution_;}
 
+	/// Shall an full solution be computed if iterative methods did not converged?
+  void set_iter_full( bool _b) {        iter_full_solution_=_b;}
+	/// Will an full solution be computed if iterative methods did not converged?
+  bool get_iter_full()         { return iter_full_solution_;}
+
 	/// Shall a final full solution be computed?
   void set_final_full( bool _b) {        final_full_solution_=_b;}
 	/// Will a final full solution be computed?
@@ -149,6 +154,11 @@ public:
   void set_no_rounding( bool _b) {        no_rounding_=_b;}
   /// Will no rounding be performed?
   bool get_no_rounding()         { return no_rounding_;}
+
+  /// Shall multiple rounding be performed?
+  void set_multiple_rounding( bool _b) {       multiple_rounding_=_b;}
+  /// Will multiple rounding be performed?
+  bool get_multiple_rounding()         { return multiple_rounding_;}
 
   /// Set number of maximum Gauss-Seidel iterations
   void         set_local_iters( unsigned int _i) { max_local_iters_ = _i;}
@@ -170,10 +180,10 @@ public:
   /// Get error threshold for Conjugate Gradient
   double get_cg_error()           { return max_cg_error_;}
 
-  /// Set error threshold before full solution is computed
-  void   set_full_error( double _d) { max_full_error_ = _d;}
-  /// Get error threshold before full solution is computed
-  double get_full_error()           { return max_full_error_;}
+  /// Set multiple rounding threshold (upper bound of rounding performed in each iteration)
+  void   set_multiple_rounding_threshold( double _d) { multiple_rounding_threshold_ = _d;}
+  /// Get multiple rounding  threshold (upper bound of rounding performed in each iteration)
+  double get_multiple_rounding_threshold()           { return multiple_rounding_threshold_;}
 
   /// Set noise level of algorithm. 0 - quiet, 1 - more noise, 2 - even more, 100 - all noise
   void         set_noise( unsigned int _i) { noisy_ = _i;}
@@ -186,6 +196,99 @@ public:
   bool get_stats( )            { return stats_; }
 	/*@}*/
 
+ private:
+
+  // find set of variables for simultaneous rounding
+  class RoundingSet
+  {
+  public:
+    typedef std::pair<double,int> PairDI;
+    
+    RoundingSet() : threshold_(0.5), cur_sum_(0.0) {}
+
+    void clear() { rset_.clear(); cur_sum_ = 0.0;}
+
+    bool add( int _id, double _rd_val)
+    {
+      // empty set? -> always add one element
+      if( rset_.size() == 0 || cur_sum_+_rd_val <= threshold_)
+      {
+	rset_.insert( PairDI(_rd_val,_id) );
+	cur_sum_ += _rd_val;
+	return true;
+      }
+      else
+      {
+	// move to last element
+	std::set<PairDI>::iterator s_it = rset_.end();
+	--s_it;
+
+	if( s_it->first > _rd_val)
+	{
+	  cur_sum_ -= s_it->first;
+	  rset_.erase(s_it);
+	  rset_.insert( PairDI(_rd_val,_id) );
+	  cur_sum_ += _rd_val;
+	  return true;
+	}
+      }
+      return false;
+    }
+    
+    void set_threshold( double _thres) { threshold_ = _thres; }
+
+    void get_ids( std::vector<int>& _ids )
+    {
+      _ids.clear();
+      _ids.reserve( rset_.size());
+      std::set<PairDI>::iterator s_it = rset_.begin();
+      for(; s_it != rset_.end(); ++s_it)
+	_ids.push_back( s_it->second);
+    }
+
+  private:
+
+    double threshold_;
+    double cur_sum_;
+
+    std::set<PairDI> rset_;
+
+    std::set<PairDI> test_;
+  };
+
+private:
+
+  void solve_no_rounding( 
+    CSCMatrix& _A, 
+    Vecd&      _x, 
+    Vecd&      _rhs );
+
+  void solve_direct_rounding( 
+    CSCMatrix& _A, 
+    Vecd&      _x, 
+    Vecd&      _rhs, 
+    Veci&      _to_round);
+
+  void solve_multiple_rounding( 
+    CSCMatrix& _A, 
+    Vecd&      _x, 
+    Vecd&      _rhs, 
+    Veci&      _to_round );
+
+  void solve_iterative(
+    CSCMatrix& _A, 
+    Vecd&      _x, 
+    Vecd&      _rhs, 
+    Veci&      _to_round,
+    bool       _fixed_order );
+
+
+void update_solution( 
+    CSCMatrix& _A, 
+    Vecd&      _x, 
+    Vecd&      _rhs, 
+    Vecui&     _neigh_i );
+
 private:
 
   /// Copy constructor (not used)
@@ -196,10 +299,14 @@ private:
 
   // parameters used by the MiSo
   bool initial_full_solution_;
+  bool iter_full_solution_;
   bool final_full_solution_;
 
   bool direct_rounding_;
   bool no_rounding_;
+  bool multiple_rounding_;
+
+  double multiple_rounding_threshold_;
 
   unsigned int max_local_iters_;
   double       max_local_error_;
@@ -208,6 +315,18 @@ private:
   double       max_full_error_;
   unsigned int noisy_;
   bool         stats_;
+
+  // flag
+  bool         cholmod_step_done_;
+
+  COMISO::CholmodSolver chol_;
+
+  IterativeSolverT<double> siter_;
+
+  // statistics
+  unsigned int n_local_;
+  unsigned int n_cg_;
+  unsigned int n_full_;
 
   friend class COMISO::MISolverDialog;
 };
