@@ -64,7 +64,7 @@ public:
   /// default Constructor
   /** _do_gcd specifies if a greatest common devisor correction should be used when no (+-)1-coefficient is found*/
   ConstrainedSolver( bool _do_gcd = true): do_gcd_(_do_gcd)
-  { epsilon_ = 1e-8; epsilon_squared_ = 1e-16; noisy_ = 1; }
+  { epsilon_ = 1e-8; noisy_ = 1; }
 
   /// Destructor
   ~ConstrainedSolver() { }
@@ -168,6 +168,12 @@ public:
 			VectorIT&         _idx_to_round,
 			std::vector<int>& _c_elim );
 
+  template<class RMatrixT, class VectorIT >
+  void make_constraints_independent_reordering(
+      RMatrixT&         _constraints,
+			VectorIT&         _idx_to_round,
+			std::vector<int>& _c_elim );
+
 /// Eliminate constraints on a factored matrix B
 /**  
   *  \note Constraints are assumed to have been made independent by \a make_constraints_independent.
@@ -230,7 +236,7 @@ public:
 /*@}*/
 
   /// Set numerical epsilon for valid constraint coefficient
-  void set_epsilon( double _epsilon) { epsilon_ = _epsilon; epsilon_squared_ = epsilon_*epsilon_;}
+  void set_epsilon( double _epsilon) { epsilon_ = _epsilon; }
 
   /// Set noise-level (how much std output is given) 0 basically none, 1 important stuff (warning/timing, is default), 2+ not so important
   void set_noisy( int _noisy) { noisy_ = _noisy;}
@@ -264,6 +270,10 @@ public:
 			   const VectorT&  _x,
 			   const VectorIT& _idx_to_round );
 /*@}*/
+
+
+  /// Access the MISolver (e.g. to change settings)
+  COMISO::MISolver& misolver() { return miso_;}
 
 private:
 
@@ -322,8 +332,10 @@ private:
   /// Assignment operator (not used)
   ConstrainedSolver& operator=(const ConstrainedSolver& _rhs);
 
+  // MISO solver
+  COMISO::MISolver miso_;
+
   double epsilon_;
-  double epsilon_squared_;
   int    noisy_;
   bool   do_gcd_;
 };

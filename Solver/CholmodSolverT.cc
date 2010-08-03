@@ -26,7 +26,8 @@
 
 #define COMISO_CHOLMOD_SOLVER_TEMPLATES_C
 
-#include "CholmodSolver.hh"
+#include <CoMISo/Solver/GMM_Tools.hh>
+#include <CoMISo/Solver/CholmodSolver.hh>
 
 
 namespace COMISO {
@@ -39,11 +40,20 @@ bool CholmodSolver::calc_system_gmm( const GMM_MatrixT& _mat)
 //   std::vector<int>    rowind;
 //   std::vector<double> values;
     
-    gmm::get_ccs_symmetric_data( _mat,
-				 'l',
-				 values_, 
-				 rowind_, 
-				 colptr_ );
+
+    if(show_timings_) sw_.start();
+
+    COMISO_GMM::get_ccs_symmetric_data( _mat,
+					 'u',
+					 values_, 
+					 rowind_, 
+					 colptr_ );
+    
+    if(show_timings_)
+    {
+      std::cerr << "Cholmod Timing GMM convert: " << sw_.stop()/1000.0 << "s\n";
+      std::cerr << "#nnz: " << values_.size() << std::endl;
+    }
 
     return calc_system( colptr_, rowind_, values_);
 }
@@ -59,13 +69,13 @@ bool CholmodSolver::update_system_gmm( const GMM_MatrixT& _mat)
 //   std::vector<int>    rowind;
 //   std::vector<double> values;
     
-  gmm::get_ccs_symmetric_data( _mat,
-			       'l',
-			       values_, 
-			       rowind_, 
-			       colptr_ );
+  COMISO_GMM::get_ccs_symmetric_data( _mat,
+				      'u',
+				       values_, 
+				       rowind_, 
+				       colptr_ );
 
-    return update_system( colptr_, rowind_, values_);
+  return update_system( colptr_, rowind_, values_);
 }
 
 

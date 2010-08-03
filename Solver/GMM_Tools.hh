@@ -23,8 +23,8 @@
 \*===========================================================================*/ 
 
 
-#ifndef GMM_GMM_TOOLS_HH
-#define GMM_GMM_TOOLS_HH
+#ifndef COMISO_GMM_TOOLS_HH
+#define COMISO_GMM_TOOLS_HH
 
 
 //== INCLUDES =================================================================
@@ -38,7 +38,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace gmm
+namespace COMISO_GMM
 {
 
 /** \class GMMTools GMM_Tools.hh
@@ -134,7 +134,8 @@ template<class IntegerT, class IntegerT2>
 void eliminate_vars_idx( 
     const std::vector<IntegerT >&  _evar,
     std::vector<IntegerT2>&        _idx,
-    IntegerT2                      _dummy = -1 );
+    IntegerT2                      _dummy = -1,
+    IntegerT2                      _range = -1);
 
 /// update index of eliminated variable
 /**  Specialization to update only one eliminated variable
@@ -146,6 +147,23 @@ void eliminate_var_idx(
     const IntegerT          _evar,
     std::vector<IntegerT2>& _idx,
     IntegerT2               _dummy = -1 );
+
+
+/// do in-place elimination in CSC format by setting row and column to zero and
+/// diagonal entry to zero
+/** 
+ *  @param _j index of variable to be eliminated
+ *  @param _value_j value c of x_i to be eliminated, x_i = c
+ *  @param _A (non-CSC) Matrix of the equation system
+ *  @param _x variable vector of equation system
+ *  @param _rhs right-hand side vector of equation system */
+template<class ScalarT, class VectorT, class RealT>
+void fix_var_csc_symmetric( const unsigned int                _j,
+			    const ScalarT                     _value_j,
+			    typename gmm::csc_matrix<RealT>&  _A,
+			    VectorT&                          _x,
+			    VectorT&                          _rhs );
+
 
 /*@}*/
 
@@ -202,6 +220,15 @@ template<class MatrixT, class VectorT>
 double residuum_norm( MatrixT& _A, VectorT& _x, VectorT& _rhs );
 
 
+/// Convert factored LSE to quadratic representation
+/** Conversion is done by computing _F^t _F where the last column is the _rhs
+  * @param _F Factored Matrix (input)
+  * @param _Q Quadratic Matrix (output)
+  * @param _rhs right hand side (output) */
+template<class MatrixT, class MatrixT2, class VectorT>
+void factored_to_quadratic( MatrixT& _F, MatrixT2& _Q, VectorT& _rhs);
+
+
 /// Inspect the matrix (print)
 /** Prints useful matrix informations such as, dimension, symmetry, zero_rows, zero_cols, nnz, max, min, max_abs, min_abs, NAN, INF
   * @param _A matrix */
@@ -211,10 +238,10 @@ void inspect_matrix( const MatrixT& _A);
 
 
 //=============================================================================
-} // namespace gmm
+} // namespace COMISO_GMM
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(GMM_GMM_TOOLS_C)
-#define GMM_GMM_TOOLS_TEMPLATES
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_GMM_TOOLS_C)
+#define COMISO_GMM_TOOLS_TEMPLATES
 #include "GMM_Tools.cc"
 #endif
 //=============================================================================

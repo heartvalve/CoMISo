@@ -37,7 +37,7 @@
 
 
 #include <CoMISo/Config/CoMISoDefines.hh>
-#include "GMM_Tools.hh"
+#include <CoMISo/Utils/StopWatch.hh>
 
 #include <iostream>
 #include <vector>
@@ -82,6 +82,8 @@ public:
     bool solve ( std::vector<double>& _x0, std::vector<double>& _b)
     {return solve( &(_x0[0]), &(_b[0]));}
 
+
+    bool& show_timings() { return show_timings_;}
     
 private:
 
@@ -93,6 +95,8 @@ private:
     std::vector<int>    colptr_;
     std::vector<int>    rowind_;
 
+    bool show_timings_;
+    StopWatch sw_;
 };
 
 //=============================================================================

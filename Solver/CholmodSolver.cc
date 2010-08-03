@@ -37,6 +37,18 @@ CholmodSolver::CholmodSolver()
     cholmod_start( mp_cholmodCommon );
 
     mp_L = 0;
+
+    show_timings_ = false;
+
+    mp_cholmodCommon->nmethods = 1;
+    // use AMD ordering
+    mp_cholmodCommon->method[0].ordering = CHOLMOD_AMD ;
+
+    // use METIS ordering
+    //    mp_cholmodCommon->method[0].ordering = CHOLMOD_METIS ;
+
+    // try all methods
+    // mp_cholmodCommon->nmethods = 9;
 }
 
 
@@ -63,6 +75,8 @@ bool CholmodSolver::calc_system( const std::vector<int>&    _colptr,
 				 const std::vector<int>&    _rowind, 
 				 const std::vector<double>& _values)
 {
+    if(show_timings_) sw_.start();
+
     colptr_ = _colptr;
     rowind_ = _rowind;
     values_ = _values;
@@ -81,7 +95,8 @@ bool CholmodSolver::calc_system( const std::vector<int>&    _colptr,
     matA.nz = 0;
     matA.z = 0;
     
-    matA.stype = -1;
+    //    matA.stype = -1;
+    matA.stype = 1;
     matA.itype = CHOLMOD_INT;
     matA.xtype = CHOLMOD_REAL;
     matA.dtype = CHOLMOD_DOUBLE;
@@ -95,11 +110,27 @@ bool CholmodSolver::calc_system( const std::vector<int>&    _colptr,
 	mp_L = 0;
     }
 
+    if(show_timings_)
+    {
+      std::cerr << " Cholmod Timing cleanup: " << sw_.stop()/1000.0 << "s\n";
+      sw_.start();
+    }
 
     if( !(mp_L = cholmod_analyze( &matA, mp_cholmodCommon )) )
     {
 	std::cout << "cholmod_analyze failed" << std::endl;
 	return false;
+    }
+
+    // // show selected ordering method
+    // std::cerr << "best    ordering was: " << mp_cholmodCommon->selected << std::endl;
+    // std::cerr << "current ordering was: " << mp_cholmodCommon->current  << std::endl;
+
+
+    if(show_timings_)
+    {
+      std::cerr << " Cholmod Timing analyze: " << sw_.stop()/1000.0 << "s\n";
+      sw_.start();
     }
 
     if( !cholmod_factorize( &matA, mp_L, mp_cholmodCommon ) )
@@ -108,6 +139,11 @@ bool CholmodSolver::calc_system( const std::vector<int>&    _colptr,
 	return false;
     }
 
+    if(show_timings_)
+    {
+      std::cerr << " Cholmod Timing factorize: " << sw_.stop()/1000.0 << "s\n";
+      sw_.start();
+    }
 
     return true;
 }
@@ -140,7 +176,8 @@ bool CholmodSolver::update_system( const std::vector<int>& _colptr,
     matA.nz = 0;
     matA.z = 0;
     
-    matA.stype = -1;
+    //    matA.stype = -1;
+    matA.stype = 1;
     matA.itype = CHOLMOD_INT;
     matA.xtype = CHOLMOD_REAL;
     matA.dtype = CHOLMOD_DOUBLE;

@@ -30,7 +30,7 @@
 //
 //=============================================================================
 
-#define GMM_GMM_TOOLS_C
+#define COMISO_GMM_TOOLS_C
 
 //== INCLUDES =================================================================
 
@@ -44,7 +44,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace gmm
+namespace COMISO_GMM
 {
 
 //== IMPLEMENTATION ==========================================================
@@ -339,8 +339,25 @@ void get_ccs_symmetric_data( const MatrixT&      _mat,
          _colptr.push_back( iv );
          break;
 
+      case 'c':
+      case 'C':
+         // for all columns
+         for ( unsigned int i=0; i<m; ++i )
+         {
+            _colptr.push_back( iv );
+            for ( unsigned int j=( csc_mat.jc )[i]; j<( csc_mat.jc )[i+1]; ++j )
+	      //               if (( csc_mat.ir )[j] <= i )
+               {
+                  ++iv;
+                  _values.push_back(( csc_mat.pr )[j] );
+                  _rowind.push_back(( csc_mat.ir )[j] );
+               }
+         }
+         _colptr.push_back( iv );
+         break;
+
       default:
-         std::cerr << "ERROR: parameter uplo must bei either 'U' or 'L' !!!\n";
+         std::cerr << "ERROR: parameter uplo must bei either 'U' or 'L' or 'C'!!!\n";
          break;
    }
 }
@@ -729,14 +746,18 @@ void eliminate_vars( const std::vector<IntegerT>&     _evar,
 template<class IntegerT, class IntegerT2>
 void eliminate_vars_idx( const std::vector<IntegerT >&     _evar,
                          std::vector<IntegerT2>&     _idx,
-                         IntegerT2                   _dummy )
+                         IntegerT2                   _dummy, 
+			 IntegerT2                   _range )
 {
    // sort input
    std::vector<IntegerT> evar( _evar );
    std::sort( evar.begin(), evar.end() );
 
    // precompute update
-   std::vector<int> update_map( _idx.size() );
+   IntegerT2 range = _range;
+   if( range == -1 )
+     range = _idx.size();
+   std::vector<int> update_map( range );
 
    typename std::vector<IntegerT>::iterator cur_var = evar.begin();
    unsigned int deleted_between = 0;
@@ -791,6 +812,64 @@ void eliminate_var_idx( const IntegerT           _evar,
 }
 
 
+
+//-----------------------------------------------------------------------------
+
+
+template<class ScalarT, class VectorT, class RealT>
+void fix_var_csc_symmetric( const unsigned int                _i,
+			    const ScalarT                     _xi,
+			    typename gmm::csc_matrix<RealT>&  _A,
+			    VectorT&                          _x,
+			    VectorT&                          _rhs )
+{
+// GMM CSC FORMAT
+//     T *pr;        // values.
+//     IND_TYPE *ir; // row indices.
+//     IND_TYPE *jc; // column repartition on pr and ir.
+
+  unsigned int n = _A.nc;
+
+  // update x
+  _x[_i]   = _xi;
+
+  std::vector<unsigned int> idx; idx.reserve(16);
+
+  // clear i-th column and collect nonzeros
+  for( unsigned int iv=_A.jc[_i]; iv<_A.jc[_i+1]; ++iv)
+  {
+    if(_A.ir[iv] == _i)
+    {
+      _A.pr[iv] = 1.0;
+      _rhs[_i]  = _xi;
+    }
+    else
+    {
+      // update rhs
+      _rhs[_A.ir[iv]] -= _A.pr[iv]*_xi;
+      // clear entry
+      _A.pr[iv] = 0;
+      // store index
+      idx.push_back( _A.ir[iv]);
+    }
+
+  }
+
+  for(unsigned int i=0; i<idx.size(); ++i)
+  {
+    unsigned int col = idx[i];
+
+    for( unsigned int j=_A.jc[col]; j<_A.jc[col+1]; ++j)
+      if(_A.ir[j] == _i)
+      {
+	_A.pr[j] = 0.0;
+	// move to next
+	break;
+      }
+  }
+}
+
+
 //-----------------------------------------------------------------------------
 
 
@@ -828,8 +907,13 @@ int gauss_seidel_local( MatrixT& _A, VectorT& _x, VectorT& _rhs, std::vector<uns
 
    double t2 = _tolerance*_tolerance;
 
+   // static variables to prevent memory allocation in each step
    std::vector<unsigned int> i_temp;
    std::queue<unsigned int>  q;
+
+//    // clear old data
+//    i_temp.clear();
+//    q.clear();
 
    for ( unsigned int i=0; i<_idxs.size(); ++i )
       q.push( _idxs[i] );
@@ -850,14 +934,19 @@ int gauss_seidel_local( MatrixT& _A, VectorT& _x, VectorT& _rhs, std::vector<uns
 
       double res_i   = -_rhs[cur_i];
       double x_i_new = _rhs[cur_i];
+      double diag    = 1.0;
       for ( ; it!=ite; ++it )
       {
          res_i   += ( *it ) * _x[it.index()];
          x_i_new -= ( *it ) * _x[it.index()];
-         i_temp.push_back( it.index() );
+	 if( it.index() != cur_i)
+	   i_temp.push_back( it.index() );
+	 else
+	   diag = *it;
       }
 
-      if ( res_i*res_i > t2 )
+      // compare relative residuum normalized by diagonal entry
+      if ( res_i*res_i/diag > t2 )
       {
          _x[cur_i] += x_i_new/_A( cur_i, cur_i );
 
@@ -868,7 +957,6 @@ int gauss_seidel_local( MatrixT& _A, VectorT& _x, VectorT& _rhs, std::vector<uns
 
    return it_count;
 }
-
 
 //-----------------------------------------------------------------------------
 
@@ -888,6 +976,37 @@ double residuum_norm( MatrixT& _A, VectorT& _x, VectorT& _rhs )
    gmm::add( Ax, gmm::scaled( _rhs, -1.0 ), res );
 
    return gmm::vect_norm2( res );
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class MatrixT, class MatrixT2, class VectorT>
+void factored_to_quadratic( MatrixT& _F, MatrixT2& _Q, VectorT& _rhs)
+{
+  unsigned int m = gmm::mat_nrows(_F);
+  unsigned int n = gmm::mat_ncols(_F);
+
+  // resize result matrix and vector
+  gmm::resize(_Q, n-1, n-1);
+  gmm::resize(_rhs, n);
+
+  // set up transposed
+  MatrixT Ft(n,m);
+  gmm::copy(gmm::transposed(_F), Ft);
+
+  // compute quadratic matrix
+  MatrixT Q(n,n);
+  gmm::mult(Ft,_F,Q);
+
+  // extract rhs
+  gmm::copy( gmm::scaled(gmm::mat_const_row( Q, n - 1),-1.0), _rhs);
+
+  // resize and copy output
+  gmm::resize( Q, n-1, n-1);
+  _rhs.resize( n - 1);
+  gmm::copy  ( Q, _Q);
 }
 
 
@@ -974,5 +1093,5 @@ void inspect_matrix( const MatrixT& _A)
 
 
 //=============================================================================
-} // namespace gmm
+} // namespace COMISO
 //=============================================================================
