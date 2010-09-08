@@ -127,7 +127,7 @@ int main(void)
   std::vector<double> evals(c_elim.size());
   std::cerr << "c_elim " << c_elim << std::endl;
   std::cerr << "CSC BEFORE " << Mcsc << std::endl;
-  gmm::eliminate_csc_vars(c_elim, evals, Mcsc, x, rhs);
+  COMISO_GMM::eliminate_csc_vars(c_elim, evals, Mcsc, x, rhs);
   std::cerr << "ELIMINATED CSC" << Mcsc << std::endl;
 
   //     T *pr;        // values.

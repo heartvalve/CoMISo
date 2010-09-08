@@ -134,7 +134,7 @@ solve(
   // convert into quadratic system
   VectorT rhs;
   gmm::col_matrix< gmm::rsvector< double > > A;
-  factored_to_quadratic(_B, A, rhs);
+  COMISO_GMM::factored_to_quadratic(_B, A, rhs);
 
   // solve
   solve( _constraints, A, _x, rhs, 
