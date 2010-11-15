@@ -78,6 +78,8 @@ get_parameters()
 
   infoSB->setValue( misolver_.get_noise());
   solverStatsCheckBox->setChecked( misolver_.get_stats( ));
+
+  use_reordering_cb->setChecked( misolver_.use_constraint_reordering() );
 }
 
 
@@ -105,6 +107,8 @@ set_parameters()
 
   misolver_.set_noise( infoSB->value());
   misolver_.set_stats( solverStatsCheckBox->isChecked());
+
+  misolver_.use_constraint_reordering() = use_reordering_cb->isChecked();
 }
 
 

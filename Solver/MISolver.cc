@@ -65,6 +65,8 @@ MISolver::MISolver()
 
   noisy_ = 0;
   stats_ = true;
+
+  use_constraint_reordering_ = true;
 }
 
 
