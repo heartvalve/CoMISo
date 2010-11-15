@@ -196,6 +196,9 @@ public:
   bool get_stats( )            { return stats_; }
 	/*@}*/
 
+  /// Set/Get use_constraint_reordering for constraint solver (default = true)
+  bool& use_constraint_reordering() { return use_constraint_reordering_;}
+
  private:
 
   // find set of variables for simultaneous rounding
@@ -327,6 +330,8 @@ private:
   unsigned int n_local_;
   unsigned int n_cg_;
   unsigned int n_full_;
+
+  bool use_constraint_reordering_;
 
   friend class COMISO::MISolverDialog;
 };

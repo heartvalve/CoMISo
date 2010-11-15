@@ -241,6 +241,9 @@ public:
   /// Set noise-level (how much std output is given) 0 basically none, 1 important stuff (warning/timing, is default), 2+ not so important
   void set_noisy( int _noisy) { noisy_ = _noisy;}
 
+  // Get/Set whether the constraint reordering is used (default true)
+  bool& use_constraint_reordering() { return miso_.use_constraint_reordering(); }
+
 /** @name Verify the result.
  * Functions to verify the result of the constrained solver. Are the constraints met, are the correct variables correctly rounded ...
  */

@@ -209,11 +209,17 @@ solve(
     bool      _show_miso_settings, 
     bool      _show_timings )
 {
+  // show options dialog
+  if( _show_miso_settings)
+    miso_.show_options_dialog();
+
+
   int nrows = gmm::mat_nrows(_A);
   int ncols = gmm::mat_ncols(_A);
   int ncons = gmm::mat_nrows(_constraints);
 
-  if( _show_timings) std::cerr << __FUNCTION__ << "\n Initital dimension: " << nrows << " x " << ncols << ", number of constraints: " << ncons << std::endl;
+  if( _show_timings) std::cerr << __FUNCTION__ << "\n Initital dimension: " << nrows << " x " << ncols 
+			       << ", number of constraints: " << ncons << " use reordering: " << use_constraint_reordering() << std::endl;
 
   // StopWatch for Timings
   COMISO::StopWatch sw, sw2; sw.start(); sw2.start();
@@ -223,8 +229,11 @@ solve(
   std::vector<int> c_elim( ncons);
 
   // apply sparse gauss elimination to make subsequent _conditions independent
-  //make_constraints_independent( _constraints, _idx_to_round, c_elim);
-  make_constraints_independent_reordering( _constraints, _idx_to_round, c_elim);
+  if(use_constraint_reordering())
+    make_constraints_independent_reordering( _constraints, _idx_to_round, c_elim);
+  else
+    make_constraints_independent( _constraints, _idx_to_round, c_elim);
+
   double time_gauss = sw.stop()/1000.0; sw.start();
 
   // re-indexing vector
@@ -239,10 +248,6 @@ solve(
     std::cerr << "Eliminated dimension: " << Acsc.nr << " x " << Acsc.nc << std::endl;
     std::cerr << "#nonzeros: " << gmm::nnz(Acsc) << std::endl;
   }
-
-  // show options dialog
-  if( _show_miso_settings)
-    miso_.show_options_dialog();
 
   sw.start();
   miso_.solve( Acsc, _x, _rhs, _idx_to_round);
@@ -1000,6 +1005,10 @@ setup_and_solve_system( CMatrixT& _B,
 			double    _reg_factor,
 			bool      _show_miso_settings)
 {
+  // show options dialog
+  if( _show_miso_settings)
+    miso_.show_options_dialog();
+
   COMISO::StopWatch s1;
   COMISO::StopWatch sw; sw.start();
   unsigned int m = gmm::mat_nrows(_B);
@@ -1054,9 +1063,6 @@ setup_and_solve_system( CMatrixT& _B,
     std::cerr << __FUNCTION__ << " CSC init " << s1.stop()/1000.0 << std::endl;
   double setup_time = sw.stop()/1000.0;
   
-  // show options dialog
-  if( _show_miso_settings)
-    miso_.show_options_dialog();
 
   COMISO::StopWatch misw;
   misw.start();
