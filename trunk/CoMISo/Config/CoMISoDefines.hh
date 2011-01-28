@@ -24,7 +24,7 @@
 
 #ifndef COMISODLLEXPORT
 	#ifdef WIN32
-		#ifdef COMISOMDLL
+		#ifdef COMISODLL
 			#ifdef USECOMISO
 				#define COMISODLLEXPORT __declspec(dllimport)
 				#define COMISODLLEXPORTONLY 
