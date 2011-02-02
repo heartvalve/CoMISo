@@ -34,6 +34,11 @@
 #include <algorithm>
 #include <gmm/gmm.h>
 
+#ifndef COMISO_NCHOLMOD
+#include <cholmod.h>
+#endif
+
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
@@ -171,7 +176,7 @@ void fix_var_csc_symmetric( const unsigned int                _j,
 /// Get matrix data (CSC matrix format) from matrix
 /** Used by Cholmod wrapper  
  *  @param _mat matrix
- *  @param _c uplo parameter (l, L, u, U)
+ *  @param _c uplo parameter (l, L, u, U, c, C)
  *  @param _values values vector
  *  @param _rowind row indices 
  *  @param _colptr column pointer  */
@@ -191,7 +196,7 @@ template<class MatrixT>
 void regularize_hack( MatrixT& _mat, double _v = 1e-6 );
 
 
-/// Local Gauß Seidel update of lin. equation system.
+/// Local Gauss Seidel update of lin. equation system.
 /**  
  *  Add factor*avg(trace(_mat))*Identity to _mat.
  *  @param _A Matrix of linear system
@@ -235,7 +240,19 @@ void factored_to_quadratic( MatrixT& _F, MatrixT2& _Q, VectorT& _rhs);
 template<class MatrixT>
 void inspect_matrix( const MatrixT& _A);
 
+#ifndef COMISO_NCHOLMOD
 
+/// GMM to Cholmod_sparse interface
+template<class MatrixT>
+void cholmod_to_gmm( const cholmod_sparse& _AC, MatrixT& _A);
+
+template<class MatrixT>
+void gmm_to_cholmod( const MatrixT&  _A,
+                     cholmod_sparse* &_AC,
+                     cholmod_common* _common,
+                     int             _sparsity_type = 0,
+                     bool            _long_int      = false);
+#endif
 
 //=============================================================================
 } // namespace COMISO_GMM

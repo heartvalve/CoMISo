@@ -294,7 +294,6 @@ void get_ccs_symmetric_data( const MatrixT&      _mat,
    unsigned int n = gmm::mat_ncols( _mat );
 
    gmm::csc_matrix<REALT> csc_mat( m,n );
-
    gmm::copy( _mat, csc_mat );
 
    _values.resize( 0 );
@@ -308,7 +307,7 @@ void get_ccs_symmetric_data( const MatrixT&      _mat,
       case 'l':
       case 'L':
          // for all columns
-         for ( unsigned int i=0; i<m; ++i )
+         for ( unsigned int i=0; i<n; ++i )
          {
             _colptr.push_back( iv );
             for ( unsigned int j=( csc_mat.jc )[i]; j<( csc_mat.jc )[i+1]; ++j )
@@ -325,7 +324,7 @@ void get_ccs_symmetric_data( const MatrixT&      _mat,
       case 'u':
       case 'U':
          // for all columns
-         for ( unsigned int i=0; i<m; ++i )
+         for ( unsigned int i=0; i<n; ++i )
          {
             _colptr.push_back( iv );
             for ( unsigned int j=( csc_mat.jc )[i]; j<( csc_mat.jc )[i+1]; ++j )
@@ -342,7 +341,7 @@ void get_ccs_symmetric_data( const MatrixT&      _mat,
       case 'c':
       case 'C':
          // for all columns
-         for ( unsigned int i=0; i<m; ++i )
+         for ( unsigned int i=0; i<n; ++i )
          {
             _colptr.push_back( iv );
             for ( unsigned int j=( csc_mat.jc )[i]; j<( csc_mat.jc )[i+1]; ++j )
@@ -1091,6 +1090,159 @@ void inspect_matrix( const MatrixT& _A)
   std::cerr << "max|eval|    : " << "..." << std::endl;
 }
 
+
+//-----------------------------------------------------------------------------
+#ifndef COMISO_NCHOLMOD
+
+/// GMM to Cholmod_sparse interface
+template<class MatrixT>
+void cholmod_to_gmm( const cholmod_sparse& _AC, MatrixT& _A)
+{
+  // initialize dimensions
+  gmm::resize(_A,_AC.nrow, _AC.ncol);
+  gmm::clear(_A);
+
+  if(!_AC.packed)
+  {
+    std::cerr << "Warning: " << __FUNCTION__ << " does not support unpacked matrices yet!!!" << std::endl;
+    return;
+  }
+
+  // Pointer to data
+  double* X((double*)_AC.x);
+
+  // complete matrix stored
+  if(_AC.stype == 0)
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j= P[i]; j< P[i+1]; ++j)
+          _A( I[j], i) += X[j];
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j= P[i]; j< P[i+1]; ++j)
+          _A( I[j], i) += X[j];
+    }
+
+  }
+  else // only upper or lower diagonal stored
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j=P[i]; j<P[i+1]; ++j)
+        {
+          _A(I[j], i) += X[j];
+
+          // add up symmetric part
+          if( I[j] != i)
+            _A(i,I[j]) += X[j];
+        }
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j=P[i]; j<P[i+1]; ++j)
+        {
+          _A(I[j], i) += X[j];
+
+          // add up symmetric part
+          if( I[j] != i)
+            _A(i,I[j]) += X[j];
+        }
+      }
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+/// GMM to Cholmod_sparse interface
+template<class MatrixT>
+void gmm_to_cholmod( const MatrixT& _A, cholmod_sparse* &_AC, cholmod_common* _common, int _sparsity_type, bool _long_int)
+{
+  /* _sparsity_type
+          * 0:  matrix is "unsymmetric": use both upper and lower triangular parts
+          *     (the matrix may actually be symmetric in pattern and value, but
+          *     both parts are explicitly stored and used).  May be square or
+          *     rectangular.
+          * >0: matrix is square and symmetric, use upper triangular part.
+          *     Entries in the lower triangular part are ignored.
+          * <0: matrix is square and symmetric, use lower triangular part.
+          *     Entries in the upper triangular part are ignored. */
+
+  int m = gmm::mat_nrows(_A);
+  int n = gmm::mat_ncols(_A);
+
+  // get upper or lower
+  char uplo = 'c';
+  if(_sparsity_type < 0) uplo = 'l';
+  if(_sparsity_type > 0) uplo = 'u';
+
+
+  if( _long_int) // long int version
+  {
+    std::vector<double> values;
+    std::vector<UF_long> rowind;
+    std::vector<UF_long> colptr;
+
+    // get data of gmm matrix
+    COMISO_GMM::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+    // allocate cholmod matrix
+    _AC = cholmod_l_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+    // copy data to cholmod matrix
+    for(UF_long i=0; i<(UF_long)values.size(); ++i)
+    {
+      ((double*) (_AC->x))[i] = values[i];
+      ((UF_long*)(_AC->i))[i] = rowind[i];
+    }
+
+    for(UF_long i=0; i<(UF_long)colptr.size(); ++i)
+      ((UF_long*)(_AC->p))[i] = colptr[i];
+  }
+  else // int version
+  {
+     std::vector<double> values;
+     std::vector<int> rowind;
+     std::vector<int> colptr;
+
+     // get data of gmm matrix
+     COMISO_GMM::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+     // allocate cholmod matrix
+     _AC = cholmod_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+     // copy data to cholmod matrix
+     for(unsigned int i=0; i<values.size(); ++i)
+     {
+       ((double*)(_AC->x))[i] = values[i];
+       ((int*)   (_AC->i))[i] = rowind[i];
+     }
+     for(unsigned int i=0; i<colptr.size(); ++i)
+       ((int*)(_AC->p))[i] = colptr[i];
+  }
+}
+#endif
 
 //=============================================================================
 } // namespace COMISO

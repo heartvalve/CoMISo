@@ -24,8 +24,6 @@
 
 
 
-#include "cholmod.h"
-
 #include "CholmodSolver.hh"
 
 
@@ -102,6 +100,7 @@ bool CholmodSolver::calc_system( const std::vector<int>&    _colptr,
     matA.dtype = CHOLMOD_DOUBLE;
     matA.sorted = 1;
     matA.packed = 1;
+
 
     // clean up
     if( mp_L )
