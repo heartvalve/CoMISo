@@ -42,8 +42,10 @@
 #include <iostream>
 #include <vector>
 
-typedef struct cholmod_common_struct cholmod_common;
-typedef struct cholmod_factor_struct cholmod_factor;
+#include "cholmod.h"
+
+// typedef struct cholmod_common_struct cholmod_common;
+// typedef struct cholmod_factor_struct cholmod_factor;
 
 
 //== NAMESPACES ===============================================================
