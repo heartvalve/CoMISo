@@ -148,3 +148,20 @@ endif(NOT APPLE)
 # display results
 acg_print_configure_header (COMISO "CoMISo")
 
+
+
+if ( SUITESPARSE_FOUND )
+  set (COMISO_SUITESPARSE_COFIG_FILE_SETTINGS "#define COMISO_ENABLE_SUITESPARSE" )
+else ()
+  set (COMISO_SUITESPARSE_COFIG_FILE_SETTINGS "#define COMISO_DISABLE_SUITESPARSE" )
+endif ()
+
+
+
+
+
+
+
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
+     "${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh" @ONLY IMMEDIATE)
+
