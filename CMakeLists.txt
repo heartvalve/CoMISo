@@ -39,8 +39,43 @@ endif ()
 
 #added by CAT
 find_package (SUITESPARSE)
-if (NOT SUITESPARSE_FOUND )
-  message (FATAL_ERROR "SUITESPARSE not found!")
+if (SUITESPARSE_FOUND )
+  set (COMISO_SUITESPARSE_CONFIG_FILE_SETTINGS "#define COMISO_SUITESPARSE_AVAILABLE 1" )
+else ()
+  message (STATUS "SUITESPARSE not found!")
+  set (COMISO_SUITESPARSE_CONFIG_FILE_SETTINGS "#define COMISO_SUITESPARSE_AVAILABLE 0" )
+endif ()
+
+find_package (MPI)
+if (MPI_FOUND )
+  set (COMISO_MPI_CONFIG_FILE_SETTINGS "#define COMISO_MPI_AVAILABLE 1" )
+else ()
+  message (STATUS "MPI not found!")
+  set (COMISO_MPI_CONFIG_FILE_SETTINGS "#define COMISO_MPI_AVAILABLE 0" )
+endif ()
+
+find_package (PETSC)
+if (PETSC_FOUND )
+  set (COMISO_PETSC_CONFIG_FILE_SETTINGS "#define COMISO_PETSC_AVAILABLE 1" )
+else ()
+  message (STATUS "PETSC not found!")
+  set (COMISO_PETSC_CONFIG_FILE_SETTINGS "#define COMISO_PETSC_AVAILABLE 0" )
+endif ()
+
+find_package (TAO)
+if (TAO_FOUND )
+  set (COMISO_TAO_CONFIG_FILE_SETTINGS "#define COMISO_TAO_AVAILABLE 1" )
+else ()
+  message (STATUS "PETSC not found!")
+  set (COMISO_TAO_CONFIG_FILE_SETTINGS "#define COMISO_TAO_AVAILABLE 0" )
+endif ()
+
+find_package (IPOPT)
+if (IPOPT_FOUND )
+  set (COMISO_IPOPT_CONFIG_FILE_SETTINGS "#define COMISO_IPOPT_AVAILABLE 1" )
+else ()
+  message (STATUS "IPOPT not found!")
+  set (COMISO_IPOPT_CONFIG_FILE_SETTINGS "#define COMISO_IPOPT_AVAILABLE 0" )
 endif ()
 
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/factored_solver/CMakeLists.txt" )
@@ -60,8 +95,6 @@ if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_factored_example/CMakeLists.txt" 
 	add_subdirectory (Examples/small_factored_example)
 endif()
 
-
-
 include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -69,6 +102,10 @@ include_directories (
   ${Boost_INCLUDE_DIR}
   ${GMM_INCLUDE_DIR}
   ${SUITESPARSE_INCLUDE_DIRS}
+  ${MPI_INCLUDE_PATH}
+  ${PETSC_INCLUDE_DIRS}
+  ${TAO_INCLUDE_DIRS}
+  ${IPOPT_INCLUDE_DIR}
 )
 
 # generate dllexport macros on windows
@@ -79,12 +116,17 @@ endif ()
 
 link_directories (
   ${SUITESPARSE_LIBRARY_DIRS}
+#  ${MPI_LIBRARY_DIR}
+  ${PETSC_LIBRARY_DIR}
+  ${TAO_LIBRARY_DIR}
+  ${IPOPT_LIBRARY_DIR}
 )
 
 # source code directories
 set (directories 
   .
-  Solver 
+  Solver
+  NSolver
   Config
   Utils
   QtWidgets
@@ -142,26 +184,17 @@ else(NOT APPLE)
 	  ${QT_LIBRARIES}
 	  ${SUITESPARSE_LIBRARIES}
 	  ${BLAS_LIBRARIES}
+	  ${PETSC_LIBRARIES}
+	  ${TAO_LIBRARIES}
+	  ${MPI_LIBRARIES}
+	  ${IPOPT_LIBRARIES}
 	)
 endif(NOT APPLE)
 
 # display results
 acg_print_configure_header (COMISO "CoMISo")
 
-
-
-if ( SUITESPARSE_FOUND )
-  set (COMISO_SUITESPARSE_COFIG_FILE_SETTINGS "#define COMISO_ENABLE_SUITESPARSE" )
-else ()
-  set (COMISO_SUITESPARSE_COFIG_FILE_SETTINGS "#define COMISO_DISABLE_SUITESPARSE" )
-endif ()
-
-
-
-
-
-
-
+# write config file
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
      "${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh" @ONLY IMMEDIATE)
 

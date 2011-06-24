@@ -1,5 +1,8 @@
 include (ACGCommon)
 find_package(CoMISo)
+find_package(SUITESPARSE)
+find_package(MPI)
+
 
 include_directories (
   ..
@@ -7,9 +10,13 @@ include_directories (
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${COMISO_INCLUDE_DIR}
+  ${SUITESPARSE_INCLUDE_DIRS}
 )
 
 link_directories (
+  ${SUITESPARSE_LIBRARY_DIRS}
+  ${TAO_LIBRARY_DIR}
+  ${PETSC_LIBRARY_DIR}
 )
 
 # source code directories
@@ -33,8 +40,15 @@ else ()
   acg_add_executable (factored_solver ${sources} ${headers} )
 endif ()
 
+# enable rpath linking
+set_target_properties(factored_solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH 1)
+
 target_link_libraries (factored_solver
   CoMISo
+  ${SUITESPARSE_LIBRARIES}
+  ${MPI_LIBRARY}
+  ${PETSC_LIBRARY}
+  ${TAO_LIBRARY}
 )
 
 if (APPLE)
