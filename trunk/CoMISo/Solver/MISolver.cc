@@ -35,8 +35,9 @@
 #include <gmm/gmm.h>
 #include <float.h>
 
-// #include "SparseQRSolver.hh"
-// #include "UMFPACKSolver.hh"
+// hack for testing only
+#include "SparseQRSolver.hh"
+#include "UMFPACKSolver.hh"
 
 #define ROUND(x) ((x)<0?int((x)-0.5):int((x)+0.5))
 
@@ -137,29 +138,55 @@ MISolver::solve_direct_rounding(
   chol_.calc_system_gmm(_A);
   chol_.solve(_x, _rhs);
 
+  // check solver performance (only for testing!!!)
+  {
+    StopWatch sw;
 
-  // // performance comparison code
-  // {
-  //   COMISO::SparseQRSolver spqr;
-  //   spqr.calc_system_gmm(_A);
-  //   Vecd x2(_x);
-  //   spqr.solve(x2,_rhs);
-  //   Vecd res(_x);
-  //   gmm::add(_x,gmm::scaled(x2,-1.0),res);
-  //   std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
-  // }
+    // performance comparison code
+    {
+      sw.start();
+      COMISO::SparseQRSolver spqr;
+      spqr.calc_system_gmm(_A);
+      std::cerr << "SparseQR factor took: " << sw.stop()/1000.0 << "s\n";
+      Vecd x2(_x);
+      sw.start();
+      spqr.solve(x2,_rhs);
+      std::cerr << "SparseQR solve took: " << sw.stop()/1000.0 << "s\n";
+      Vecd res(_x);
+      gmm::add(_x,gmm::scaled(x2,-1.0),res);
+      std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
+    }
 
-  // // performance comparison code
-  // {
-  //   COMISO::UMFPACKSolver umf;
-  //   umf.calc_system_gmm(_A);
-  //   Vecd x3(_x);
-  //   umf.solve(x3,_rhs);
-  //   Vecd res2(_x);
-  //   gmm::add(_x,gmm::scaled(x3,-1.0),res2);
-  //   std::cerr << "UMFPACK DIFFERENCE IN RESULT: " << gmm::vect_norm2(res2) << std::endl;
-  // }
+    // performance comparison code
+    {
+      sw.start();
+      COMISO::UMFPACKSolver umf;
+      umf.calc_system_gmm(_A);
+      std::cerr << "UMFPack factor took: " << sw.stop()/1000.0 << "s\n";
+      Vecd x3(_x);
+      sw.start();
+      umf.solve(x3,_rhs);
+      std::cerr << "UMFPack solve took: " << sw.stop()/1000.0 << "s\n";
+      Vecd res2(_x);
+      gmm::add(_x,gmm::scaled(x3,-1.0),res2);
+      std::cerr << "UMFPACK DIFFERENCE IN RESULT: " << gmm::vect_norm2(res2) << std::endl;
+    }
 
+    // performance comparison code
+    {
+      sw.start();
+      COMISO::CholmodSolver chol;
+      chol.calc_system_gmm(_A);
+      std::cerr << "Choldmod factor took: " << sw.stop()/1000.0 << "s\n";
+      Vecd x4(_x);
+      sw.start();
+      chol.solve(x4,_rhs);
+      std::cerr << "Choldmod solve took: " << sw.stop()/1000.0 << "s\n";
+      Vecd res(_x);
+      gmm::add(_x,gmm::scaled(x4,-1.0),res);
+      std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
+    }
+  }
 
   // round and eliminate variables
   Vecui elim_i;
