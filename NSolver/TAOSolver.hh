@@ -8,7 +8,7 @@
 #ifndef ACG_TAOSOLVER_HH
 #define ACG_TAOSOLVER_HH
 
-// check availability of package
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
 #if COMISO_TAO_AVAILABLE
 
