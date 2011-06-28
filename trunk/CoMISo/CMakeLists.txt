@@ -23,17 +23,18 @@ acg_get_version ()
 include (ACGOutput)
 
 find_package (GMM)
-if (NOT GMM_FOUND)
+if (GMM_FOUND)
+  set (COMISO_GMM_CONFIG_FILE_SETTINGS "#define COMISO_GMM_AVAILABLE 1" )
+else()
+  set (COMISO_GMM_CONFIG_FILE_SETTINGS "#define COMISO_GMM_AVAILABLE 0" )
   message (FATAL_ERROR "GMM not found!")
 endif ()
 
-find_package (Boost)
-if (NOT Boost_FOUND)
-  message (FATAL_ERROR "Boost not found!")
-endif ()
-
 find_package (BLAS)
-if (NOT BLAS_FOUND )
+if (BLAS_FOUND )
+  set (COMISO_BLAS_CONFIG_FILE_SETTINGS "#define COMISO_BLAS_AVAILABLE 1" )
+else()
+  set (COMISO_BLAS_CONFIG_FILE_SETTINGS "#define COMISO_BLAS_AVAILABLE 0" )
   message (FATAL_ERROR "BLAS not found!")
 endif ()
 
@@ -100,7 +101,6 @@ include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${Boost_INCLUDE_DIR}
   ${GMM_INCLUDE_DIR}
   ${SUITESPARSE_INCLUDE_DIRS}
   ${MPI_INCLUDE_PATH}
