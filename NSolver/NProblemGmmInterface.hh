@@ -1,12 +1,12 @@
 //=============================================================================
 //
-//  CLASS BaseTaoGmmInterface
+//  CLASS NProblemGmmInterface
 //
 //=============================================================================
 
 
-#ifndef ACG_NSOLVERGMMINTERFACE_HH
-#define ACG_NSOLVERGMMINTERFACE_HH
+#ifndef ACG_NPROBLEMGMMINTERFACE_HH
+#define ACG_NPROBLEMGMMINTERFACE_HH
 
 
 //== INCLUDES =================================================================
@@ -23,13 +23,13 @@ namespace ACG {
 
 	      
 
-/** \class NSolverGmmInterface NSolverGmmInterface.hh <ACG/.../NSolverGmmInterface.hh>
+/** \class NProblemGmmInterface NProblemGmmInterface.hh <ACG/.../NPRoblemGmmInterface.hh>
 
     Brief Description.
   
     A more elaborate description follows.
 */
-class NSolverGmmInterface
+class NProblemGmmInterface
 {
 public:
   
@@ -37,10 +37,10 @@ public:
   typedef gmm::row_matrix< gmm::wsvector<double> > SMatrixNS;
 
   /// Default constructor
-  NSolverGmmInterface() {}
+  NProblemGmmInterface() {}
  
   /// Destructor
-  ~NSolverGmmInterface() {}
+  ~NProblemGmmInterface() {}
 
   virtual int    n_unknowns   (                                ) = 0;
   virtual void   initial_x    (       double* _x               ) = 0;
@@ -54,6 +54,6 @@ public:
 //=============================================================================
 } // namespace ACG
 //=============================================================================
-#endif // ACG_NSOLVERGMMINTERFACE_HH defined
+#endif // ACG_NROBLEMGMMINTERFACE_HH defined
 //=============================================================================
 

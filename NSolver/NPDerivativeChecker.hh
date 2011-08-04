@@ -16,7 +16,7 @@
 
 #include <ACG/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
-#include "NSolverGmmInterface.hh"
+#include "NProblemGmmInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -56,14 +56,14 @@ public:
   /// Destructor
   ~NPDerivativeChecker() {}
 
-  bool check_all(NSolverGmmInterface* _np, double _dx, double _eps)
+  bool check_all(NProblemGmmInterface* _np, double _dx, double _eps)
   {
     conf_.dx = _dx;
     conf_.eps = _eps;
     return check_all(_np);
   }
 
-  bool check_all(NSolverGmmInterface* _np)
+  bool check_all(NProblemGmmInterface* _np)
   {
     bool d1_ok = check_d1(_np);
     bool d2_ok = check_d2(_np);
@@ -71,7 +71,7 @@ public:
     return ( d1_ok && d2_ok);
   }
 
-  bool check_d1(NSolverGmmInterface* _np)
+  bool check_d1(NProblemGmmInterface* _np)
   {
     int n_ok     = 0;
     int n_errors = 0;
@@ -113,14 +113,14 @@ public:
     return (n_errors == 0);
   }
 
-  bool check_d2(NSolverGmmInterface* _np)
+  bool check_d2(NProblemGmmInterface* _np)
   {
     int n_ok     = 0;
     int n_errors = 0;
 
     int n = _np->n_unknowns();
     std::vector<double> x(n);
-    NSolverGmmInterface::SMatrixNS H(n,n);
+    NProblemGmmInterface::SMatrixNS H(n,n);
 
     for(int i=0; i<conf_.n_iters; ++i)
     {
