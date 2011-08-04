@@ -120,7 +120,7 @@ public:
 
     int n = _np->n_unknowns();
     std::vector<double> x(n);
-    NProblemGmmInterface::SMatrixNS H(n,n);
+    NProblemGmmInterface::SMatrixNP H(n,n);
 
     for(int i=0; i<conf_.n_iters; ++i)
     {

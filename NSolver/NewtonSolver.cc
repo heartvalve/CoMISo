@@ -25,7 +25,7 @@ solve(NProblemGmmInterface* _problem)
   int n = _problem->n_unknowns();
 
   // hesse matrix
-  NProblemGmmInterface::SMatrixNS H;
+  NProblemGmmInterface::SMatrixNP H;
   // gradient
   std::vector<double> x(n), x_new(n), dx(n), g(n);
 

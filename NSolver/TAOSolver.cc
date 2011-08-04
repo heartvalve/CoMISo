@@ -203,12 +203,12 @@ hessian(TAO_APPLICATION _app, Vec _x, Mat* _H, Mat* _H_pre, MatStructure* _H_str
   info = MatZeroEntries(*_H);  CHKERRQ(info);
 
   // iterate over non-zero elements
-  NProblemGmmInterface::SMatrixNS H;
+  NProblemGmmInterface::SMatrixNP H;
   base->eval_hessian( x, H);
 
   for (unsigned int i = 0; i < gmm::mat_nrows(H); ++i) 
   {
-    typedef gmm::linalg_traits<NProblemGmmInterface::SMatrixNS>::const_sub_row_type
+    typedef gmm::linalg_traits<NProblemGmmInterface::SMatrixNP>::const_sub_row_type
       CRow;
     CRow row = gmm::mat_const_row(H, i);
 
