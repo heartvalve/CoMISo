@@ -91,10 +91,10 @@ public:
     this->transform_gradient( P(vtemp_), _g);
   }
 
-  virtual void   eval_hessian ( const double* _x, SMatrixNS& _H)
+  virtual void   eval_hessian ( const double* _x, SMatrixNP& _H)
   {
     update_x(_x);
-    SMatrixNS H;
+    SMatrixNP H;
     base_->eval_hessian(P(x_), H);
     this->transform_hessian(H,_H);
   }
@@ -204,7 +204,7 @@ public:
     this->add_penalty_gradient((double*)_x, _g);
   }
 
-  virtual void   eval_hessian ( const double* _x, SMatrixNS& _H)
+  virtual void   eval_hessian ( const double* _x, SMatrixNP& _H)
   {
     base_->eval_hessian(_x, _H);
     this->add_penalty_hessian(_H);

@@ -34,7 +34,7 @@ class NProblemGmmInterface
 public:
   
   // ToDo: appropriate MatrixType ???
-  typedef gmm::row_matrix< gmm::wsvector<double> > SMatrixNS;
+  typedef gmm::row_matrix< gmm::wsvector<double> > SMatrixNP;
 
   /// Default constructor
   NProblemGmmInterface() {}
@@ -46,7 +46,7 @@ public:
   virtual void   initial_x    (       double* _x               ) = 0;
   virtual double eval_f       ( const double* _x               ) = 0;
   virtual void   eval_gradient( const double* _x, double*    _g) = 0;
-  virtual void   eval_hessian ( const double* _x, SMatrixNS& _H) = 0;
+  virtual void   eval_hessian ( const double* _x, SMatrixNP& _H) = 0;
   virtual void   store_result ( const double* _x               ) = 0;
 };
 

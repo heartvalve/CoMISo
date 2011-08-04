@@ -71,7 +71,7 @@ public:
     timing_eval_gradient_ += sw_.stop();
   }
 
-  virtual void   eval_hessian ( const double* _x, SMatrixNS& _H)
+  virtual void   eval_hessian ( const double* _x, SMatrixNP& _H)
   {
     ++n_eval_hessian_;
     sw_.start();

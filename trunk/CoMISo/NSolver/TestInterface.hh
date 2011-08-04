@@ -63,7 +63,7 @@ public:
     _g[0] = 2.0*(_x[0]-2.4);
   }
 
-  virtual void   eval_hessian( const double* _x, SMatrixNS& _H)
+  virtual void   eval_hessian( const double* _x, SMatrixNP& _H)
   {
     gmm::resize(_H,1,1);
     _H(0,0) = 2.0;
