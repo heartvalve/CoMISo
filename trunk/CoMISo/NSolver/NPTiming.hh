@@ -16,7 +16,7 @@
 
 #include <ACG/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
-#include "NSolverGmmInterface.hh"
+#include "NProblemGmmInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -28,18 +28,18 @@ namespace ACG {
 
 	      
 
-/** \class NSolverGmmInterface NSolverGmmInterface.hh <ACG/.../NSolverGmmInterface.hh>
+/** \class NProblemGmmInterface NProblemGmmInterface.hh <ACG/.../NProblemGmmInterface.hh>
 
     Brief Description.
   
     A more elaborate description follows.
 */
-class NPTiming : public NSolverGmmInterface
+class NPTiming : public NProblemGmmInterface
 {
 public:
   
   /// Default constructor
-  NPTiming(NSolverGmmInterface* _base) : base_(_base) {start_timing();}
+  NPTiming(NProblemGmmInterface* _base) : base_(_base) {start_timing();}
  
   /// Destructor
   ~NPTiming() {}
@@ -125,7 +125,7 @@ protected:
   }
 
 private:
-  NSolverGmmInterface* base_;
+  NProblemGmmInterface* base_;
   StopWatch swg_;
   StopWatch sw_;
 

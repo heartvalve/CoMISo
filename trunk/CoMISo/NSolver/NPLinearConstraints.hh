@@ -12,7 +12,7 @@
 //== INCLUDES =================================================================
 
 #include <gmm/gmm.h>
-#include "NSolverGmmInterface.hh"
+#include "NProblemGmmInterface.hh"
 #include "LinearConstraintHandlerElimination.hh"
 #include "LinearConstraintHandlerPenalty.hh"
 //#include "LinearConstraintHandlerLagrange.hh"
@@ -36,7 +36,7 @@ problem into an unconstrained one.
 
 
 // ConstraintHandler working with Elimination approach
-class NPLinearConstraintsElimination : public NSolverGmmInterface, public LinearConstraintHandlerElimination
+class NPLinearConstraintsElimination : public NProblemGmmInterface, public LinearConstraintHandlerElimination
 {
 public:
 
@@ -44,7 +44,7 @@ public:
   typedef gmm::array1D_reference<double*> VectorPT;
 
   /// Default constructor having a pointer to the main problem
-  NPLinearConstraintsElimination( NSolverGmmInterface* _np) : base_(_np), cache_initialized_(false)
+  NPLinearConstraintsElimination( NProblemGmmInterface* _np) : base_(_np), cache_initialized_(false)
   {
     if( !base_) std::cerr << "Warning: initialized NPLinearConstraints with zero pointer...\n";
     this->initialize_identity(base_->n_unknowns());
@@ -149,7 +149,7 @@ protected:
   }
 
 private:
-  NSolverGmmInterface* base_;
+  NProblemGmmInterface* base_;
 
   bool cache_initialized_;
 
@@ -163,7 +163,7 @@ private:
 
 
 // ConstraintHandler working with Penalty
-class NPLinearConstraintsPenalty : public NSolverGmmInterface, public LinearConstraintHandlerPenalty
+class NPLinearConstraintsPenalty : public NProblemGmmInterface, public LinearConstraintHandlerPenalty
 {
 public:
 
@@ -171,7 +171,7 @@ public:
   typedef gmm::array1D_reference<double*> VectorPT;
 
   /// Default constructor having a pointer to the main problem
-  NPLinearConstraintsPenalty( NSolverGmmInterface* _np) : base_(_np)
+  NPLinearConstraintsPenalty( NProblemGmmInterface* _np) : base_(_np)
   { if( !base_) std::cerr << "Warning: initialized NPLinearConstraints with zero pointer...\n"; }
 
   /// Destructor
@@ -216,7 +216,7 @@ public:
   }
 
 private:
-  NSolverGmmInterface* base_;
+  NProblemGmmInterface* base_;
 };
 
 

@@ -19,13 +19,13 @@ namespace ACG {
 // solve
 int
 NewtonSolver::
-solve(NSolverGmmInterface* _problem)
+solve(NProblemGmmInterface* _problem)
 {
   // get problem size
   int n = _problem->n_unknowns();
 
   // hesse matrix
-  NSolverGmmInterface::SMatrixNS H;
+  NProblemGmmInterface::SMatrixNS H;
   // gradient
   std::vector<double> x(n), x_new(n), dx(n), g(n);
 

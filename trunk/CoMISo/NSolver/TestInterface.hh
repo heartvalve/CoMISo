@@ -1,18 +1,18 @@
 //=============================================================================
 //
-//  CLASS NewtonSolver
+//  CLASS BaseTaoGmmInterface
 //
 //=============================================================================
 
 
-#ifndef ACG_NEWTONSOLVER_HH
-#define ACG_NEWTONSOLVER_HH
+#ifndef ACG_TESTINTERFACE_HH
+#define ACG_TESTINTERFACE_HH
 
 
 //== INCLUDES =================================================================
 
-#include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
+#include <gmm/gmm.h>
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -24,54 +24,61 @@ namespace ACG {
 
 	      
 
-/** \class NewtonSolver NewtonSolver.hh <ACG/.../NewtonSolver.hh>
+/** \class BaseTaoGmmInterface BaseTaoGmmInterface.hh <ACG/.../BaseTaoGmmInterface.hh>
 
     Brief Description.
   
     A more elaborate description follows.
 */
-class NewtonSolver
+
+class TestInterface : public NProblemGmmInterface
 {
 public:
-   
+  
   /// Default constructor
-  NewtonSolver() : max_iter_(20), convergence_eps_(1e-6), constant_hessian_structure_(false) {}
+  TestInterface() {}
  
   /// Destructor
-  ~NewtonSolver() {}
+  ~TestInterface() {}
 
-  // solve
-  int solve(NProblemGmmInterface* _problem);
+  // minimize (x-2.4)^2
 
-  // solve specifying parameters
-  int solve(NProblemGmmInterface* _problem, int _max_iter, double _eps)
-  {
-    max_iter_ = _max_iter;
-    convergence_eps_ = _eps;
-    return solve(_problem);
+  virtual int    n_unknowns  (                              )
+  { 
+    return 1; 
   }
 
-  bool& constant_hessian_structure() { return constant_hessian_structure_; }
-
-protected:
-  double* P(std::vector<double>& _v)
+  virtual void   initial_x        (       double* _x             )
   {
-    if( !_v.empty())
-      return ((double*)&_v[0]);
-    else
-      return 0;
+    _x[0] = 100;
   }
 
-private:
-  int    max_iter_;
-  double convergence_eps_;
-  bool   constant_hessian_structure_;
+  virtual double eval_f       ( const double* _x             )
+  {
+    return (_x[0]-2.4)*(_x[0]-2.4);
+  }
+
+  virtual void   eval_gradient( const double* _x, double*  _g)
+  {
+    _g[0] = 2.0*(_x[0]-2.4);
+  }
+
+  virtual void   eval_hessian( const double* _x, SMatrixNS& _H)
+  {
+    gmm::resize(_H,1,1);
+    _H(0,0) = 2.0;
+  }
+
+  virtual void   store_result     ( const double* _x             )
+  {
+    std::cerr << "result: " << _x[0] << std::endl;
+  }
 };
 
 
 //=============================================================================
 } // namespace ACG
 //=============================================================================
-#endif // ACG_NEWTONSOLVER_HH defined
+#endif // ACG_TESTINTERFACE_HH defined
 //=============================================================================
 

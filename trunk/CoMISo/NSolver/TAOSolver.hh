@@ -18,7 +18,7 @@
 #include <tao.h>
 #include <gmm/gmm.h>
 
-#include "NSolverGmmInterface.hh"
+#include "NProblemGmmInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -47,7 +47,7 @@ public:
   ~TAOSolver() {}
 
   // solve problem
-  static int solve( NSolverGmmInterface* _base);
+  static int solve( NProblemGmmInterface* _base);
 
 
 private:

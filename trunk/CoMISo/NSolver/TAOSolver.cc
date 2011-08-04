@@ -28,7 +28,7 @@ bool TAOSolver::initialized_ = false;
 
 int
 TAOSolver::
-solve( NSolverGmmInterface* _base)
+solve( NProblemGmmInterface* _base)
 {
   // // initialize (only once)
   // initialize();
@@ -141,7 +141,7 @@ int
 TAOSolver::
 objective( TAO_APPLICATION _app, Vec _x, double* _result, void* _base)
 {
-  NSolverGmmInterface* base = (NSolverGmmInterface*) _base;
+  NProblemGmmInterface* base = (NProblemGmmInterface*) _base;
   
   PetscScalar *x;
 
@@ -165,7 +165,7 @@ int
 TAOSolver::
 gradient(TAO_APPLICATION _app, Vec _x, Vec _g, void* _base)
 {
-  NSolverGmmInterface* base = (NSolverGmmInterface*) _base;
+  NProblemGmmInterface* base = (NProblemGmmInterface*) _base;
 
   PetscScalar *x, *g;
   int info;
@@ -192,7 +192,7 @@ int
 TAOSolver::
 hessian(TAO_APPLICATION _app, Vec _x, Mat* _H, Mat* _H_pre, MatStructure* _H_struct, void* _base)
 {
-  NSolverGmmInterface* base = (NSolverGmmInterface*) _base;
+  NProblemGmmInterface* base = (NProblemGmmInterface*) _base;
 
   PetscScalar *x;
 
@@ -203,12 +203,12 @@ hessian(TAO_APPLICATION _app, Vec _x, Mat* _H, Mat* _H_pre, MatStructure* _H_str
   info = MatZeroEntries(*_H);  CHKERRQ(info);
 
   // iterate over non-zero elements
-  NSolverGmmInterface::SMatrixNS H;
+  NProblemGmmInterface::SMatrixNS H;
   base->eval_hessian( x, H);
 
   for (unsigned int i = 0; i < gmm::mat_nrows(H); ++i) 
   {
-    typedef gmm::linalg_traits<NSolverGmmInterface::SMatrixNS>::const_sub_row_type
+    typedef gmm::linalg_traits<NProblemGmmInterface::SMatrixNS>::const_sub_row_type
       CRow;
     CRow row = gmm::mat_const_row(H, i);
 
