@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_TESTINTERFACE_HH
-#define ACG_TESTINTERFACE_HH
+#ifndef COMISO_TESTINTERFACE_HH
+#define COMISO_TESTINTERFACE_HH
 
 
 //== INCLUDES =================================================================
@@ -18,7 +18,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -77,8 +77,8 @@ public:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#endif // ACG_TESTINTERFACE_HH defined
+#endif // COMISO_TESTINTERFACE_HH defined
 //=============================================================================
 

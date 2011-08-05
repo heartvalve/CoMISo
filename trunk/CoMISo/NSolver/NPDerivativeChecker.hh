@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_NPDERIVATIVECHECKER_HH
-#define ACG_NPDERIVATIVECHECKER_HH
+#ifndef COMISO_NPDERIVATIVECHECKER_HH
+#define COMISO_NPDERIVATIVECHECKER_HH
 
 
 //== INCLUDES =================================================================
@@ -22,7 +22,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -189,7 +189,7 @@ private:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
 #endif // ACG_NPDERIVATIVECHECKER defined
 //=============================================================================

@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_TAOSOLVER_HH
-#define ACG_TAOSOLVER_HH
+#ifndef COMISO_TAOSOLVER_HH
+#define COMISO_TAOSOLVER_HH
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
@@ -24,7 +24,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -69,7 +69,7 @@ private:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 
 //=============================================================================
 #endif // COMISO_TAO_AVAILABLE

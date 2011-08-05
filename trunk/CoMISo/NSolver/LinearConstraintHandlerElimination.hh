@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_LINEARCONSTRAINTHANDLERELIMINATION_HH
-#define ACG_LINEARCONSTRAINTHANDLERELIMINATION_HH
+#ifndef COMISO_LINEARCONSTRAINTHANDLERELIMINATION_HH
+#define COMISO_LINEARCONSTRAINTHANDLERELIMINATION_HH
 
 
 //== INCLUDES =================================================================
@@ -18,7 +18,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -81,6 +81,10 @@ public:
   void inv_transform_x( const std::vector<double>& _xC, std::vector<double>& _x);
   void inv_transform_x( double* _xC, double* _x);
 
+  // project x to closest one fullfilling the constraints: inv_transform_x(transform_x(x))
+  void project_x( const std::vector<double>& _x, std::vector<double>& _xp);
+  void project_x( double* _x, double* _xp);
+
   // transform gradient
   void transform_gradient( const std::vector<double>& _g, std::vector<double>& _gC);
   void transform_gradient( double* _g, double* _gC);
@@ -111,11 +115,11 @@ private:
 //=============================================================================
 } // namespace ACG
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(ACG_LINEARCONSTRAINTHANDLERELIMINATION_C)
-#define ACG_LINEARCONSTRAINTHANDLERELIMINATION_TEMPLATES
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_LINEARCONSTRAINTHANDLERELIMINATION_C)
+#define COMISO_LINEARCONSTRAINTHANDLERELIMINATION_TEMPLATES
 #include "LinearConstraintHandlerEliminationT.cc"
 #endif
 //=============================================================================
-#endif // ACG_LINEARCONSTRAINTHANDLERELIMINATION_HH defined
+#endif // COMISO_LINEARCONSTRAINTHANDLERELIMINATION_HH defined
 //=============================================================================
 

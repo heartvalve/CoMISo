@@ -12,7 +12,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== IMPLEMENTATION ==========================================================
 
@@ -128,6 +128,41 @@ inv_transform_x( double* _xC, double* _x)
 
 void
 LinearConstraintHandlerElimination::
+project_x( const std::vector<double>& _x, std::vector<double>& _xp)
+{
+  _xp.resize(n_);
+  if( _x.size())
+    project_x((double*)&(_x[0]), &(_xp[0]));
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+LinearConstraintHandlerElimination::
+project_x( double* _x, double* _xp)
+{
+  if( n_ == n_red_)   // special case of no constraints
+  {
+    // just copy
+    gmm::copy(VectorPT(_x, n_), VectorPT(_xp, n_));
+  }
+  else
+  {
+    Vtemp_.resize( n_red_);
+
+    transform_x    (_x         , &Vtemp_[0]);
+    inv_transform_x( &Vtemp_[0], _xp       );
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+LinearConstraintHandlerElimination::
 transform_gradient( const std::vector<double>& _g, std::vector<double>& _gC)
 {
   _gC.resize(n_red_);
@@ -168,5 +203,5 @@ transform_hessian( const RMatrix& _H, RMatrix& _HC)
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================

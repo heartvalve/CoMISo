@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_NPROBLEMGMMINTERFACE_HH
-#define ACG_NPROBLEMGMMINTERFACE_HH
+#ifndef COMISO_NPROBLEMGMMINTERFACE_HH
+#define COMISO_NPROBLEMGMMINTERFACE_HH
 
 
 //== INCLUDES =================================================================
@@ -17,7 +17,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -52,8 +52,8 @@ public:
 
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
-#endif // ACG_NROBLEMGMMINTERFACE_HH defined
+#endif // COMISO_NPROBLEMGMMINTERFACE_HH defined
 //=============================================================================
 

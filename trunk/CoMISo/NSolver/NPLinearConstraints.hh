@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_NPLINEARCONSTRAINTS_HH
-#define ACG_NPLINEARCONSTRAINTS_HH
+#ifndef COMISO_NPLINEARCONSTRAINTS_HH
+#define COMISO_NPLINEARCONSTRAINTS_HH
 
 
 //== INCLUDES =================================================================
@@ -22,7 +22,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -223,6 +223,6 @@ private:
 //=============================================================================
 } // namespace ACG
 //=============================================================================
-#endif // ACG_NSOLVERGMMINTERFACE_HH defined
+#endif // COMISO_NSOLVERGMMINTERFACE_HH defined
 //=============================================================================
 
