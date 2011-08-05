@@ -5,8 +5,8 @@
 //=============================================================================
 
 
-#ifndef ACG_LINEARCONSTRAINTHANDLERPENALTY_HH
-#define ACG_LINEARCONSTRAINTHANDLERPENALTY_HH
+#ifndef COMISO_LINEARCONSTRAINTHANDLERPENALTY_HH
+#define COMISO_LINEARCONSTRAINTHANDLERPENALTY_HH
 
 
 //== INCLUDES =================================================================
@@ -18,7 +18,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace ACG {
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
@@ -104,7 +104,7 @@ private:
 };
 
 //=============================================================================
-} // namespace ACG
+} // namespace COMISO
 //=============================================================================
 #if defined(INCLUDE_TEMPLATES) && !defined(ACG_LINEARCONSTRAINTHANDLERPENALTY_C)
 #define ACG_LINEARCONSTRAINTHANDLERPENALTY_TEMPLATES
