@@ -59,6 +59,22 @@ initialize( const MatrixT& _C, const VectorT& _c)
     n_     = gmm::mat_nrows(C_);
     n_red_ = gmm::mat_ncols(C_);
     m_     = n_ - n_red_;
+
+    // hack -> store initial system
+    if(0)
+    {
+      gmm::resize(A_orig_, gmm::mat_nrows(_C), gmm::mat_ncols(_C));
+      gmm::resize(b_orig_, _c.size());
+      gmm::copy(_C, A_orig_);
+      gmm::copy(_c, b_orig_);
+    }
+
+//    RMatrix CtC(n_red_, n_red_);
+//    gmm::mult(Ct_,C_, CtC);
+//    std::cerr << "CtC\n";
+//    std::cerr << CtC << std::endl;
+
+
     /*
   // set up least squares problem
   gmm::resize(Mtemp_, gmm::mat_ncols(C_), gmm::mat_ncols(C_));

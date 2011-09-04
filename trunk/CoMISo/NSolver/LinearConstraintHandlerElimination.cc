@@ -152,8 +152,55 @@ project_x( double* _x, double* _xp)
   {
     Vtemp_.resize( n_red_);
 
-    transform_x    (_x         , &Vtemp_[0]);
-    inv_transform_x( &Vtemp_[0], _xp       );
+    transform_x    (_x           , &(Vtemp_[0]));
+    inv_transform_x( &(Vtemp_[0]), _xp       );
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+LinearConstraintHandlerElimination::
+project_dx( const std::vector<double>& _x, std::vector<double>& _xp)
+{
+  _xp.resize(n_);
+  if( _x.size())
+    project_dx((double*)&(_x[0]), &(_xp[0]));
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+LinearConstraintHandlerElimination::
+project_dx( double* _x, double* _xp)
+{
+  if( n_ == n_red_)   // special case of no constraints
+  {
+    // just copy
+    gmm::copy(VectorPT(_x, n_), VectorPT(_xp, n_));
+  }
+  else
+  {
+    // idea: C_ is an orthonormal basis of the kernel
+    // -> simply project out the non-constraint part
+
+    Vtemp_.resize( n_red_);
+
+    gmm::mult(Ct_, VectorPT(_x, n_), Vtemp_);
+    gmm::mult(C_, Vtemp_, VectorPT(_xp, n_));
+
+//    // check result
+//    std::cerr << "check result..." << std::endl;
+//    Vtemp_.resize(b_orig_.size());
+//    gmm::mult(A_orig_, VectorPT(_xp, n_), Vtemp_);
+////    gmm::add(gmm::scaled(b_orig_, -1.0), Vtemp_);
+//    std::cerr << "check constraint update... " << gmm::vect_norm2(Vtemp_) << std::endl;
+//
+////    std::cerr << "check constraint update... " << COMISO_GMM::residuum_norm<RMatrix,std::vector<double> >(A_orig_,Vtemp_, b_orig_) << std::endl;
   }
 }
 
