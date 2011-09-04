@@ -963,13 +963,13 @@ template<class MatrixT, class VectorT>
 double residuum_norm( MatrixT& _A, VectorT& _x, VectorT& _rhs )
 {
    if ( gmm::mat_ncols( _A ) != _x.size() )
-      std::cerr << "DIM ERROR (residuum_norm): " << gmm::mat_ncols( _A ) << " " << _x.size() << std::endl;
-   if ( _rhs.size() != _x.size() )
-      std::cerr << "DIM ERROR 2 (residuum_norm): " << _rhs.size() << " " << _x.size() << std::endl;
+      std::cerr << "DIM ERROR (residuum_norm): " << gmm::mat_ncols( _A ) << " vs " << _x.size() << std::endl;
+   if ( gmm::mat_nrows( _A) !=_rhs.size() )
+      std::cerr << "DIM ERROR 2 (residuum_norm): " << gmm::mat_nrows( _A) << " vs " << _rhs.size() << std::endl;
 
    // temp vectors
-   VectorT Ax( _x.size() );
-   VectorT res( _x.size() );
+   VectorT Ax( _rhs.size());
+   VectorT res( _rhs.size() );
 
    gmm::mult( _A,_x, Ax );
    gmm::add( Ax, gmm::scaled( _rhs, -1.0 ), res );

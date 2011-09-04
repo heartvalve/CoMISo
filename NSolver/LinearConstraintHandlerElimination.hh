@@ -85,6 +85,10 @@ public:
   void project_x( const std::vector<double>& _x, std::vector<double>& _xp);
   void project_x( double* _x, double* _xp);
 
+  // project dx to closest one that A(x0+dx) = b
+  void project_dx( const std::vector<double>& _x, std::vector<double>& _xp);
+  void project_dx( double* _x, double* _xp);
+
   // transform gradient
   void transform_gradient( const std::vector<double>& _g, std::vector<double>& _gC);
   void transform_gradient( double* _g, double* _gC);
@@ -110,6 +114,10 @@ private:
   // temp matrix to transform hessian and temp vectors
   RMatrix             Mtemp_;
   std::vector<double> Vtemp_;
+
+  // hack -> store initial linear system
+  RMatrix              A_orig_;
+  std::vector<double>  b_orig_;
 };
 
 //=============================================================================
