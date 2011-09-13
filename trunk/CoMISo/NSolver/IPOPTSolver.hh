@@ -19,7 +19,7 @@
 #include <cstddef>
 #include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
-#include "NConstraintGmmInterface.hh"
+#include "NConstraintInterface.hh"
 #include <IpTNLP.hpp>
 #include <IpIpoptApplication.hpp>
 #include <IpSolveStatistics.hpp>
@@ -78,7 +78,7 @@ public:
 //    };
 //------------------------------------------------------
 
-  int solve(NProblemGmmInterface* _problem, std::vector<NConstraintGmmInterface*>& _constraints);
+  int solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints);
 
 protected:
   double* P(std::vector<double>& _v)
@@ -108,8 +108,11 @@ public:
   typedef Ipopt::IpoptData                 IpoptData;
   typedef Ipopt::IpoptCalculatedQuantities IpoptCalculatedQuantities;
 
-  typedef NConstraintGmmInterface::SVectorNP SVectorNP;
-  typedef NConstraintGmmInterface::SMatrixNP SMatrixNP;
+  // sparse matrix and vector types
+  typedef NConstraintInterface::SVectorNC SVectorNC;
+  typedef NConstraintInterface::SMatrixNC SMatrixNC;
+  typedef gmm::wsvector<double>           SVectorNP;
+  typedef NProblemGmmInterface::SMatrixNP SMatrixNP;
 
   typedef gmm::array1D_reference<       double* > VectorPT;
   typedef gmm::array1D_reference< const double* > VectorPTC;
@@ -121,7 +124,7 @@ public:
   typedef typename gmm::linalg_traits<SVectorNP>::iterator       SVectorNP_iter;
 
   /** default constructor */
-  NProblemIPOPT(NProblemGmmInterface* _problem, std::vector<NConstraintGmmInterface*>& _constraints)
+  NProblemIPOPT(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
    : problem_(_problem), constraints_(_constraints) {}
 
   /** default destructor */
@@ -205,7 +208,7 @@ private:
   // pointer to problem instance
   NProblemGmmInterface* problem_;
   // reference to constraints vector
-  std::vector<NConstraintGmmInterface*>& constraints_;
+  std::vector<NConstraintInterface*>& constraints_;
 
   int nnz_jac_g_;
   int nnz_h_lag_;
@@ -215,6 +218,9 @@ private:
   std::vector<Index> jac_g_jCol_;
   std::vector<Index> h_lag_iRow_;
   std::vector<Index> h_lag_jCol_;
+
+  // Sparse Matrix of problem (don't initialize every time!!!)
+  SMatrixNP HP_;
 };
 
 

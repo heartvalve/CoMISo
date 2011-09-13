@@ -11,8 +11,7 @@
 
 //== INCLUDES =================================================================
 
-#include <gmm/gmm.h>
-#include "NConstraintGmmInterface.hh"
+#include "NConstraintInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -30,13 +29,9 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class LinearConstraint : public NConstraintGmmInterface
+class LinearConstraint : public NConstraintInterface
 {
 public:
-  
-  // ToDo: appropriate Vector/MatrixType ???
-  typedef gmm::wsvector<double>        SVectorNP;
-  typedef gmm::row_matrix< SVectorNP > SMatrixNP;
 
   // use c-arrays as vectors for gmm
   typedef gmm::array1D_reference<double*> VectorPT;
@@ -45,31 +40,13 @@ public:
 //  enum ConstraintType {NC_EQUAL, NC_LESS_EQUAL, NC_GREATER_EQUAL};
 
   /// Default constructor
-  LinearConstraint(const ConstraintType _type = NC_EQUAL) : NConstraintGmmInterface(_type)
+  LinearConstraint(const ConstraintType _type = NC_EQUAL) : NConstraintInterface(_type)
   {}
 
   // linear equation of the form -> coeffs_^T * (x,1) =_type= 0
-  LinearConstraint(const SVectorNP& _coeffs_plus_const, const ConstraintType _type = NC_EQUAL) : NConstraintGmmInterface(_type)
+  LinearConstraint(const SVectorNC& _coeffs, const double _b, const ConstraintType _type = NC_EQUAL) : NConstraintInterface(_type)
   {
-    int n = gmm::vect_size(_coeffs_plus_const)-1;
-
-    gmm::resize(coeffs_, n+1);
-    gmm::copy(_coeffs_plus_const, coeffs_);
-
-    if( n >= 0)
-      b_ = coeffs_[n];
-    else
-      b_ = 0.0;
-
-    gmm::resize(coeffs_, n);
-  }
-
-  // linear equation of the form -> coeffs_^T * (x,1) =_type= 0
-  LinearConstraint(const SVectorNP& _coeffs, const double _b, const ConstraintType _type = NC_EQUAL) : NConstraintGmmInterface(_type)
-  {
-    int n = gmm::vect_size(_coeffs);
-    gmm::resize(coeffs_, n);
-    gmm::copy(_coeffs, coeffs_);
+    coeffs_ = _coeffs;
     b_ = _b;
   }
 
@@ -78,24 +55,29 @@ public:
 
   virtual int n_unknowns()
   {
-    return gmm::vect_size(coeffs_);
+    return coeffs_.innerSize();
   }
 
   virtual double eval_constraint ( const double* _x )
   {
-     return (gmm::vect_sp(coeffs_, VectorPT((double*)_x, gmm::vect_size(coeffs_))) + b_);
+    double v = b_;
+
+    SVectorNC::InnerIterator c_it(coeffs_);
+    for(; c_it; ++c_it)
+      v += c_it.value()*_x[c_it.index()];
+
+    return v;
   }
 
-  virtual void eval_gradient( const double* _x, SVectorNP& _g      )
+  virtual void eval_gradient( const double* _x, SVectorNC& _g      )
   {
-    gmm::resize(_g, gmm::vect_size(coeffs_));
-    gmm::copy  (coeffs_, _g);
+    _g = coeffs_;
   }
 
-  virtual void eval_hessian    ( const double* _x, SMatrixNP& _h      )
+  virtual void eval_hessian    ( const double* _x, SMatrixNC& _h      )
   {
-    gmm::resize(_h, gmm::vect_size(coeffs_), gmm::vect_size(coeffs_));
-    gmm::clear(_h);
+    _h.clear();
+    _h.resize(coeffs_.innerSize(), coeffs_.innerSize());
   }
 
   // inherited from base
@@ -104,7 +86,7 @@ public:
 private:
 
   // linear equation of the form -> coeffs_^T * x + b_
-  SVectorNP coeffs_;
+  SVectorNC coeffs_;
   double    b_;
 };
 
