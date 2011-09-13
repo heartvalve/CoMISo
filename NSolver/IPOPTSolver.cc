@@ -24,7 +24,7 @@ namespace COMISO {
 
 int
 IPOPTSolver::
-solve(NProblemGmmInterface* _problem, std::vector<NConstraintGmmInterface*>& _constraints)
+solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
 {
   //----------------------------------------------------------------------------
   // 1. Create an instance of IPOPT NLP
@@ -38,7 +38,7 @@ solve(NProblemGmmInterface* _problem, std::vector<NConstraintGmmInterface*>& _co
   Ipopt::SmartPtr<Ipopt::IpoptApplication> app = IpoptApplicationFactory();
 
   app->Options()->SetStringValue("linear_solver", "ma57");
-  //  app->Options()->SetStringValue("derivative_test", "second-order");
+//  app->Options()->SetStringValue("derivative_test", "second-order");
   //  app->Options()->SetIntegerValue("print_level", 0);
 
   // Initialize the IpoptApplication and process the options
@@ -89,11 +89,12 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   // ToDo: perturb x
 
   // nonzeros in the jacobian of C_ and the hessian of the lagrangian
-  SVectorNP g;
-  SMatrixNP H;
-  problem_->eval_hessian(&(x[0]), H);
+  SMatrixNP HP;
+  SVectorNC g;
+  SMatrixNC H;
+  problem_->eval_hessian(&(x[0]), HP);
   nnz_jac_g = 0;
-  nnz_h_lag = gmm::nnz(H);
+  nnz_h_lag = 0;
 
   // clear old data
   jac_g_iRow_.clear();
@@ -105,7 +106,7 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   // iterate over rows
   for( int i=0; i<n; ++i)
   {
-    SVectorNP& ri = H.row(i);
+    SVectorNP& ri = HP.row(i);
 
     SVectorNP_citer v_it  = gmm::vect_const_begin(ri);
     SVectorNP_citer v_end = gmm::vect_const_end  (ri);
@@ -117,6 +118,7 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
       {
         h_lag_iRow_.push_back(i);
         h_lag_jCol_.push_back(v_it.index());
+        ++nnz_h_lag;
       }
     }
   }
@@ -127,36 +129,26 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   {
     constraints_[i]->eval_gradient(&(x[0]),g);
     constraints_[i]->eval_hessian (&(x[0]),H);
-    nnz_jac_g += gmm::nnz(g);
-    nnz_h_lag += gmm::nnz(H);
 
-    // build table
-    SVectorNP_citer v_it  = gmm::vect_const_begin(g);
-    SVectorNP_citer v_end = gmm::vect_const_end  (g);
-
-    for(; v_it != v_end; ++v_it)
+    // iterate over sparse vector
+    SVectorNC::InnerIterator v_it(g);
+    for(; v_it; ++v_it)
     {
       jac_g_iRow_.push_back(i);
       jac_g_jCol_.push_back(v_it.index());
+      ++nnz_jac_g;
     }
 
-    for( int i=0; i<n; ++i)
-    {
-      SVectorNP& ri = H.row(i);
-
-      v_it  = gmm::vect_const_begin(ri);
-      v_end = gmm::vect_const_end  (ri);
-
-      for(; v_it != v_end; ++v_it)
+    // iterate over superSparseMatrix
+    SMatrixNC::iterator m_it  = H.begin();
+    SMatrixNC::iterator m_end = H.end();
+    for(; m_it != m_end; ++m_it)
+      if( m_it.row() >= m_it.col())
       {
-        // store lower triangular part only
-        if( i >= (int)v_it.index())
-        {
-          h_lag_iRow_.push_back(i);
-          h_lag_jCol_.push_back(v_it.index());
-        }
+        h_lag_iRow_.push_back(m_it.row());
+        h_lag_jCol_.push_back(m_it.col());
+        ++nnz_h_lag;
       }
-    }
   }
 
   // store for error checking...
@@ -192,10 +184,10 @@ bool NProblemIPOPT::get_bounds_info(Index n, Number* x_l, Number* x_u,
     // enum ConstraintType {NC_EQUAL, NC_LESS_EQUAL, NC_GREATER_EQUAL};
     switch(constraints_[i]->constraint_type())
     {
-      case NConstraintGmmInterface::NC_EQUAL         : g_u[i] = 0.0   ; g_l[i] =  0.0   ; break;
-      case NConstraintGmmInterface::NC_LESS_EQUAL    : g_u[i] = 0.0   ; g_l[i] = -1.0e19; break;
-      case NConstraintGmmInterface::NC_GREATER_EQUAL : g_u[i] = 1.0e19; g_l[i] =  0.0   ; break;
-      default                                        :  g_u[i] = 1.0e19; g_l[i] = -1.0e19; break;
+      case NConstraintInterface::NC_EQUAL         : g_u[i] = 0.0   ; g_l[i] =  0.0   ; break;
+      case NConstraintInterface::NC_LESS_EQUAL    : g_u[i] = 0.0   ; g_l[i] = -1.0e19; break;
+      case NConstraintInterface::NC_GREATER_EQUAL : g_u[i] = 1.0e19; g_l[i] =  0.0   ; break;
+      default                                     : g_u[i] = 1.0e19; g_l[i] = -1.0e19; break;
     }
   }
 
@@ -273,20 +265,18 @@ bool NProblemIPOPT::eval_jac_g(Index n, const Number* x, bool new_x,
     // return the structure of the jacobian of the constraints
     // global index
     int gi = 0;
-    SVectorNP g;
+    SVectorNC g;
 
     for( int i=0; i<m; ++i)
     {
       constraints_[i]->eval_gradient(x, g);
 
-      // iterate over non-zero values
-      SVectorNP_citer it  = gmm::vect_const_begin(g);
-      SVectorNP_citer ite = gmm::vect_const_end(g);
+      SVectorNC::InnerIterator v_it(g);
 
-      for (; it != ite; ++it)
+      for( ; v_it; ++v_it)
       {
         if(gi < nele_jac)
-          values[gi] = *it;
+          values[gi] = v_it.value();
         ++gi;
       }
     }
@@ -322,12 +312,11 @@ bool NProblemIPOPT::eval_h(Index n, const Number* x, bool new_x,
     int gi = 0;
 
     // get hessian of problem
-    SMatrixNP H;
-    problem_->eval_hessian(x, H);
+    problem_->eval_hessian(x, HP_);
 
     for( int i=0; i<n; ++i)
     {
-      SVectorNP& ri = H.row(i);
+      SVectorNP& ri = HP_.row(i);
 
       SVectorNP_citer v_it  = gmm::vect_const_begin(ri);
       SVectorNP_citer v_end = gmm::vect_const_end  (ri);
@@ -347,24 +336,20 @@ bool NProblemIPOPT::eval_h(Index n, const Number* x, bool new_x,
     // Hessians of Constraints
     for(unsigned int j=0; j<constraints_.size(); ++j)
     {
+      SMatrixNC H;
       constraints_[j]->eval_hessian(x, H);
 
-      for( int i=0; i<n; ++i)
+      SMatrixNC::iterator m_it  = H.begin();
+      SMatrixNC::iterator m_end = H.end();
+
+      for(; m_it != m_end; ++m_it)
       {
-        SVectorNP& ri = H.row(i);
-
-        SVectorNP_citer v_it  = gmm::vect_const_begin(ri);
-        SVectorNP_citer v_end = gmm::vect_const_end  (ri);
-
-        for(; v_it != v_end; ++v_it)
+        // store lower triangular part only
+        if( m_it.row() >= m_it.col())
         {
-          // store lower triangular part only
-          if( i >= (int)v_it.index())
-          {
-            if( gi < nele_hess)
-              values[gi] = lambda[j]*(*v_it);
-            ++gi;
-          }
+          if( gi < nele_hess)
+            values[gi] = lambda[j]*(*m_it);
+          ++gi;
         }
       }
     }

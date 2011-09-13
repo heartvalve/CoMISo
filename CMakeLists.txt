@@ -97,6 +97,15 @@ else ()
   set (COMISO_IPOPT_CONFIG_FILE_SETTINGS "#define COMISO_IPOPT_AVAILABLE 0" )
 endif ()
 
+find_package (Eigen3)
+if (Eigen3_FOUND )
+  set (COMISO_Eigen3_CONFIG_FILE_SETTINGS "#define COMISO_Eigen3_AVAILABLE 1" )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${Eigen3_INCLUDE_DIR} )
+else ()
+  message (STATUS "Eigen3 not found!")
+  set (COMISO_Eigen3_CONFIG_FILE_SETTINGS "#define COMISO_Eigen3_AVAILABLE 0" )
+endif ()
+
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/factored_solver/CMakeLists.txt" )
 	add_subdirectory (Examples/factored_solver)
 endif()
@@ -112,6 +121,9 @@ if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_quadratic_example/CMakeLists.txt"
 endif()
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_factored_example/CMakeLists.txt" )
 	add_subdirectory (Examples/small_factored_example)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/super_sparse_matrix/CMakeLists.txt" )
+	add_subdirectory (Examples/super_sparse_matrix)
 endif()
 
 include_directories (
