@@ -40,6 +40,7 @@ solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _const
   app->Options()->SetStringValue("linear_solver", "ma57");
 //  app->Options()->SetStringValue("derivative_test", "second-order");
   //  app->Options()->SetIntegerValue("print_level", 0);
+  app->Options()->SetIntegerValue("max_iter", 100);
 
   // Initialize the IpoptApplication and process the options
   Ipopt::ApplicationReturnStatus status;
