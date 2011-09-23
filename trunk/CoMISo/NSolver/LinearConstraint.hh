@@ -43,7 +43,7 @@ public:
   LinearConstraint(const ConstraintType _type = NC_EQUAL) : NConstraintInterface(_type)
   {}
 
-  // linear equation of the form -> coeffs_^T * (x,1) =_type= 0
+  // linear equation of the form -> coeffs_^T *x  + b_=_type= 0
   LinearConstraint(const SVectorNC& _coeffs, const double _b, const ConstraintType _type = NC_EQUAL) : NConstraintInterface(_type)
   {
     coeffs_ = _coeffs;
@@ -57,6 +57,9 @@ public:
   {
     return coeffs_.innerSize();
   }
+
+  SVectorNC& coeffs() { return coeffs_;}
+  double&    b()      { return b_;}
 
   virtual double eval_constraint ( const double* _x )
   {
