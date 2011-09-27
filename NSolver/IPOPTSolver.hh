@@ -120,8 +120,8 @@ public:
   typedef gmm::array1D_reference<       Index* > VectorPTi;
   typedef gmm::array1D_reference< const Index* > VectorPTCi;
 
-  typedef typename gmm::linalg_traits<SVectorNP>::const_iterator SVectorNP_citer;
-  typedef typename gmm::linalg_traits<SVectorNP>::iterator       SVectorNP_iter;
+  typedef gmm::linalg_traits<SVectorNP>::const_iterator SVectorNP_citer;
+  typedef gmm::linalg_traits<SVectorNP>::iterator       SVectorNP_iter;
 
   /** default constructor */
   NProblemIPOPT(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
