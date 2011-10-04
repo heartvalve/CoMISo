@@ -2,8 +2,20 @@ include (ACGCommon)
 find_package(CoMISo)
 find_package(SUITESPARSE)
 find_package(MPI)
+find_package (MUMPS)
 find_package(IPOPT)
 
+if (MUMPS_FOUND )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${MUMPS_INCLUDE_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES ${MUMPS_LIBRARY} )
+endif ()
+
+find_package (IPOPT)
+if (IPOPT_FOUND AND MUMPS_FOUND)
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${IPOPT_INCLUDE_DIR} )
+  list( APPEND COMISO_LINK_DIRECTORIES ${IPOPT_LIBRARY_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES ${IPOPT_LIBRARY} )
+endif ()
 
 include_directories (
   ..
@@ -12,15 +24,14 @@ include_directories (
   ${CMAKE_CURRENT_BINARY_DIR}
   ${COMISO_INCLUDE_DIR}
   ${SUITESPARSE_INCLUDE_DIRS}
-  ${MUMPS_INCLUDE_DIR}
-  ${IPOPT_INCLUDE_DIR}
+  ${COMISO_INCLUDE_DIRECTORIES}
 )
 
 link_directories (
   ${SUITESPARSE_LIBRARY_DIRS}
   ${TAO_LIBRARY_DIR}
   ${PETSC_LIBRARY_DIR}
-  ${IPOPT_HSL_LIBRARY_DIR}
+  ${COMISO_LINK_DIRECTORIES}
 )
 
 # source code directories
@@ -53,8 +64,7 @@ target_link_libraries (quadratic_solver
   ${MPI_LIBRARY}
   ${PETSC_LIBRARY}
   ${TAO_LIBRARY}
-  ${MUMPS_LIBRARY}
-  ${IPOPT_LIBRARY}
+  ${COMISO_LINK_LIBRARIES}
 )
 
 if (APPLE)
