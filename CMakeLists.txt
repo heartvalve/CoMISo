@@ -229,3 +229,4 @@ if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/super_sparse_matrix/CMakeLists.txt" )
 	add_subdirectory (Examples/super_sparse_matrix)
 endif()
 
+
