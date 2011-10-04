@@ -106,26 +106,6 @@ else ()
   set (COMISO_Eigen3_CONFIG_FILE_SETTINGS "#define COMISO_Eigen3_AVAILABLE 0" )
 endif ()
 
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/factored_solver/CMakeLists.txt" )
-	add_subdirectory (Examples/factored_solver)
-endif()
-
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/quadratic_solver/CMakeLists.txt" )
-	add_subdirectory (Examples/quadratic_solver)
-endif()
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/test2/CMakeLists.txt" )
-	add_subdirectory (Examples/test2)
-endif()
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_quadratic_example/CMakeLists.txt" )
-	add_subdirectory (Examples/small_quadratic_example)
-endif()
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_factored_example/CMakeLists.txt" )
-	add_subdirectory (Examples/small_factored_example)
-endif()
-if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/super_sparse_matrix/CMakeLists.txt" )
-	add_subdirectory (Examples/super_sparse_matrix)
-endif()
-
 include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -222,4 +202,30 @@ acg_print_configure_header (COMISO "CoMISo")
 # write config file
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
      "${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh" @ONLY IMMEDIATE)
+     
+     
+     
+#######################################################################
+# Configure the examples last to be sure, that all configure files
+# of the library are already there
+#######################################################################
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/factored_solver/CMakeLists.txt" )
+	add_subdirectory (Examples/factored_solver)
+endif()
+
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/quadratic_solver/CMakeLists.txt" )
+	add_subdirectory (Examples/quadratic_solver)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/test2/CMakeLists.txt" )
+	add_subdirectory (Examples/test2)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_quadratic_example/CMakeLists.txt" )
+	add_subdirectory (Examples/small_quadratic_example)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_factored_example/CMakeLists.txt" )
+	add_subdirectory (Examples/small_factored_example)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/super_sparse_matrix/CMakeLists.txt" )
+	add_subdirectory (Examples/super_sparse_matrix)
+endif()
 
