@@ -79,7 +79,7 @@ public:
 /// Quadratic matrix constrained solver
 /**  
   *  Takes a system of the form Ax=b, a constraint matrix C and a set of variables _to_round to be rounded to integers. \f$ A\in \mathbf{R}^{n\times n}\f$
-  *  @param _constraints row matrix with rows of the form \f$ [c_1, c_2, \cdots, c_n, c_{n+1}] \f$ corresponding to the linear equation \f$ c_1*x_1+\cdots+c_n*x_n + c_{n+1}=0 \f$.
+  *  @param _constraints row matrix with rows of the form \f$ \[c_1, c_2, \cdots, c_n, c_{n+1}\] \f$ corresponding to the linear equation \f$ c_1*x_1+\cdots+c_n*x_n + c_{n+1}=0 \f$.
   *  @param _A nxn-dimensional column matrix of the system 
   *  @param _x n-dimensional variable vector
   *  @param _rhs n-dimensional right hand side.
