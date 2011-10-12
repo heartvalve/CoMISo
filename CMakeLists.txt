@@ -33,6 +33,11 @@ else()
   message (FATAL_ERROR "GMM not found!")
 endif ()
 
+# We require cgal with its blas on windows
+if (WIN32)
+  find_package(CGAL)
+endif()
+
 find_package (BLAS)
 if (BLAS_FOUND )
   set (COMISO_BLAS_CONFIG_FILE_SETTINGS "#define COMISO_BLAS_AVAILABLE 1" )
