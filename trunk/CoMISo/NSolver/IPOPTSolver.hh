@@ -15,6 +15,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include <vector>
 #include <cstddef>
 #include <gmm/gmm.h>
@@ -40,7 +41,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class IPOPTSolver
+class COMISODLLEXPORT IPOPTSolver
 {
 public:
    

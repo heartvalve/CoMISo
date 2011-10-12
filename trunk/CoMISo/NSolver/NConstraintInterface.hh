@@ -11,6 +11,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include "SuperSparseMatrixT.hh"
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
@@ -19,7 +20,7 @@
 
 //== NAMESPACES ===============================================================
 
-namespace COMISO {
+namespace COMISO { 
 
 //== CLASS DEFINITION =========================================================
 
@@ -31,7 +32,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class NConstraintInterface
+class COMISODLLEXPORT NConstraintInterface
 {
 public:
   
