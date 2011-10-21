@@ -17,6 +17,36 @@ namespace COMISO {
 //== IMPLEMENTATION ==========================================================
 
 
+/// Constructor
+LinearConstraintHandlerPenalty::LinearConstraintHandlerPenalty() : penalty_(10000) {}
+
+
+//-----------------------------------------------------------------------------
+
+/// Destructor
+LinearConstraintHandlerPenalty::~LinearConstraintHandlerPenalty()
+{}
+
+//-----------------------------------------------------------------------------
+
+// penalty weight
+double& LinearConstraintHandlerPenalty::penalty()
+{ return penalty_; }
+
+//-----------------------------------------------------------------------------
+
+// number of variables
+int LinearConstraintHandlerPenalty::n()
+{return n_;}
+
+//-----------------------------------------------------------------------------
+
+// number of linearly independent constraints (n-n_reduced)
+int LinearConstraintHandlerPenalty::n_constraints()
+{ return m_;}
+
+//-----------------------------------------------------------------------------
+
 void
 LinearConstraintHandlerPenalty::
 initialize( const std::vector<double>& _c)

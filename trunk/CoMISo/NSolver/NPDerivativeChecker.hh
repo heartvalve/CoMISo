@@ -14,7 +14,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <ACG/Utils/StopWatch.hh>
+#include <CoMISo/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
 

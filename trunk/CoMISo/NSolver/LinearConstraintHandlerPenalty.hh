@@ -45,25 +45,23 @@ public:
   typedef gmm::array1D_reference<double*> VectorPT;
 
   /// Constructor
-  LinearConstraintHandlerPenalty() : penalty_(10000) {}
+  LinearConstraintHandlerPenalty();
 
   // initialize Constructor
   template<class MatrixT, class VectorT>
-  LinearConstraintHandlerPenalty( const MatrixT& _C, const VectorT& _c) : penalty_(10000)
-  {initialize(_C, _c); }
-
+  LinearConstraintHandlerPenalty( const MatrixT& _C, const VectorT& _c);
  
   /// Destructor
-  ~LinearConstraintHandlerPenalty() {}
+  ~LinearConstraintHandlerPenalty();
 
   // penalty weight
-  double& penalty() { return penalty_; }
+  double& penalty();
 
   // number of variables
-  int n() {return n_;}
+  int n();
 
   // number of linearly independent constraints (n-n_reduced)
-  int n_constraints() { return m_;}
+  int n_constraints();
 
   // initialize new constraints
   template<class MatrixT, class VectorT>
