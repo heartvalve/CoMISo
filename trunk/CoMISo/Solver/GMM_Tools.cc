@@ -1092,6 +1092,18 @@ void inspect_matrix( const MatrixT& _A)
 
 
 //-----------------------------------------------------------------------------
+
+
+template<class MatrixT>
+void print_dense( const MatrixT& _A)
+{
+  gmm::dense_matrix<double> A(gmm::mat_nrows(_A), gmm::mat_ncols(_A));
+  gmm::copy(_A, A);
+  std::cerr << A << std::endl;
+}
+
+
+//-----------------------------------------------------------------------------
 #ifndef COMISO_NCHOLMOD
 
 /// GMM to Cholmod_sparse interface

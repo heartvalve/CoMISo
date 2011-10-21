@@ -13,6 +13,8 @@
 
 #include <gmm/gmm.h>
 
+#include <CoMISo/Config/CoMISoDefines.hh>
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
@@ -29,7 +31,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class NProblemGmmInterface
+class COMISODLLEXPORT NProblemGmmInterface
 {
 public:
   

@@ -143,6 +143,7 @@ MISolver::solve_direct_rounding(
     StopWatch sw;
 
     // performance comparison code
+    if(0)
     {
       sw.start();
       COMISO::SparseQRSolver spqr;
@@ -158,6 +159,7 @@ MISolver::solve_direct_rounding(
     }
 
     // performance comparison code
+    if(0)
     {
       sw.start();
       COMISO::UMFPACKSolver umf;
@@ -173,6 +175,7 @@ MISolver::solve_direct_rounding(
     }
 
     // performance comparison code
+    if(0)
     {
       sw.start();
       COMISO::CholmodSolver chol;

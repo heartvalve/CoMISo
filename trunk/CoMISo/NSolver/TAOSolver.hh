@@ -14,6 +14,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include <mpi.h>
 #include <tao.h>
 #include <gmm/gmm.h>
@@ -36,7 +37,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class TAOSolver
+class COMISODLLEXPORT TAOSolver
 {
 public:
    
