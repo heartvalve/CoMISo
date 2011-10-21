@@ -11,6 +11,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include <iostream>
 #include <gmm/gmm.h>
 
@@ -33,7 +34,7 @@ namespace COMISO {
 */
 
 
-class LinearConstraintHandlerPenalty
+class COMISODLLEXPORT LinearConstraintHandlerPenalty
 {
 public:
    

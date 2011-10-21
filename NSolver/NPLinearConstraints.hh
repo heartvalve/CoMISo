@@ -11,6 +11,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
 #include "LinearConstraintHandlerElimination.hh"
@@ -36,7 +37,7 @@ problem into an unconstrained one.
 
 
 // ConstraintHandler working with Elimination approach
-class NPLinearConstraintsElimination : public NProblemGmmInterface, public LinearConstraintHandlerElimination
+class COMISODLLEXPORT NPLinearConstraintsElimination : public NProblemGmmInterface, public LinearConstraintHandlerElimination
 {
 public:
 
@@ -163,7 +164,7 @@ private:
 
 
 // ConstraintHandler working with Penalty
-class NPLinearConstraintsPenalty : public NProblemGmmInterface, public LinearConstraintHandlerPenalty
+class COMISODLLEXPORT NPLinearConstraintsPenalty : public NProblemGmmInterface, public LinearConstraintHandlerPenalty
 {
 public:
 

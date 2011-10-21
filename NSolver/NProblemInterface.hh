@@ -14,6 +14,8 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
 
+#include <CoMISo/Config/CoMISoDefines.hh>
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
@@ -30,7 +32,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class NProblemInterface
+class COMISODLLEXPORT NProblemInterface
 {
 public:
   

@@ -240,6 +240,11 @@ void factored_to_quadratic( MatrixT& _F, MatrixT2& _Q, VectorT& _rhs);
 template<class MatrixT>
 void inspect_matrix( const MatrixT& _A);
 
+/// Print the matrix as dense matrix
+template<class MatrixT>
+void print_dense( const MatrixT& _A);
+
+
 #ifndef COMISO_NCHOLMOD
 
 /// GMM to Cholmod_sparse interface

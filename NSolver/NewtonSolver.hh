@@ -11,6 +11,7 @@
 
 //== INCLUDES =================================================================
 
+#include <CoMISo/Config/CoMISoDefines.hh>
 #include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
 
@@ -30,7 +31,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class NewtonSolver
+class COMISODLLEXPORT NewtonSolver
 {
 public:
    

@@ -18,6 +18,8 @@
 #include <gmm/gmm.h>
 #include "NProblemGmmInterface.hh"
 
+#include <CoMISo/Config/CoMISoDefines.hh>
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
@@ -34,7 +36,7 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
-class NPTiming : public NProblemGmmInterface
+class COMISODLLEXPORT NPTiming : public NProblemGmmInterface
 {
 public:
   
