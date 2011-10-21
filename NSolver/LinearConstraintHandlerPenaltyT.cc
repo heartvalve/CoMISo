@@ -16,6 +16,12 @@ namespace COMISO {
 
 //== IMPLEMENTATION ==========================================================
 
+// initialize Constructor
+template<class MatrixT, class VectorT>
+LinearConstraintHandlerPenalty::LinearConstraintHandlerPenalty( const MatrixT& _C, const VectorT& _c) :
+  penalty_(10000)
+{initialize(_C, _c); }
+
 template<class MatrixT, class VectorT>
 void
 LinearConstraintHandlerPenalty::
