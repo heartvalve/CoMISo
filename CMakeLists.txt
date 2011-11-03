@@ -111,6 +111,15 @@ else ()
   set (COMISO_Eigen3_CONFIG_FILE_SETTINGS "#define COMISO_Eigen3_AVAILABLE 0" )
 endif ()
 
+find_package (Taucs)
+if (TAUCS_FOUND )
+  set (COMISO_TAUCS_CONFIG_FILE_SETTINGS "#define COMISO_TAUCS_AVAILABLE 1" )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${TAUCS_INCLUDE_DIR} )
+else ()
+  message (STATUS "TAUCS not found!")
+  set (COMISO_TAUCS_CONFIG_FILE_SETTINGS "#define COMISO_TAUCS_AVAILABLE 0" )
+endif ()
+
 include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}

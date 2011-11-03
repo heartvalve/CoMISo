@@ -1,38 +1,5 @@
 include (ACGCommon)
-find_package(CoMISo)
-find_package(SUITESPARSE)
-find_package(MPI)
-find_package (MUMPS)
-find_package(IPOPT)
-
-if (MUMPS_FOUND )
-  list( APPEND COMISO_INCLUDE_DIRECTORIES ${MUMPS_INCLUDE_DIR} )
-  list( APPEND COMISO_LINK_LIBRARIES ${MUMPS_LIBRARY} )
-endif ()
-
-find_package (IPOPT)
-if (IPOPT_FOUND AND MUMPS_FOUND)
-  list( APPEND COMISO_INCLUDE_DIRECTORIES ${IPOPT_INCLUDE_DIR} )
-  list( APPEND COMISO_LINK_DIRECTORIES ${IPOPT_LIBRARY_DIR} )
-  list( APPEND COMISO_LINK_LIBRARIES ${IPOPT_LIBRARY} )
-endif ()
-
-include_directories (
-  ..
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${COMISO_INCLUDE_DIR}
-  ${SUITESPARSE_INCLUDE_DIRS}
-  ${COMISO_INCLUDE_DIRECTORIES}
-)
-
-link_directories (
-  ${SUITESPARSE_LIBRARY_DIRS}
-  ${TAO_LIBRARY_DIR}
-  ${PETSC_LIBRARY_DIR}
-  ${COMISO_LINK_DIRECTORIES}
-)
+include (CoMISoExample)
 
 # source code directories
 set (directories 
@@ -60,10 +27,6 @@ set_target_properties(small_quadratic_solver PROPERTIES INSTALL_RPATH_USE_LINK_P
 
 target_link_libraries (small_quadratic_solver
   CoMISo
-  ${SUITESPARSE_LIBRARIES}
-  ${MPI_LIBRARY}
-  ${PETSC_LIBRARY}
-  ${TAO_LIBRARY}
   ${COMISO_LINK_LIBRARIES}
 )
 
