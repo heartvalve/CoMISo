@@ -102,7 +102,7 @@ if ( COMISO_INCLUDE_DIR )
      message(ERROR "COMISO configured with Taucs but Taucs not available")
    endif()
 
-   list (APPEND  COMISO_OPT_DEPS "TAUCS")
+   list (APPEND  COMISO_OPT_DEPS "Taucs")
 
   endif()
 
