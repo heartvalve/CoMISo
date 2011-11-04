@@ -3,6 +3,10 @@
 #include "TaucsSolver.hh"
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_TAUCS_AVAILABLE
+
 namespace COMISO {
 
 
@@ -83,3 +87,7 @@ void TaucsSolver::get_matrix_gmm( GMM_MatrixT& _mat)
   }
 
 }
+
+//=============================================================================
+#endif // COMISO_TAUCS_AVAILABLE
+//=============================================================================

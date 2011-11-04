@@ -1,5 +1,8 @@
 #include "TaucsSolver.hh"
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_TAUCS_AVAILABLE
 
 namespace COMISO {
 
@@ -261,3 +264,6 @@ void TaucsSolver::update_system()
 
   
 }
+
+//=============================================================================
+#endif // COMISO_TAUCS_AVAILABLE
