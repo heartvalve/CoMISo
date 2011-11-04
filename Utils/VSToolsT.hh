@@ -49,6 +49,11 @@
      return _isnan(x);
    } 
 
+   // Which idiot defines isinf as a macro somewhere?
+   #ifdef isinf 
+     #undef isinf
+   #endif
+
    inline int isinf(double x)
    {
      return !_finite(x);
