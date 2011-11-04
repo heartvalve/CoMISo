@@ -87,6 +87,8 @@ public:
 
     bool& show_timings() { return show_timings_;}
     
+    int dimension() { return std::max(int(0), (int)(colptr_.size()-1)); }
+    
 private:
 
     cholmod_common * mp_cholmodCommon;
