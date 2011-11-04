@@ -13,6 +13,10 @@
 #define COMISO_TAUCS_SOLVER_HH
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_TAUCS_AVAILABLE
+
 //== INCLUDES =================================================================
 #include <CoMISo/Config/CoMISoDefines.hh>
 
@@ -114,6 +118,8 @@ class COMISODLLEXPORT TaucsSolver
 #define COMISO_TAUCS_SOLVER_TEMPLATES
 #include "TaucsSolverT.cc"
 #endif
+//=============================================================================
+#endif // COMISO_TAUCS_AVAILABLE
 //=============================================================================
 #endif // COMISO_TAUCS_SOLVER_HH defined
 //=============================================================================
