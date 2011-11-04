@@ -230,6 +230,26 @@ bool CholmodSolver::solve( double * _x, double * _b)
 
 //-----------------------------------------------------------------------------
 
+int CholmodSolver::dimension()
+{
+  return std::max(int(0), (int)(colptr_.size()-1));
+}
 
-  
+//-----------------------------------------------------------------------------
+
+bool CholmodSolver::
+solve ( std::vector<double>& _x0, std::vector<double>& _b)
+{
+  return solve( &(_x0[0]), &(_b[0]));
+}
+
+//-----------------------------------------------------------------------------
+
+bool& CholmodSolver::
+show_timings()
+{
+  return show_timings_;
+}
+
+
 }

@@ -81,13 +81,11 @@ public:
 
     bool solve ( double *             _x0, double *             _b);
 
-    bool solve ( std::vector<double>& _x0, std::vector<double>& _b)
-    {return solve( &(_x0[0]), &(_b[0]));}
+    bool solve ( std::vector<double>& _x0, std::vector<double>& _b);
 
-
-    bool& show_timings() { return show_timings_;}
+    bool& show_timings();
     
-    int dimension() { return std::max(int(0), (int)(colptr_.size()-1)); }
+    int dimension();
     
 private:
 
