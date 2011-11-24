@@ -67,12 +67,14 @@ get_parameters()
   directRoundingCB  ->setChecked( misolver_.get_direct_rounding());
   noRoundingCB      ->setChecked( misolver_.get_no_rounding());
   multipleRoundingCB->setChecked( misolver_.get_multiple_rounding());
+  gurobiRoundingCB  ->setChecked( misolver_.get_gurobi_rounding());
 
   localItersSB ->setValue( misolver_.get_local_iters());
   localErrorDSB->setValue( log(misolver_.get_local_error())/log(10.0f));
 
   cgItersSB ->setValue( misolver_.get_cg_iters());
   cgErrorDSB->setValue( log(misolver_.get_cg_error())/log(10.0f));
+  gurobiMaxTimeDSB->setValue(misolver_.get_gurobi_max_time());
   
   multipleRoundingDSB->setValue( misolver_.get_multiple_rounding_threshold());
 
@@ -96,12 +98,15 @@ set_parameters()
   misolver_.set_direct_rounding( directRoundingCB->isChecked());
   misolver_.set_no_rounding( noRoundingCB->isChecked());
   misolver_.set_multiple_rounding( multipleRoundingCB->isChecked());
+  misolver_.set_gurobi_rounding( gurobiRoundingCB->isChecked());
 
   misolver_.set_local_iters( localItersSB ->value());
   misolver_.set_local_error( pow(10, localErrorDSB->value()));
 
   misolver_.set_cg_iters( cgItersSB ->value());
   misolver_.set_cg_error( pow(10, cgErrorDSB->value()));
+
+  misolver_.set_gurobi_max_time(gurobiMaxTimeDSB->value());
 
   misolver_.set_multiple_rounding_threshold( multipleRoundingDSB->value());
 

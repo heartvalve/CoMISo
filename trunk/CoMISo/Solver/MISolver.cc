@@ -23,11 +23,15 @@
 \*===========================================================================*/ 
 
 
-
+#include <CoMISo/Config/config.hh>
 #include "MISolver.hh"
 
 #ifdef QT4_FOUND
 #include <CoMISo/QtWidgets/MISolverDialogUI.hh>
+#endif
+
+#if COMISO_GUROBI_AVAILABLE
+  #include <gurobi_c++.h>
 #endif
 
 #include <CoMISo/Utils/StopWatch.hh>
@@ -56,6 +60,7 @@ MISolver::MISolver()
   direct_rounding_   = false;
   no_rounding_       = false;
   multiple_rounding_ = true;
+  gurobi_rounding_   = false;
 
   max_local_iters_ = 100000;
   max_local_error_ = 1e-3;
@@ -63,6 +68,8 @@ MISolver::MISolver()
   max_cg_error_    = 1e-3;
 
   multiple_rounding_threshold_ = 0.5;
+
+  gurobi_max_time_ = 60;
 
   noisy_ = 0;
   stats_ = true;
@@ -86,16 +93,19 @@ MISolver::solve(
   if( gmm::mat_ncols(_A) == 0 || gmm::mat_nrows(_A) == 0)
     return;
 
-  if( no_rounding_ || _to_round.size() == 0)
-    solve_no_rounding( _A, _x, _rhs);
+  if( gurobi_rounding_)
+    solve_gurobi(_A, _x, _rhs, _to_round);
   else
-    if( direct_rounding_)
-      solve_direct_rounding( _A, _x, _rhs, _to_round);
+    if( no_rounding_ || _to_round.size() == 0)
+      solve_no_rounding( _A, _x, _rhs);
     else
-      if( multiple_rounding_)
-	solve_multiple_rounding( _A, _x, _rhs, _to_round);
+      if( direct_rounding_)
+        solve_direct_rounding( _A, _x, _rhs, _to_round);
       else
-	solve_iterative( _A, _x, _rhs, _to_round, _fixed_order);
+        if( multiple_rounding_)
+          solve_multiple_rounding( _A, _x, _rhs, _to_round);
+        else
+          solve_iterative( _A, _x, _rhs, _to_round, _fixed_order);
 }
 
 
@@ -142,8 +152,10 @@ MISolver::solve_direct_rounding(
   {
     StopWatch sw;
 
+    const bool enable_performance_test = false;
+
     // performance comparison code
-    if(0)
+    if(enable_performance_test)
     {
       sw.start();
       COMISO::SparseQRSolver spqr;
@@ -159,7 +171,7 @@ MISolver::solve_direct_rounding(
     }
 
     // performance comparison code
-    if(0)
+    if(enable_performance_test)
     {
       sw.start();
       COMISO::UMFPACKSolver umf;
@@ -175,7 +187,7 @@ MISolver::solve_direct_rounding(
     }
 
     // performance comparison code
-    if(0)
+    if(enable_performance_test)
     {
       sw.start();
       COMISO::CholmodSolver chol;
@@ -609,6 +621,94 @@ MISolver::solve_multiple_rounding(
     std::cerr << "\t\t time searching next integer = " << time_search_next_integer / 1000.0 <<"s\n";
     std::cerr << std::endl;
   }
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+MISolver::solve_gurobi(
+    CSCMatrix& _A,
+    Vecd&      _x,
+    Vecd&      _rhs,
+    Veci&      _to_round)
+{
+#if COMISO_GUROBI_AVAILABLE
+
+  // get round-indices in set
+  std::set<int> to_round;
+  for(unsigned int i=0; i<_to_round.size();++i)
+    to_round.insert(_to_round[i]);
+
+  try {
+    GRBEnv env = GRBEnv();
+
+    GRBModel model = GRBModel(env);
+
+    // set time limite
+    model.getEnv().set(GRB_DoubleParam_TimeLimit, gurobi_max_time_);
+
+    unsigned int n = _rhs.size();
+
+    // 1. allocate variables
+    std::vector<GRBVar> vars;
+    for( unsigned int i=0; i<n; ++i)
+      if( to_round.count(i))
+        vars.push_back( model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_INTEGER));
+      else
+        vars.push_back( model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS));
+
+    // Integrate new variables
+    model.update();
+
+    // 2. setup_energy
+
+    // build objective function from linear system E = x^tAx - 2x^t*rhs
+    GRBQuadExpr objective;
+
+    for(unsigned int i=0; i<_A.nc; ++i)
+      for(unsigned int j=_A.jc[i]; j<_A.jc[i+1]; ++j)
+      {
+        objective += _A.pr[j]*vars[_A.ir[j]]*vars[i];
+      }
+    for(unsigned int i=0; i<n; ++i)
+      objective -= 2*_rhs[i]*vars[i];
+
+//    _A.jc[c+1]
+//    _A.pr[write]
+//    _A.ir[write]
+//    _A.nc
+//    _A.nr
+
+    // minimize
+    model.set(GRB_IntAttr_ModelSense, 1);
+    model.setObjective(objective);
+
+    // 4. solve
+    model.optimize();
+
+    // 5. store result
+    _x.resize(n);
+    for(unsigned int i=0; i<n; ++i)
+      _x[i] = vars[i].get(GRB_DoubleAttr_X);
+
+    std::cout << "GUROBI objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+
+  }
+  catch(GRBException e)
+  {
+    std::cout << "Error code = " << e.getErrorCode() << std::endl;
+    std::cout << e.getMessage() << std::endl;
+  }
+  catch(...)
+  {
+    std::cout << "Exception during optimization" << std::endl;
+  }
+
+#else
+  std::cerr << "GUROBI solver is not available, please install it..." << std::endl;
+#endif
 }
 
 
