@@ -160,6 +160,12 @@ public:
   /// Will multiple rounding be performed?
   bool get_multiple_rounding()         { return multiple_rounding_;}
 
+  /// Shall gurobi solver be used?
+  void set_gurobi_rounding( bool _b) {        gurobi_rounding_=_b;}
+  /// Will gurobi rounding be performed?
+  bool get_gurobi_rounding()         { return gurobi_rounding_;}
+
+
   /// Set number of maximum Gauss-Seidel iterations
   void         set_local_iters( unsigned int _i) { max_local_iters_ = _i;}
   /// Get number of maximum Gauss-Seidel iterations
@@ -189,6 +195,11 @@ public:
   void         set_noise( unsigned int _i) { noisy_ = _i;}
   /// Get noise level of algorithm
   unsigned int get_noise()                 { return noisy_;}
+
+  /// Set time limit for gurobi solver (in seconds)
+  void   set_gurobi_max_time( double _d) { gurobi_max_time_ = _d;}
+  /// Get time limit for gurobi solver (in seconds)
+  double get_gurobi_max_time()          { return gurobi_max_time_;}
 
   /// Set output statistics of solver
   void set_stats( bool _stats) { stats_ = _stats; }
@@ -285,6 +296,12 @@ private:
     Veci&      _to_round,
     bool       _fixed_order );
 
+  void solve_gurobi(
+    CSCMatrix& _A,
+    Vecd&      _x,
+    Vecd&      _rhs,
+    Veci&      _to_round );
+
 
 void update_solution( 
     CSCMatrix& _A, 
@@ -308,6 +325,7 @@ private:
   bool direct_rounding_;
   bool no_rounding_;
   bool multiple_rounding_;
+  bool gurobi_rounding_;
 
   double multiple_rounding_threshold_;
 
@@ -318,6 +336,9 @@ private:
   double       max_full_error_;
   unsigned int noisy_;
   bool         stats_;
+
+  // time limit for gurobi solver (in seconds)
+  double       gurobi_max_time_;
 
   // flag
   bool         cholmod_step_done_;

@@ -44,9 +44,17 @@ int LinearConstraint::n_unknowns()
   return coeffs_.innerSize();
 }
 
+const LinearConstraint::SVectorNC& LinearConstraint::coeffs() const
+{
+  return coeffs_;
+}
 LinearConstraint::SVectorNC& LinearConstraint::coeffs() 
 { 
   return coeffs_;
+}
+const double&    LinearConstraint::b() const
+{
+  return b_;
 }
 double&    LinearConstraint::b()      
 { 

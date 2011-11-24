@@ -52,8 +52,11 @@ public:
 
   virtual int n_unknowns();
 
-  SVectorNC& coeffs();
-  double&    b();
+  const SVectorNC& coeffs() const;
+        SVectorNC& coeffs();
+
+  const double&    b() const;
+        double&    b();
 
   virtual double eval_constraint ( const double* _x );
   
