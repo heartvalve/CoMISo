@@ -42,6 +42,8 @@ solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _const
   //  app->Options()->SetIntegerValue("print_level", 0);
   app->Options()->SetIntegerValue("max_iter", 100);
 
+//  app->Options()->SetStringValue("expect_infeasible_problem", "yes");
+
   // Initialize the IpoptApplication and process the options
   Ipopt::ApplicationReturnStatus status;
   status = app->Initialize();
