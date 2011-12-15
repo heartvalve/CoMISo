@@ -914,7 +914,8 @@ eliminate_constraints(
     std::cerr << __FUNCTION__ << " Constraints eliminated " << sw.stop()/1000.0 << std::endl;
   sw.start();
   // init _new_idx vector
-  _new_idx.resize( mat_ncols(_constraints));
+//  _new_idx.resize( gmm::mat_ncols(_constraints));
+  _new_idx.resize( gmm::mat_ncols(_A)+1);
   for( unsigned int i=0; i<_new_idx.size(); ++i)
     _new_idx[i] = i;
 
