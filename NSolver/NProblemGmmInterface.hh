@@ -1,7 +1,7 @@
 //=============================================================================
 //
 //  CLASS NProblemGmmInterface
-//
+//  **************** DEPRECATED -> Please use NProblemInterface ***************//
 //=============================================================================
 
 
@@ -31,6 +31,8 @@ namespace COMISO {
   
     A more elaborate description follows.
 */
+
+//  *** This class is DEPRECATED -> Please use NProblemInterface ***//
 class COMISODLLEXPORT NProblemGmmInterface
 {
 public:
@@ -39,7 +41,8 @@ public:
   typedef gmm::row_matrix< gmm::wsvector<double> > SMatrixNP;
 
   /// Default constructor
-  NProblemGmmInterface() {}
+  NProblemGmmInterface()
+  {std::cerr << "Warning: NProblemGmmInterface is deprecated -> use NProblemInterface instead!!!" << std::endl;}
  
   /// Destructor
   ~NProblemGmmInterface() {}
