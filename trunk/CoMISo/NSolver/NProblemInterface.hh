@@ -37,7 +37,7 @@ class COMISODLLEXPORT NProblemInterface
 public:
   
   // Sparse Matrix Type
-  typedef Eigen::DynamicSparseMatrix<double,ColMajor> SMatrixNP;
+  typedef Eigen::DynamicSparseMatrix<double,Eigen::ColMajor> SMatrixNP;
 
   /// Default constructor
   NProblemInterface() {}
@@ -45,12 +45,17 @@ public:
   /// Destructor
   ~NProblemInterface() {}
 
+  // problem definition
   virtual int    n_unknowns   (                                ) = 0;
   virtual void   initial_x    (       double* _x               ) = 0;
   virtual double eval_f       ( const double* _x               ) = 0;
   virtual void   eval_gradient( const double* _x, double*    _g) = 0;
   virtual void   eval_hessian ( const double* _x, SMatrixNP& _H) = 0;
   virtual void   store_result ( const double* _x               ) = 0;
+
+  // advanced properties
+  virtual bool   constant_hessian() { return false; }
+
 };
 
 

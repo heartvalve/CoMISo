@@ -97,7 +97,7 @@ public:
   const VT& operator()(const unsigned int _i, const unsigned int _j) const
   {  return data_[PII(_i,_j)]; }
 
-  // get number of nstored elements
+  // get number of stored elements
   unsigned int nonZeros() { return data_.size(); }
 
   // get dimensions
