@@ -65,6 +65,8 @@ public:
 
   virtual void eval_hessian    ( const double* _x, SMatrixNC& _h      );
 
+  virtual bool is_linear() { return true;}
+
   // inherited from base
 //  virtual ConstraintType  constraint_type (                                      ) { return type_; }
 
