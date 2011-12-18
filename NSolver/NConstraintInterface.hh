@@ -67,6 +67,8 @@ public:
     return false;
   }
 
+  virtual bool   is_linear() { return false;}
+
   virtual double gradient_update_factor( const double* _x, double _eps = 1e-6 )
   {
     double val = eval_constraint(_x);

@@ -57,6 +57,7 @@ public:
   virtual void   eval_gradient   ( const double* _x, SVectorNC& _g      ) { _g.resize(n_); _g.coeffRef(idx_) = 1.0; }
   virtual void   eval_hessian    ( const double* _x, SMatrixNC& _h      ) { _h.clear(); _h.resize(n_,n_); }
 
+  virtual bool   is_linear() { return true;}
 
   // set/get values
   unsigned int& idx()   {return idx_;}
