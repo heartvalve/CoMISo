@@ -28,8 +28,18 @@ IPOPTSolver()
   // Create an instance of the IpoptApplication
   app_ = IpoptApplicationFactory();
 
+  // Switch to HSL if available in Comiso
+  #if COMISO_HSL_AVAILABLE
+    app_->Options()->SetStringValue("linear_solver", "ma57");
+  #endif
+
+  // Restrict memory to be able to run larger problems on windows
+  // with the default mumps solver
+  #ifdef WIN32
+    app_->Options()->SetIntegerValue("mumps_mem_percent", 5);
+  #endif
+
   // set default parameters
-  app_->Options()->SetStringValue("linear_solver", "ma57");
   app_->Options()->SetIntegerValue("max_iter", 100);
   //  app->Options()->SetStringValue("derivative_test", "second-order");
   //  app->Options()->SetIntegerValue("print_level", 0);
