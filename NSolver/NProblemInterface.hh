@@ -40,10 +40,10 @@ public:
   typedef Eigen::DynamicSparseMatrix<double,Eigen::ColMajor> SMatrixNP;
 
   /// Default constructor
-  NProblemInterface() {}
+  NProblemInterface();
  
   /// Destructor
-  ~NProblemInterface() {}
+  virtual ~NProblemInterface();
 
   // problem definition
   virtual int    n_unknowns   (                                ) = 0;
