@@ -21,12 +21,11 @@ namespace COMISO {
 //== IMPLEMENTATION ========================================================== 
 
 
-//// Constructor
-//GUROBISolver::
-//GUROBISolver()
-//{
-//
-//}
+
+GUROBISolver::
+GUROBISolver()
+{
+}
 
 //-----------------------------------------------------------------------------
 
@@ -140,9 +139,31 @@ solve(NProblemInterface*                  _problem,
     model.set(GRB_IntAttr_ModelSense, 1);
     model.setObjective(objective);
 
+
     //----------------------------------------------
     // 4. solve problem
     //----------------------------------------------
+
+
+    if (solution_input_path_.empty())
+    {
+      if (!problem_env_output_path_.empty())
+      {
+        std::cout << "Writing problem's environment into file \"" << problem_env_output_path_ << "\"." << std::endl;
+        model.getEnv().writeParams(problem_env_output_path_);
+      }
+      if (!problem_output_path_.empty())
+      {
+        std::cout << "Writing problem into file \"" << problem_output_path_ << "\"." << std::endl;
+        GurobiHelper::outputModelToMpsGz(model, problem_output_path_);
+      }
+
+      model.optimize();
+    }
+    else
+    {
+        std::cout << "Reading solution from file \"" << solution_input_path_ << "\"." << std::endl;
+    }
 
     model.optimize();
 
@@ -150,8 +171,17 @@ solve(NProblemInterface*                  _problem,
     // 5. store result
     //----------------------------------------------
 
-    for(unsigned int i=0; i<vars.size(); ++i)
-      x[i] = vars[i].get(GRB_DoubleAttr_X);
+    if (solution_input_path_.empty())
+    {
+      // store computed result
+      for(unsigned int i=0; i<vars.size(); ++i)
+        x[i] = vars[i].get(GRB_DoubleAttr_X);
+    }
+    else
+    {
+      // store loaded result
+      GurobiHelper::readSolutionVectorFromSOL(x, solution_input_path_);
+    }
 
     _problem->store_result(P(x));
 
@@ -171,6 +201,39 @@ solve(NProblemInterface*                  _problem,
   }
 
   return false;
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+GUROBISolver::
+set_problem_output_path( const std::string &_problem_output_path)
+{
+  problem_output_path_ = _problem_output_path;
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+GUROBISolver::
+set_problem_env_output_path( const std::string &_problem_env_output_path)
+{
+  problem_env_output_path_ = _problem_env_output_path;
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+GUROBISolver::
+set_solution_input_path(const std::string &_solution_input_path)
+{
+  solution_input_path_ = _solution_input_path;
 }
 
 
