@@ -53,6 +53,8 @@ public:
 
   virtual int n_unknowns();
 
+  void  resize(const unsigned int _n);
+
   const SVectorNC& coeffs() const;
         SVectorNC& coeffs();
 

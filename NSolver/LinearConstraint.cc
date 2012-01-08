@@ -44,6 +44,11 @@ int LinearConstraint::n_unknowns()
   return coeffs_.innerSize();
 }
 
+void LinearConstraint::resize(const unsigned int _n)
+{
+  coeffs_.m_size = _n;
+}
+
 const LinearConstraint::SVectorNC& LinearConstraint::coeffs() const
 {
   return coeffs_;
