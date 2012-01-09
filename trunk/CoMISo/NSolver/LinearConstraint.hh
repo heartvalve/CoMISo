@@ -13,7 +13,8 @@
 
 #include <CoMISo/Config/CoMISoDefines.hh>
 #include "NConstraintInterface.hh"
-#include <gmm/gmm.h>
+#include <Eigen/StdVector>
+
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -35,8 +36,7 @@ class COMISODLLEXPORT LinearConstraint : public NConstraintInterface
 {
 public:
 
-  // use c-arrays as vectors for gmm
-  typedef gmm::array1D_reference<double*> VectorPT;
+  // sparse vector type
   typedef NConstraintInterface::SVectorNC SVectorNC;
 
   // different types of constraints
@@ -80,11 +80,11 @@ private:
 };
 
 
-// support std vectors
-EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(LinearConstraint);
-
 //=============================================================================
 } // namespace COMISO
+//=============================================================================
+// support std vectors
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(COMISO::LinearConstraint);
 //=============================================================================
 #endif // ACG_LINEARCONSTRAINT_HH defined
 //=============================================================================
