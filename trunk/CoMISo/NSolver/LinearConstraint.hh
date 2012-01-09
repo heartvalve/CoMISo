@@ -80,6 +80,9 @@ private:
 };
 
 
+// support std vectors
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(LinearConstraint);
+
 //=============================================================================
 } // namespace COMISO
 //=============================================================================
