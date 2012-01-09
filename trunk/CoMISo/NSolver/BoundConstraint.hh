@@ -45,24 +45,23 @@ public:
   BoundConstraint(const unsigned int  _var_idx = 0,   // index of variable for bound constraint
                   const double        _bound   = 0.0, // bound: x(_var_idx) #_type, <,=,># _bound
                   const unsigned int   _n      = 0,   // number of unknowns in problem
-                  const ConstraintType _type   = NC_LESS_EQUAL) // type of bound upper, lower or both (equal)
-  : NConstraintInterface(_type), idx_(_var_idx), bound_(_bound), n_(_n)
-  {}
+                  const ConstraintType _type   = NC_LESS_EQUAL); // type of bound upper, lower or both (equal)
+
  
   /// Destructor
-  ~BoundConstraint() {}
+  ~BoundConstraint();
 
-  virtual int    n_unknowns      (                                      ) { return n_;}
-  virtual double eval_constraint ( const double* _x                     ) { return _x[idx_] - bound_; }
-  virtual void   eval_gradient   ( const double* _x, SVectorNC& _g      ) { _g.resize(n_); _g.coeffRef(idx_) = 1.0; }
-  virtual void   eval_hessian    ( const double* _x, SMatrixNC& _h      ) { _h.clear(); _h.resize(n_,n_); }
+  virtual int    n_unknowns      (                                      );
+  virtual double eval_constraint ( const double* _x                     );
+  virtual void   eval_gradient   ( const double* _x, SVectorNC& _g      );
+  virtual void   eval_hessian    ( const double* _x, SMatrixNC& _h      );
 
-  virtual bool   is_linear() { return true;}
+  virtual bool   is_linear();
 
   // set/get values
-  unsigned int& idx()   {return idx_;}
-  double&       bound() {return bound_;}
-  unsigned int& n()     {return n_;}
+  unsigned int& idx();
+  double&       bound();
+  unsigned int& n();
 
 private:
   // variable idx
