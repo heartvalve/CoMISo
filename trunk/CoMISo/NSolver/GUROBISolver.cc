@@ -14,6 +14,8 @@
 
 #include "GUROBISolver.hh"
 
+#include <stdexcept>
+
 //== NAMESPACES ===============================================================
 
 namespace COMISO {
@@ -138,6 +140,7 @@ solve(NProblemInterface*                  _problem,
 
     model.set(GRB_IntAttr_ModelSense, 1);
     model.setObjective(objective);
+    model.update();
 
 
     //----------------------------------------------
@@ -165,8 +168,6 @@ solve(NProblemInterface*                  _problem,
         std::cout << "Reading solution from file \"" << solution_input_path_ << "\"." << std::endl;
     }
 
-    model.optimize();
-
     //----------------------------------------------
     // 5. store result
     //----------------------------------------------
@@ -179,13 +180,22 @@ solve(NProblemInterface*                  _problem,
     }
     else
     {
-      // store loaded result
-      GurobiHelper::readSolutionVectorFromSOL(x, solution_input_path_);
+        std::cout << "Loading stored solution from \"" << solution_input_path_ << "\"." << std::endl;
+        // store loaded result
+        const size_t oldSize = x.size();
+        x.clear();
+        GurobiHelper::readSolutionVectorFromSOL(x, solution_input_path_);
+        if (oldSize != x.size()) {
+            std::cerr << "oldSize != x.size() <=> " << oldSize << " != " << x.size() << std::endl;
+            throw std::runtime_error("Loaded solution vector doesn't have expected dimension.");
+        }
     }
 
     _problem->store_result(P(x));
 
-    std::cout << "GUROBI Objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+    // ObjVal is only available if the optimize was called.
+    if (solution_input_path_.empty())
+        std::cout << "GUROBI Objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
     return true;
   }
   catch(GRBException e)
