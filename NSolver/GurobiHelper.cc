@@ -51,9 +51,9 @@ static void moveConstantTermIntoConstrainedVariable(GRBModel &model) {
     //tmpModel.getObjective().addConstant(-constantTerm);
     model.getObjective() -= constantTerm;
 #if OUTPUT_CONSTANT_AS_CONT
-    model.addVar(constantTerm, constantTerm, 1, GRB_CONTINUOUS, "constant");
+    model.addVar(constantTerm, constantTerm, 1, GRB_CONTINUOUS, "MIQ_synthetic_constant");
 #else
-    model.addVar(1, 1, constantTerm, GRB_INTEGER, "constant");
+    model.addVar(1, 1, constantTerm, GRB_INTEGER, "MIQ_synthetic_constant");
 #endif
 }
 
@@ -144,7 +144,7 @@ void GurobiHelper::importInitialSolutionIntoModel(GRBModel &model, const std::st
 
     //moveConstantTermIntoConstrainedVariable(model);
     const double constantTerm = model.getObjective().getLinExpr().getConstant();
-    model.addVar(constantTerm, constantTerm, 0, GRB_CONTINUOUS, "constant");
+    model.addVar(constantTerm, constantTerm, 0, GRB_CONTINUOUS, "MIQ_synthetic_constant");
 
     model.update();
     model.read(fileName);
@@ -157,15 +157,15 @@ void GurobiHelper::readSolutionVectorFromSOL(std::vector<double> &out_solution_,
     //    throw std::runtime_error("Unable to open file \"" + fileName + "\".");
 
     static const boost::regex commentRe("\\s*#", boost::regex_constants::perl);
-    static const boost::regex variableRe("\\s*\\S+\\s+([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)", boost::regex_constants::perl);
+    static const boost::regex variableRe("\\s*(\\S+)\\s+([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)", boost::regex_constants::perl);
 
     std::string line;
     while (solFile) {
         std::getline(solFile, line);
         if (boost::regex_search(line, commentRe, boost::match_continuous)) continue;
         boost::smatch match;
-        if (boost::regex_search(line, match, variableRe, boost::match_continuous)) {
-            out_solution_.push_back(boost::lexical_cast<double>(match[1]));
+        if (boost::regex_search(line, match, variableRe, boost::match_continuous) && match[1] != "MIQ_synthetic_constant") {
+            out_solution_.push_back(boost::lexical_cast<double>(match[2]));
         }
     }
 }
