@@ -184,13 +184,13 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
   // get nonzero structure
   std::vector<double> x(n);
-  problem_->initial_x(&(x[0]));
+  problem_->initial_x(P(x));
 
   // nonzeros in the jacobian of C_ and the hessian of the lagrangian
   SMatrixNP HP;
   SVectorNC g;
   SMatrixNC H;
-  problem_->eval_hessian(&(x[0]), HP);
+  problem_->eval_hessian(P(x), HP);
 
   // get nonzero structure of hessian of problem
   for(int i=0; i<HP.outerSize(); ++i)
@@ -201,12 +201,12 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   // get nonzero structure of constraints
   for( int i=0; i<m; ++i)
   {
-    constraints_[i]->eval_gradient(&(x[0]),g);
+    constraints_[i]->eval_gradient(P(x),g);
 
     nnz_jac_g += g.nonZeros();
 
     // count lower triangular elements
-    constraints_[i]->eval_hessian (&(x[0]),H);
+    constraints_[i]->eval_hessian (P(x),H);
 
     SMatrixNC::iterator m_it = H.begin();
     for(; m_it != H.end(); ++m_it)
@@ -227,6 +227,13 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 bool NProblemIPOPT::get_bounds_info(Index n, Number* x_l, Number* x_u,
                             Index m, Number* g_l, Number* g_u)
 {
+  // check dimensions
+  if( n != (Index)problem_->n_unknowns())
+    std::cerr << "Warning: IPOPT #unknowns != n " << n << problem_->n_unknowns() << std::endl;
+  if( m != (Index)constraints_.size())
+    std::cerr << "Warning: IPOPT #constraints != m " << m << constraints_.size() << std::endl;
+
+
   // first clear all variable bounds
   for( int i=0; i<n; ++i)
   {
@@ -240,8 +247,10 @@ bool NProblemIPOPT::get_bounds_info(Index n, Number* x_l, Number* x_u,
   // iterate over bound constraints and set them
   for(unsigned int i=0; i<bound_constraints_.size(); ++i)
   {
-    switch(bound_constraints_[i]->constraint_type())
+    if((Index)(bound_constraints_[i]->idx()) < n)
     {
+      switch(bound_constraints_[i]->constraint_type())
+      {
       case NConstraintInterface::NC_LESS_EQUAL:
       {
         x_u[bound_constraints_[i]->idx()] = bound_constraints_[i]->bound();
@@ -257,7 +266,10 @@ bool NProblemIPOPT::get_bounds_info(Index n, Number* x_l, Number* x_u,
         x_l[bound_constraints_[i]->idx()] = bound_constraints_[i]->bound();
         x_u[bound_constraints_[i]->idx()] = bound_constraints_[i]->bound();
       }break;
+      }
     }
+    else
+      std::cerr << "Warning: invalid bound constraint in IPOPTSolver!!!" << std::endl;
   }
 
   // set bounds for constraints

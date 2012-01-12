@@ -130,7 +130,7 @@ public:
 
   /** default constructor */
   NProblemIPOPT(NProblemInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
-   : problem_(_problem), constraints_(_constraints) { split_constraints(_constraints);}
+   : problem_(_problem) { split_constraints(_constraints);}
 
   /** default destructor */
   virtual ~NProblemIPOPT() {};
@@ -209,6 +209,15 @@ private:
 
   // split user-provided constraints into general-constraints and bound-constraints
   void split_constraints(std::vector<NConstraintInterface*>& _constraints);
+
+protected:
+  double* P(std::vector<double>& _v)
+  {
+    if( !_v.empty())
+      return ((double*)&_v[0]);
+    else
+      return 0;
+  }
 
 private:
 

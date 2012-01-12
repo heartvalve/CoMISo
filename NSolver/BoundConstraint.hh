@@ -49,7 +49,7 @@ public:
 
  
   /// Destructor
-  ~BoundConstraint();
+  virtual ~BoundConstraint();
 
   virtual int    n_unknowns      (                                      );
   virtual double eval_constraint ( const double* _x                     );
