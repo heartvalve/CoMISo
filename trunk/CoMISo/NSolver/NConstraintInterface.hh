@@ -47,7 +47,7 @@ public:
   NConstraintInterface(const ConstraintType _type = NC_EQUAL) : type_(_type) {}
  
   /// Destructor
-  ~NConstraintInterface() {}
+  virtual ~NConstraintInterface() {}
 
   virtual int             n_unknowns      (                                      ) = 0;
   virtual double          eval_constraint ( const double* _x                     ) = 0;

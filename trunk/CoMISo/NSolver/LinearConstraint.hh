@@ -49,7 +49,7 @@ public:
   LinearConstraint(const SVectorNC& _coeffs, const double _b, const ConstraintType _type = NC_EQUAL);
 
   /// Destructor
-  ~LinearConstraint();
+  virtual ~LinearConstraint();
 
   virtual int n_unknowns();
 
