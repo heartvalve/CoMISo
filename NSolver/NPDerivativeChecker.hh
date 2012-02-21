@@ -11,12 +11,14 @@
 
 //== INCLUDES =================================================================
 
+#include "NProblemGmmInterface.hh"
+#include "NProblemInterface.hh"
+
 #include <iostream>
 #include <iomanip>
 
 #include <CoMISo/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
-#include "NProblemGmmInterface.hh"
 
 #include <CoMISo/Config/CoMISoDefines.hh>
 
@@ -42,7 +44,7 @@ public:
 
   struct Config
   {
-    Config() : x_min(-1.0), x_max(1.0), n_iters(1), dx(1e-5), eps(1e-3)
+    Config() : x_min(-1.0), x_max(1.0), n_iters(1), dx(1e-5), eps(1e-3), relativeEps(NAN)
     {}
 
     double x_min;
@@ -50,6 +52,7 @@ public:
     int    n_iters;
     double dx;
     double eps;
+    double relativeEps;
   };
   
   /// Default constructor
@@ -58,14 +61,16 @@ public:
   /// Destructor
   ~NPDerivativeChecker() {}
 
-  bool check_all(NProblemGmmInterface* _np, double _dx, double _eps)
+  template<class ProblemInterface>
+  bool check_all(ProblemInterface* _np, double _dx, double _eps)
   {
     conf_.dx = _dx;
     conf_.eps = _eps;
     return check_all(_np);
   }
 
-  bool check_all(NProblemGmmInterface* _np)
+  template<class ProblemInterface>
+  bool check_all(ProblemInterface* _np)
   {
     bool d1_ok = check_d1(_np);
     bool d2_ok = check_d2(_np);
@@ -73,7 +78,8 @@ public:
     return ( d1_ok && d2_ok);
   }
 
-  bool check_d1(NProblemGmmInterface* _np)
+  template<class ProblemInterface>
+  bool check_d1(ProblemInterface* _np)
   {
     int n_ok     = 0;
     int n_errors = 0;
@@ -99,7 +105,7 @@ public:
         x[j] += conf_.dx;
         double fd = (f1-f0)/(2.0*conf_.dx);
 
-        if( fabs(fd-g[j]) > conf_.eps)
+        if ((!isnan(conf_.relativeEps) && fabs(fd-g[j]) > fmax(fabs(g[j]), 1.0) * conf_.relativeEps) || fabs(fd-g[j]) > conf_.eps)
         {
           ++ n_errors;
           std::cerr << "Gradient error in component " << j << ": " << g[j]
@@ -108,21 +114,27 @@ public:
         else ++ n_ok;
       }
     }
-    std::cerr << "############## Gradient Checker #############\n";
-    std::cerr << "#ok   : " << n_ok << std::endl;
-    std::cerr << "#error: " << n_errors << std::endl;
+    if (n_errors > 0) {
+        std::cerr << "############## Gradient Checker #############\n";
+        std::cerr << "#ok   : " << n_ok << std::endl;
+        std::cerr << "#error: " << n_errors << std::endl;
+    }
 
     return (n_errors == 0);
   }
 
-  bool check_d2(NProblemGmmInterface* _np)
+  template<class MatrixType>
+  inline double getCoeff(const MatrixType &m, int r, int c);
+
+  template<class ProblemInterface>
+  bool check_d2(ProblemInterface* _np)
   {
     int n_ok     = 0;
     int n_errors = 0;
 
     int n = _np->n_unknowns();
     std::vector<double> x(n);
-    NProblemGmmInterface::SMatrixNP H(n,n);
+    typename ProblemInterface::SMatrixNP H(n,n);
 
     for(int i=0; i<conf_.n_iters; ++i)
     {
@@ -148,19 +160,23 @@ public:
           double fd = (f0-f1-f2+f3)/(4.0*conf_.dx*conf_.dx);
 
 
-          if( fabs(fd-H(j,k)) > conf_.eps)
+          if ((!isnan(conf_.relativeEps) && fabs(fd-H.coeff(j,k)) > fmax(fabs(getCoeff(H, j,k)), 1.0) * conf_.relativeEps) || fabs(fd-getCoeff(H, j,k)) > conf_.eps)
           {
             ++ n_errors;
-            std::cerr << "Hessian error in component " << j << "," << k << ": " << H(j,k)
-                      << " should be (following FiniteDifferences) " << fd << " (" << fabs(fd-H(j,k)) << ")" << std::endl;
+            std::cerr << "Hessian error in component " << j << "," << k << ": " << getCoeff(H, j,k)
+                      << " should be (following FiniteDifferences) " << fd
+                      << " (absolute delta: " << fabs(fd-getCoeff(H, j,k))
+                      << ", relative delta:" << (fabs(fd-getCoeff(H, j,k))/fmax(fabs(getCoeff(H, j,k)), 1.0)) << ")" << std::endl;
           }
           else ++ n_ok;
         }
     }
 
-    std::cerr << "############## Hessian Checker #############\n";
-    std::cerr << "#ok   : " << n_ok << std::endl;
-    std::cerr << "#error: " << n_errors << std::endl;
+    if (n_errors > 0) {
+        std::cerr << "############## Hessian Checker #############\n";
+        std::cerr << "#ok   : " << n_ok << std::endl;
+        std::cerr << "#error: " << n_errors << std::endl;
+    }
 
     return (n_errors == 0);
   }
@@ -188,6 +204,16 @@ protected:
 private:
   Config conf_;
 };
+
+template<>
+inline double NPDerivativeChecker::getCoeff(const NProblemInterface::SMatrixNP &m, int r, int c) {
+    return m.coeff(r, c);
+}
+
+template<>
+inline double NPDerivativeChecker::getCoeff(const NProblemGmmInterface::SMatrixNP &m, int r, int c) {
+    return m(r, c);
+}
 
 
 //=============================================================================
