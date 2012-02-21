@@ -82,7 +82,7 @@ public:
 //    };
 //------------------------------------------------------
 
-  int solve(NProblemInterface*    _problem, std::vector<NConstraintInterface*>& _constraints);
+  int solve(NProblemInterface*    _problem, const std::vector<NConstraintInterface*>& _constraints);
 
   // deprecated interface for backwards compatibility
   int solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints);
@@ -129,7 +129,7 @@ public:
   typedef NProblemInterface::SMatrixNP    SMatrixNP;
 
   /** default constructor */
-  NProblemIPOPT(NProblemInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
+  NProblemIPOPT(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _constraints)
    : problem_(_problem) { split_constraints(_constraints);}
 
   /** default destructor */
@@ -208,7 +208,7 @@ private:
   //@}
 
   // split user-provided constraints into general-constraints and bound-constraints
-  void split_constraints(std::vector<NConstraintInterface*>& _constraints);
+  void split_constraints(const std::vector<NConstraintInterface*>& _constraints);
 
 protected:
   double* P(std::vector<double>& _v)
