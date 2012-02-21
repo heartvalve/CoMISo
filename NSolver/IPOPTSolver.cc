@@ -54,7 +54,7 @@ IPOPTSolver()
 
 int
 IPOPTSolver::
-solve(NProblemInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
+solve(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _constraints)
 {
   //----------------------------------------------------------------------------
   // 1. Create an instance of IPOPT NLP
@@ -148,7 +148,7 @@ solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _const
 
 void
 NProblemIPOPT::
-split_constraints(std::vector<NConstraintInterface*>& _constraints)
+split_constraints(const std::vector<NConstraintInterface*>& _constraints)
 {
   // split user-provided constraints into general-constraints and bound-constraints
   constraints_      .clear();       constraints_.reserve(_constraints.size());
