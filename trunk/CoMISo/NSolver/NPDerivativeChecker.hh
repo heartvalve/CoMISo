@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 #include <CoMISo/Utils/StopWatch.hh>
 #include <gmm/gmm.h>
@@ -105,7 +106,7 @@ public:
         x[j] += conf_.dx;
         double fd = (f1-f0)/(2.0*conf_.dx);
 
-        if ((!isnan(conf_.relativeEps) && fabs(fd-g[j]) > fmax(fabs(g[j]), 1.0) * conf_.relativeEps) || fabs(fd-g[j]) > conf_.eps)
+        if ((!std::isnan(conf_.relativeEps) && fabs(fd-g[j]) > fmax(fabs(g[j]), 1.0) * conf_.relativeEps) || fabs(fd-g[j]) > conf_.eps)
         {
           ++ n_errors;
           std::cerr << "Gradient error in component " << j << ": " << g[j]
@@ -160,7 +161,7 @@ public:
           double fd = (f0-f1-f2+f3)/(4.0*conf_.dx*conf_.dx);
 
 
-          if ((!isnan(conf_.relativeEps) && fabs(fd-H.coeff(j,k)) > fmax(fabs(getCoeff(H, j,k)), 1.0) * conf_.relativeEps) || fabs(fd-getCoeff(H, j,k)) > conf_.eps)
+          if ((!std::isnan(conf_.relativeEps) && fabs(fd-H.coeff(j,k)) > fmax(fabs(getCoeff(H, j,k)), 1.0) * conf_.relativeEps) || fabs(fd-getCoeff(H, j,k)) > conf_.eps)
           {
             ++ n_errors;
             std::cerr << "Hessian error in component " << j << "," << k << ": " << getCoeff(H, j,k)
