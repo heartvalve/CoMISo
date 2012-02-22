@@ -45,7 +45,7 @@ public:
 
   struct Config
   {
-    Config() : x_min(-1.0), x_max(1.0), n_iters(1), dx(1e-5), eps(1e-3), relativeEps(NAN)
+    Config() : x_min(-1.0), x_max(1.0), n_iters(1), dx(1e-5), eps(1e-3), relativeEps(FP_NAN)
     {}
 
     double x_min;
