@@ -121,6 +121,20 @@ if ( COMISO_INCLUDE_DIR )
   endif()
 
 
+  STRING(REGEX MATCH "\#define COMISO_ARPACK_AVAILABLE 1" COMISO_ARPACK_BUILD_TIME_AVAILABLE ${CURRENT_COMISO_CONFIG} )
+
+  if ( COMISO_ARPACK_BUILD_TIME_AVAILABLE )
+
+   find_package(ARPACK)
+
+   if ( NOT ARPACK_FOUND )
+     message(ERROR "COMISO configured with ARPACK but ARPACK not available")
+   endif()
+
+   list (APPEND  COMISO_OPT_DEPS "ARPACK")
+
+  endif()
+
   add_definitions (-DCOMISODLL -DUSECOMISO )
 
 endif(COMISO_INCLUDE_DIR)

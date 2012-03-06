@@ -162,6 +162,17 @@ else ()
   set (COMISO_GUROBI_CONFIG_FILE_SETTINGS "#define COMISO_GUROBI_AVAILABLE 0" )
 endif ()
 
+find_package (ARPACK)
+if (ARPACK_FOUND )
+  set (COMISO_ARPACK_CONFIG_FILE_SETTINGS "#define COMISO_ARPACK_AVAILABLE 1" )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${ARPACK_INCLUDE_DIR} )
+#  list( APPEND COMISO_LINK_DIRECTORIES    ${ARPACK_LIBRARY_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${ARPACK_LIBRARY} )
+else ()
+  message (STATUS "ARPACK not found!")
+  set (COMISO_ARPACK_CONFIG_FILE_SETTINGS "#define COMISO_ARPACK_AVAILABLE 0" )
+endif ()
+
 include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -184,6 +195,7 @@ set (directories
   .
   Solver
   NSolver
+  EigenSolver
   Config
   Utils
   QtWidgets
@@ -274,5 +286,9 @@ endif()
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/super_sparse_matrix/CMakeLists.txt" )
 	add_subdirectory (Examples/super_sparse_matrix)
 endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/eigen_solver/CMakeLists.txt" )
+	add_subdirectory (Examples/eigen_solver)
+endif()
+
 
 

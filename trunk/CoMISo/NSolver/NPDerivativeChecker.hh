@@ -116,11 +116,10 @@ public:
         else ++ n_ok;
       }
     }
-    if (n_errors > 0) {
-        std::cerr << "############## Gradient Checker #############\n";
-        std::cerr << "#ok   : " << n_ok << std::endl;
-        std::cerr << "#error: " << n_errors << std::endl;
-    }
+
+    std::cerr << "############## Gradient Checker #############\n";
+    std::cerr << "#ok   : " << n_ok << std::endl;
+    std::cerr << "#error: " << n_errors << std::endl;
 
     return (n_errors == 0);
   }
@@ -174,11 +173,9 @@ public:
         }
     }
 
-    if (n_errors > 0) {
-        std::cerr << "############## Hessian Checker #############\n";
-        std::cerr << "#ok   : " << n_ok << std::endl;
-        std::cerr << "#error: " << n_errors << std::endl;
-    }
+    std::cerr << "############## Hessian Checker #############\n";
+    std::cerr << "#ok   : " << n_ok << std::endl;
+    std::cerr << "#error: " << n_errors << std::endl;
 
     return (n_errors == 0);
   }
