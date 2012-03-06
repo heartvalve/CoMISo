@@ -434,7 +434,7 @@ bool NProblemIPOPT::eval_h(Index n, const Number* x, bool new_x,
     for(unsigned int j=0; j<constraints_.size(); ++j)
     {
       SMatrixNC H;
-      constraints_[j]->eval_hessian(x, H);
+      constraints_[j]->eval_hessian(&(x_rnd[0]), H);
 
       SMatrixNC::iterator m_it  = H.begin();
       SMatrixNC::iterator m_end = H.end();
