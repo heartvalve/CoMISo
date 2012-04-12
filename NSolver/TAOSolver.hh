@@ -58,10 +58,16 @@ private:
   // ToDo: cleanup has to be started automatically
   static void cleanup();
 
+#if (TAO_VERSION_MAJOR < 2)
   // declar TAO function prototypes
   static int objective(TAO_APPLICATION,Vec,double*,void*);
   static int gradient (TAO_APPLICATION,Vec,Vec    ,void*);
   static int hessian  (TAO_APPLICATION,Vec,Mat*,Mat*,MatStructure*,void*);
+#else
+  static PetscErrorCode objective(TaoSolver,Vec,double*,void*);
+  static PetscErrorCode gradient (TaoSolver,Vec,Vec    ,void*);
+  static PetscErrorCode hessian  (TaoSolver,Vec,Mat*,Mat*,MatStructure*,void*);
+#endif
 
 private:
   // initialized?
