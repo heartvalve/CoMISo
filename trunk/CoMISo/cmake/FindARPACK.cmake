@@ -8,7 +8,7 @@
 #  ARPACK_LIBRARIES    - Link this to use ARPACK together with ARPACK++
 
 
-find_path (ARPACK_INCLUDE_DIR NAMES argeig.h
+find_path (ARPACK_INCLUDE_DIR NAMES arpack++/argeig.h
   HINTS ENV ARPACK_INCLUDE_DIR
   PATHS /usr/include/arpack++ $ENV{HOME}/opt/arpack++/include "C:\\libs\\arpack++\\include"
   DOC "ARPACK Include Directory")
