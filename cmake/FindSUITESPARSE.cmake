@@ -56,7 +56,7 @@ else( WIN32 )
    	
            FIND_PATH( SUITESPARSE_LIBRARY_DIR
                       NAMES libcholmod.so 
-                      PATHS /usr/lib /usr/local/lib )
+                      PATHS /usr/lib /usr/lib64 /usr/local/lib )
 
 
    ENDIF(APPLE)
@@ -69,40 +69,32 @@ else( WIN32 )
 
    # if we found the library, add it to the defined libraries
    IF ( SUITESPARSE_LIBRARY_DIR )
-       FIND_LIBRARY( CHOLMOD_LIBRARY
-                     NAMES cholmod CHOLMOD
+       list ( APPEND SUITESPARSE_LIBRARIES amd)
+       list ( APPEND SUITESPARSE_LIBRARIES btf)
+       list ( APPEND SUITESPARSE_LIBRARIES camd)
+       list ( APPEND SUITESPARSE_LIBRARIES ccolamd)
+       list ( APPEND SUITESPARSE_LIBRARIES cholmod)
+       list ( APPEND SUITESPARSE_LIBRARIES colamd)
+#       list ( APPEND SUITESPARSE_LIBRARIES csparse)
+       list ( APPEND SUITESPARSE_LIBRARIES cxsparse)
+       list ( APPEND SUITESPARSE_LIBRARIES klu)
+#       list ( APPEND SUITESPARSE_LIBRARIES spqr)
+       list ( APPEND SUITESPARSE_LIBRARIES umfpack)
+   
+       # Metis and spqr are optional
+       FIND_LIBRARY( SUITESPARSE_METIS_LIBRARY
+                     NAMES metis
                      PATHS ${SUITESPARSE_LIBRARY_DIR} )
-       FIND_LIBRARY( UMFPACK_LIBRARY
-                     NAMES umfpack UMFPACK
-                     PATHS ${SUITESPARSE_LIBRARY_DIR} )
+       IF (SUITESPARSE_METIS_LIBRARY)			
+	  list ( APPEND SUITESPARSE_LIBRARIES metis)
+       ENDIF(SUITESPARSE_METIS_LIBRARY)
+       
        FIND_LIBRARY( SUITESPARSE_SPQR_LIBRARY
-                     NAMES spqr SPQR
-                     HINTS $ENV{HOME}/opt/SPQR/lib
+                     NAMES spqr
                      PATHS ${SUITESPARSE_LIBRARY_DIR} )
-    
-        FIND_PATH( SUITESPARSE_SPQR_LIBRARY_DIR
-                      NAMES libspqr.so 
-                      PATHS /usr/lib /usr/local/lib $ENV{HOME}/opt/SPQR/lib)
-                    
-       list ( APPEND SUITESPARSE_LIBRARY_DIRS ${SUITESPARSE_SPQR_LIBRARY_DIR} )
-       list ( APPEND SUITESPARSE_LIBRARY_DIRS ${SUITESPARSE_LIBRARY_DIR} )
-	IF(APPLE)
-		list ( APPEND SUITESPARSE_LIBRARIES ${SUITESPARSE_LIBRARY_DIR}/libamd.a 
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libbtf.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libcamd.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libccolamd.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libcolamd.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libcsparse.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libcxsparse.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libklu.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libspqr.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libumfpack.a
-                                                    ${SUITESPARSE_LIBRARY_DIR}/libmetis.a
-			)
-	ENDIF(APPLE)
-
-
-	list ( APPEND SUITESPARSE_LIBRARIES ${CHOLMOD_LIBRARY} ${UMFPACK_LIBRARY} ${SUITESPARSE_SPQR_LIBRARY})
+       IF (SUITESPARSE_SPQR_LIBRARY)			
+	  list ( APPEND SUITESPARSE_LIBRARIES spqr)
+       ENDIF (SUITESPARSE_SPQR_LIBRARY)			
    ENDIF( SUITESPARSE_LIBRARY_DIR )  
    
 endif( WIN32 )
