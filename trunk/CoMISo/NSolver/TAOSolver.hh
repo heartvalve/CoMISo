@@ -20,6 +20,7 @@
 #include <gmm/gmm.h>
 
 #include "NProblemGmmInterface.hh"
+#include "NProblemInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -43,11 +44,13 @@ public:
    
   /// Default constructor
   TAOSolver() {}
- 
+
+
   /// Destructor
   ~TAOSolver() {}
 
   // solve problem
+  static int solve( NProblemInterface*    _base);
   static int solve( NProblemGmmInterface* _base);
 
 
@@ -63,10 +66,18 @@ private:
   static int objective(TAO_APPLICATION,Vec,double*,void*);
   static int gradient (TAO_APPLICATION,Vec,Vec    ,void*);
   static int hessian  (TAO_APPLICATION,Vec,Mat*,Mat*,MatStructure*,void*);
+
+  static int objective2(TAO_APPLICATION,Vec,double*,void*);
+  static int gradient2 (TAO_APPLICATION,Vec,Vec    ,void*);
+  static int hessian2  (TAO_APPLICATION,Vec,Mat*,Mat*,MatStructure*,void*);
 #else
   static PetscErrorCode objective(TaoSolver,Vec,double*,void*);
   static PetscErrorCode gradient (TaoSolver,Vec,Vec    ,void*);
   static PetscErrorCode hessian  (TaoSolver,Vec,Mat*,Mat*,MatStructure*,void*);
+
+  static PetscErrorCode objective2(TaoSolver,Vec,double*,void*);
+  static PetscErrorCode gradient2 (TaoSolver,Vec,Vec    ,void*);
+  static PetscErrorCode hessian2  (TaoSolver,Vec,Mat*,Mat*,MatStructure*,void*);
 #endif
 
 private:

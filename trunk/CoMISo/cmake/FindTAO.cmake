@@ -47,11 +47,11 @@ find_path(TAO_INCLUDE_DIR NAMES "include/tao.h"
       
       #check VERSION 1.x or 2
       IF(IS_DIRECTORY "$ENV{TAO_DIR}/lib/$ENV{PETSC_ARCH}/")
-        MESSAGE(STATUS "TAO Version 1.x")
+#        MESSAGE(STATUS "TAO Version 1.x")
 	SET(TAO_LIBRARY_DIR "$ENV{TAO_DIR}/lib/$ENV{PETSC_ARCH}/" CACHE PATH "Path to TAO Library")
 	SET(TAO_LIBRARY "tao;taopetsc;taofortran" CACHE STRING "TAO Libraries")  
       ELSE(IS_DIRECTORY "$ENV{TAO_DIR}/lib/$ENV{PETSC_ARCH}/") #VERSION 2
-        MESSAGE(STATUS "TAO Version 2.x")
+#        MESSAGE(STATUS "TAO Version 2.x")
 	SET(TAO_LIBRARY_DIR "$ENV{TAO_DIR}/$ENV{PETSC_ARCH}/lib" CACHE PATH "Path to TAO Library")
 	SET(TAO_LIBRARY "tao" CACHE STRING "TAO Libraries")  
       ENDIF(IS_DIRECTORY "$ENV{TAO_DIR}/lib/$ENV{PETSC_ARCH}/")

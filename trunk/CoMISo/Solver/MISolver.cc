@@ -26,7 +26,7 @@
 #include <CoMISo/Config/config.hh>
 #include "MISolver.hh"
 
-#ifdef QT4_FOUND
+#if(COMISO_QT4_AVAILABLE)
 #include <CoMISo/QtWidgets/MISolverDialogUI.hh>
 #endif
 
@@ -155,6 +155,7 @@ MISolver::solve_direct_rounding(
     const bool enable_performance_test = false;
 
     // performance comparison code
+#if(COMISO_SUITESPARSE_SPQR_AVAILABLE)
     if(enable_performance_test)
     {
       sw.start();
@@ -169,6 +170,7 @@ MISolver::solve_direct_rounding(
       gmm::add(_x,gmm::scaled(x2,-1.0),res);
       std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
     }
+#endif
 
     // performance comparison code
     if(enable_performance_test)
@@ -719,9 +721,11 @@ void
 MISolver::
 show_options_dialog()
 {
-#ifdef QT4_FOUND
+#if(COMISO_QT4_AVAILABLE)
   MISolverDialog* pd = new MISolverDialog(*this);
   pd->exec();
+#else
+  std::cerr << "Warning: Qt not available to show solver dialog!!!" << std::endl;
 #endif
 }
 

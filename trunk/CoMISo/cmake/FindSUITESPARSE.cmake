@@ -8,7 +8,7 @@
 #  SUITESPARSE_SPQR_LIBRARY_DIR - name of spqr library (necessary due to error in debian package)
 #  SUITESPARSE_LIBRARY_DIR      - Library main directory containing suitesparse libs
 #  SUITESPARSE_LIBRARY_DIRS     - all Library directories containing suitesparse libs
-#   
+#  SUITESPARSE_SPQR_VALID       - automatic identification whether or not spqr package is installed correctly
 
 IF (SUITESPARSE_INCLUDE_DIRS)
   # Already in cache, be silent
@@ -50,13 +50,18 @@ else( WIN32 )
 
    ELSE(APPLE)
 	   FIND_PATH( CHOLMOD_INCLUDE_DIR cholmod.h
-        	      PATHS /usr/local/include /usr/include /usr/include/suitesparse/ ${CMAKE_SOURCE_DIR}/MacOS/Libs/cholmod
+        	      PATHS /usr/local/include 
+        	            /usr/include 
+        	            /usr/include/suitesparse/ 
+        	            ${CMAKE_SOURCE_DIR}/MacOS/Libs/cholmod
               	      PATH_SUFFIXES cholmod/ CHOLMOD/ )
 
    	
            FIND_PATH( SUITESPARSE_LIBRARY_DIR
                       NAMES libcholmod.so 
-                      PATHS /usr/lib /usr/lib64 /usr/local/lib )
+                      PATHS /usr/lib 
+                            /usr/lib64 
+                            /usr/local/lib )
 
 
    ENDIF(APPLE)
@@ -88,14 +93,23 @@ else( WIN32 )
        IF (SUITESPARSE_METIS_LIBRARY)			
 	  list ( APPEND SUITESPARSE_LIBRARIES metis)
        ENDIF(SUITESPARSE_METIS_LIBRARY)
+
+       if(EXISTS  "${CHOLMOD_INCLUDE_DIR}/SuiteSparseQR.hpp")
+	  SET(SUITESPARSE_SPQR_VALID TRUE CACHE BOOL "SuiteSparseSPQR valid")
+       else()
+	  SET(SUITESPARSE_SPQR_VALID false CACHE BOOL "SuiteSparseSPQR valid")
+       endif()
+
+       if(SUITESPARSE_SPQR_VALID)
+	  FIND_LIBRARY( SUITESPARSE_SPQR_LIBRARY
+		      NAMES spqr
+		      PATHS ${SUITESPARSE_LIBRARY_DIR} )
+	  IF (SUITESPARSE_SPQR_LIBRARY)			
+	    list ( APPEND SUITESPARSE_LIBRARIES spqr)
+	  ENDIF (SUITESPARSE_SPQR_LIBRARY)
+       endif()
        
-       FIND_LIBRARY( SUITESPARSE_SPQR_LIBRARY
-                     NAMES spqr
-                     PATHS ${SUITESPARSE_LIBRARY_DIR} )
-       IF (SUITESPARSE_SPQR_LIBRARY)			
-	  list ( APPEND SUITESPARSE_LIBRARIES spqr)
-       ENDIF (SUITESPARSE_SPQR_LIBRARY)			
-   ENDIF( SUITESPARSE_LIBRARY_DIR )  
+    ENDIF( SUITESPARSE_LIBRARY_DIR )  
    
 endif( WIN32 )
 

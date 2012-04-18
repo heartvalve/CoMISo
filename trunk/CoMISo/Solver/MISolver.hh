@@ -36,6 +36,7 @@
 
 //== INCLUDES =================================================================
 #include <CoMISo/Config/CoMISoDefines.hh>
+#include <CoMISo/Config/config.hh>
 
 #include "GMM_Tools.hh"
 #include "CholmodSolver.hh"
@@ -354,7 +355,9 @@ private:
 
   bool use_constraint_reordering_;
 
+#if(COMISO_QT4_AVAILABLE)
   friend class COMISO::MISolverDialog;
+#endif
 };
 
 
