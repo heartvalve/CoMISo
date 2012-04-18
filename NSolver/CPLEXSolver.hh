@@ -1,17 +1,17 @@
 //=============================================================================
 //
-//  CLASS GUROBISolver
+//  CLASS CPLEXSolver
 //
 //=============================================================================
 
 
-#ifndef COMISO_GUROBISOLVER_HH
-#define COMISO_GUROBISOLVER_HH
+#ifndef COMISO_CPLEXSOLVER_HH
+#define COMISO_CPLEXSOLVER_HH
 
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
-#if COMISO_GUROBI_AVAILABLE
+#if COMISO_CPLEX_AVAILABLE
 
 //== INCLUDES =================================================================
 
@@ -21,9 +21,10 @@
 #include "NProblemInterface.hh"
 #include "NConstraintInterface.hh"
 #include "VariableType.hh"
-#include "GurobiHelper.hh"
 
-#include <gurobi_c++.h>
+#include <ilcplex/ilocplex.h>
+
+ILOSTLBEGIN
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -35,31 +36,31 @@ namespace COMISO {
 
 	      
 
-/** \class NewtonSolver GUROBISolver.hh
+/** \class NewtonSolver CPLEXSolver.hh
 
     Brief Description.
   
     A more elaborate description follows.
 */
-class COMISODLLEXPORT GUROBISolver
+class COMISODLLEXPORT CPLEXSolver
 {
 public:
 
   /// Default constructor
-  GUROBISolver();
+  CPLEXSolver();
  
   /// Destructor
-  ~GUROBISolver() {}
+  ~CPLEXSolver() { cplex_env_.end();}
 
   // ********** SOLVE **************** //
   bool solve(NProblemInterface*                  _problem,                // problem instance
              std::vector<NConstraintInterface*>& _constraints,            // linear constraints
              std::vector<PairIndexVtype>&        _discrete_constraints,   // discrete constraints
-             const double                        _time_limit = 60     ); // time limit in seconds
+             const double                        _time_limit = 60     );  // time limit in seconds
 
-  void set_problem_output_path    ( const std::string &_problem_output_path);
-  void set_problem_env_output_path( const std::string &_problem_env_output_path);
-  void set_solution_input_path    ( const std::string &_solution_input_path);
+//  void set_problem_output_path    ( const std::string &_problem_output_path);
+//  void set_problem_env_output_path( const std::string &_problem_env_output_path);
+//  void set_solution_input_path    ( const std::string &_solution_input_path);
 
 protected:
   double* P(std::vector<double>& _v)
@@ -72,11 +73,14 @@ protected:
 
 private:
 
+  // CPLEX environment
+  IloEnv cplex_env_;
+
   // filenames for exporting/importing gurobi solutions
   // if string is empty nothing is imported or exported
-  std::string problem_output_path_;
-  std::string problem_env_output_path_;
-  std::string solution_input_path_;
+//  std::string problem_output_path_;
+//  std::string problem_env_output_path_;
+//  std::string solution_input_path_;
 };
 
 
@@ -85,8 +89,8 @@ private:
 } // namespace COMISO
 
 //=============================================================================
-#endif // COMISO_GUROBI_AVAILABLE
+#endif // COMISO_CPLEX_AVAILABLE
 //=============================================================================
-#endif // ACG_GUROBISOLVER_HH defined
+#endif // ACG_CPLEXSOLVER_HH defined
 //=============================================================================
 

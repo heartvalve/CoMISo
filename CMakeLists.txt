@@ -202,6 +202,9 @@ if (CPLEX_FOUND )
 #  list( APPEND COMISO_LINK_DIRECTORIES    ${CPLEX_LIBRARY_DIR} )
 #  list( APPEND COMISO_LINK_DIRECTORIES    ${CPLEX_CONCERT_LIBRARY_DIR} )
   list( APPEND COMISO_LINK_LIBRARIES  ${CPLEX_LIBRARIES} )
+  
+  #enable c++ support
+   add_definitions(-DIL_STD)
 else ()
   message (STATUS "CPLEX not found!")
   set (COMISO_ARPACK_CONFIG_FILE_SETTINGS "#define COMISO_CPLEX_AVAILABLE 0" )
@@ -325,6 +328,9 @@ if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/eigen_solver/CMakeLists.txt" )
 endif()
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_nsolver/CMakeLists.txt" )
 	add_subdirectory (Examples/small_nsolver)
+endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_miqp/CMakeLists.txt" )
+	add_subdirectory (Examples/small_miqp)
 endif()
 
 
