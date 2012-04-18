@@ -37,12 +37,18 @@
 
 
 #include <CoMISo/Config/CoMISoDefines.hh>
+#include <CoMISo/Config/config.hh>
 #include "GMM_Tools.hh"
 
 #include <CoMISo/Utils/StopWatch.hh>
 
 #include <iostream>
 #include <vector>
+
+
+//== BUILD-TIME DEPENDENCIES =================================================================
+#if(COMISO_SUITESPARSE_SPQR_AVAILABLE)
+//============================================================================================
 
 #include "SuiteSparseQR.hpp"
 #include "cholmod.h"
@@ -139,6 +145,8 @@ private:
 #if defined(INCLUDE_TEMPLATES) && !defined(COMISO_SPARSE_QR_SOLVER_TEMPLATES_C)
 #define COMISO_SPARSE_QR_SOLVER_TEMPLATES
 #include "SparseQRSolverT.cc"
+#endif
+//== BUILD-TIME DEPENDENCIES ==================================================
 #endif
 //=============================================================================
 #endif // COMISO_SPARSE_QR_SOLVER_HH defined

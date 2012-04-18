@@ -34,10 +34,14 @@
 #define COMISO_MISOLVERDIALOG_HH
 
 
+#include <CoMISo/Config/config.hh>
+
+//== BUILD-TIME DEPENDENCIES =================================================================
+#if(COMISO_QT4_AVAILABLE)
+//============================================================================================
+
 //== INCLUDES =================================================================
 
-// qmake users have to include
-#ifdef QT4_FOUND 
 #include "ui_QtMISolverDialogBaseUI.hh"
 
 // ACGMake users have to include
