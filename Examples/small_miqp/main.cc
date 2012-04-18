@@ -122,6 +122,12 @@ int main(void)
 
   std::cout << "---------- 4) setup constraints..." << std::endl;
   std::vector<COMISO::NConstraintInterface*> constraints;
+  // setup constraint x+y <= 0
+  COMISO::LinearConstraint::SVectorNC coeffs(2);
+  coeffs.coeffRef(0) = 1.0;
+  coeffs.coeffRef(1) = 1.0;
+  COMISO::LinearConstraint lc(coeffs, 0, COMISO::LinearConstraint::NC_LESS_EQUAL);
+  constraints.push_back(&lc);
 
 
 // check if IPOPT solver available in current configuration
