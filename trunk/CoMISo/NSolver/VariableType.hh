@@ -24,6 +24,8 @@ namespace COMISO {
 
 enum VariableType { Real, Integer, Binary};
 
+typedef std::pair<unsigned int, VariableType> PairIndexVtype;
+
 //=============================================================================
 } // namespace COMISO
 //=============================================================================

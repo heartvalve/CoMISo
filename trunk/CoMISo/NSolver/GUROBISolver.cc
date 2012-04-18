@@ -36,7 +36,7 @@ bool
 GUROBISolver::
 solve(NProblemInterface*                  _problem,
       std::vector<NConstraintInterface*>& _constraints,
-      std::vector<PairUiV>&               _discrete_constraints,
+      std::vector<PairIndexVtype>&        _discrete_constraints,
       const double                        _time_limit)
 {
   try
