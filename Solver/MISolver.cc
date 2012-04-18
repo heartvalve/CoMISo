@@ -34,6 +34,11 @@
   #include <gurobi_c++.h>
 #endif
 
+#if COMISO_CPLEX_AVAILABLE
+  #include <ilcplex/ilocplex.h>
+#endif
+
+
 #include <CoMISo/Utils/StopWatch.hh>
 
 #include <gmm/gmm.h>
@@ -61,6 +66,7 @@ MISolver::MISolver()
   no_rounding_       = false;
   multiple_rounding_ = true;
   gurobi_rounding_   = false;
+  cplex_rounding_    = false;
 
   max_local_iters_ = 100000;
   max_local_error_ = 1e-3;
@@ -96,16 +102,19 @@ MISolver::solve(
   if( gurobi_rounding_)
     solve_gurobi(_A, _x, _rhs, _to_round);
   else
-    if( no_rounding_ || _to_round.size() == 0)
-      solve_no_rounding( _A, _x, _rhs);
+    if( cplex_rounding_)
+      solve_gurobi(_A, _x, _rhs, _to_round);
     else
-      if( direct_rounding_)
-        solve_direct_rounding( _A, _x, _rhs, _to_round);
+      if( no_rounding_ || _to_round.size() == 0)
+        solve_no_rounding( _A, _x, _rhs);
       else
-        if( multiple_rounding_)
-          solve_multiple_rounding( _A, _x, _rhs, _to_round);
+        if( direct_rounding_)
+          solve_direct_rounding( _A, _x, _rhs, _to_round);
         else
-          solve_iterative( _A, _x, _rhs, _to_round, _fixed_order);
+          if( multiple_rounding_)
+            solve_multiple_rounding( _A, _x, _rhs, _to_round);
+          else
+            solve_iterative( _A, _x, _rhs, _to_round, _fixed_order);
 }
 
 
@@ -710,6 +719,93 @@ MISolver::solve_gurobi(
 
 #else
   std::cerr << "GUROBI solver is not available, please install it..." << std::endl;
+#endif
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
+MISolver::solve_cplex(
+    CSCMatrix& _A,
+    Vecd&      _x,
+    Vecd&      _rhs,
+    Veci&      _to_round)
+{
+#if COMISO_CPLEX_AVAILABLE
+
+  // get round-indices in set
+  std::set<int> to_round;
+  for(unsigned int i=0; i<_to_round.size();++i)
+    to_round.insert(_to_round[i]);
+
+  try {
+
+    IloEnv env_;
+    IloModel model(env_);
+
+    // set time limite
+//    model.getEnv().set(GRB_DoubleParam_TimeLimit, gurobi_max_time_);
+
+    unsigned int n = _rhs.size();
+
+    // 1. allocate variables
+    std::vector<IloNumVar> vars;
+    for( unsigned int i=0; i<n; ++i)
+      if( to_round.count(i))
+        vars.push_back( IloNumVar(env_,  -IloIntMax,   IloIntMax, IloNumVar::Int)   );
+      else
+        vars.push_back( IloNumVar(env_,-IloInfinity, IloInfinity, IloNumVar::Float) );
+
+
+    // 2. setup_energy
+
+    // build objective function from linear system E = x^tAx - 2x^t*rhs
+    IloExpr objective(env_);
+
+    for(unsigned int i=0; i<_A.nc; ++i)
+      for(unsigned int j=_A.jc[i]; j<_A.jc[i+1]; ++j)
+      {
+        objective += _A.pr[j]*vars[_A.ir[j]]*vars[i];
+      }
+    for(unsigned int i=0; i<n; ++i)
+      objective -= 2*_rhs[i]*vars[i];
+
+//    _A.jc[c+1]
+//    _A.pr[write]
+//    _A.ir[write]
+//    _A.nc
+//    _A.nr
+
+    // minimize
+    model.add(IloMinimize(env_,objective));
+
+    // 4. solve
+    IloCplex cplex(model);
+    cplex.setParam(IloCplex::TiLim, gurobi_max_time_);
+    cplex.solve();
+
+    // 5. store result
+    _x.resize(n);
+    for(unsigned int i=0; i<n; ++i)
+      _x[i] = cplex.getValue(vars[i]);
+
+    std::cout << "CPLEX objective: " << cplex.getObjValue() << std::endl;
+
+  }
+  catch (IloException& e)
+  {
+     cerr << "CPLEX Concert exception caught: " << e << endl;
+  }
+  catch (...)
+  {
+     cerr << "CPLEX Unknown exception caught" << endl;
+  }
+
+
+#else
+  std::cerr << "CPLEX solver is not available, please install it..." << std::endl;
 #endif
 }
 

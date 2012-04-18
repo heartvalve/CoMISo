@@ -166,6 +166,10 @@ public:
   /// Will gurobi rounding be performed?
   bool get_gurobi_rounding()         { return gurobi_rounding_;}
 
+  /// Shall cplex solver be used?
+  void set_cplex_rounding( bool _b) {        cplex_rounding_=_b;}
+  /// Will cplex rounding be performed?
+  bool get_cplex_rounding()         { return cplex_rounding_;}
 
   /// Set number of maximum Gauss-Seidel iterations
   void         set_local_iters( unsigned int _i) { max_local_iters_ = _i;}
@@ -303,6 +307,12 @@ private:
     Vecd&      _rhs,
     Veci&      _to_round );
 
+  void solve_cplex(
+    CSCMatrix& _A,
+    Vecd&      _x,
+    Vecd&      _rhs,
+    Veci&      _to_round );
+
 
 void update_solution( 
     CSCMatrix& _A, 
@@ -327,6 +337,7 @@ private:
   bool no_rounding_;
   bool multiple_rounding_;
   bool gurobi_rounding_;
+  bool cplex_rounding_;
 
   double multiple_rounding_threshold_;
 

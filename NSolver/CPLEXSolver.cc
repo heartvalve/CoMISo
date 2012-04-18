@@ -150,6 +150,7 @@ solve(NProblemInterface*                  _problem,
     //----------------------------------------------
 
     IloCplex cplex(model);
+    cplex.setParam(IloCplex::TiLim, _time_limit);
     cplex.solve();
 
 
