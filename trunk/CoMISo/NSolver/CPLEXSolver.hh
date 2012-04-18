@@ -50,7 +50,7 @@ public:
   CPLEXSolver();
  
   /// Destructor
-  ~CPLEXSolver() { cplex_env_.end();}
+  ~CPLEXSolver() { env_.end();}
 
   // ********** SOLVE **************** //
   bool solve(NProblemInterface*                  _problem,                // problem instance
@@ -74,7 +74,7 @@ protected:
 private:
 
   // CPLEX environment
-  IloEnv cplex_env_;
+  IloEnv env_;
 
   // filenames for exporting/importing gurobi solutions
   // if string is empty nothing is imported or exported

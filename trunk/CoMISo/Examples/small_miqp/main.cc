@@ -46,7 +46,7 @@ public:
 
 
   // specify a function which has several local minima
-  // f(x,y)=(x-2y+1)^2 + (x-2)^2
+  // f(x,y)=(x-2y+1)^2 + (x-5)^2
 
   // number of unknown variables, here x and y = 2
   virtual int    n_unknowns   (                                )
@@ -65,7 +65,7 @@ public:
   virtual double eval_f       ( const double* _x               )
   {
     double term  = _x[0] - 2.0*_x[1] + 1.0;
-    double term2 = _x[0] - 2.0;
+    double term2 = _x[0] - 5.0;
 
     return term*term + term2*term2;
   }
@@ -74,7 +74,7 @@ public:
   virtual void   eval_gradient( const double* _x, double*    _g)
   {
     double term  = _x[0] - 2.0*_x[1] + 1.0;
-    double term2 = _x[0] - 2.0;
+    double term2 = _x[0] - 5.0;
 
     _g[0] =  2.0*term + 2.0*term2;
     _g[1] = -4.0*term;
@@ -122,11 +122,11 @@ int main(void)
 
   std::cout << "---------- 4) setup constraints..." << std::endl;
   std::vector<COMISO::NConstraintInterface*> constraints;
-  // setup constraint x+y <= 0
+  // setup constraint x+y <= 6.5
   COMISO::LinearConstraint::SVectorNC coeffs(2);
   coeffs.coeffRef(0) = 1.0;
   coeffs.coeffRef(1) = 1.0;
-  COMISO::LinearConstraint lc(coeffs, 0, COMISO::LinearConstraint::NC_LESS_EQUAL);
+  COMISO::LinearConstraint lc(coeffs, -6.5, COMISO::LinearConstraint::NC_LESS_EQUAL);
   constraints.push_back(&lc);
 
 
