@@ -31,6 +31,7 @@
 #include <CoMISo/NSolver/GUROBISolver.hh>
 #include <CoMISo/NSolver/CPLEXSolver.hh>
 #include <CoMISo/NSolver/LinearConstraint.hh>
+#include <CoMISo/NSolver/VariableType.hh>
 
 
 // generate an instance of a nonlinear problem by deriving from base class NProblemInterface
