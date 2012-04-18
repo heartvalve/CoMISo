@@ -74,6 +74,7 @@ get_parameters()
   noRoundingCB      ->setChecked( misolver_.get_no_rounding());
   multipleRoundingCB->setChecked( misolver_.get_multiple_rounding());
   gurobiRoundingCB  ->setChecked( misolver_.get_gurobi_rounding());
+  cplexRoundingCB   ->setChecked( misolver_.get_cplex_rounding());
 
   localItersSB ->setValue( misolver_.get_local_iters());
   localErrorDSB->setValue( log(misolver_.get_local_error())/log(10.0f));
@@ -105,6 +106,7 @@ set_parameters()
   misolver_.set_no_rounding( noRoundingCB->isChecked());
   misolver_.set_multiple_rounding( multipleRoundingCB->isChecked());
   misolver_.set_gurobi_rounding( gurobiRoundingCB->isChecked());
+  misolver_.set_cplex_rounding ( cplexRoundingCB->isChecked());
 
   misolver_.set_local_iters( localItersSB ->value());
   misolver_.set_local_error( pow(10, localErrorDSB->value()));
