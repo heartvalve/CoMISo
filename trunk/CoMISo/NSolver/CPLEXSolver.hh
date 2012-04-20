@@ -23,7 +23,6 @@
 #include "VariableType.hh"
 
 #include <ilcplex/ilocplex.h>
-
 ILOSTLBEGIN
 
 //== FORWARDDECLARATIONS ======================================================
@@ -50,17 +49,19 @@ public:
   CPLEXSolver();
  
   /// Destructor
-  ~CPLEXSolver() { env_.end();}
+  ~CPLEXSolver() { /*env_.end();*/}
 
   // ********** SOLVE **************** //
-  bool solve(NProblemInterface*                  _problem,                // problem instance
-             std::vector<NConstraintInterface*>& _constraints,            // linear constraints
-             std::vector<PairIndexVtype>&        _discrete_constraints,   // discrete constraints
-             const double                        _time_limit = 60     );  // time limit in seconds
+  // this function has to be inline due to static linking issues
+  inline bool solve(NProblemInterface*                  _problem,                // problem instance
+                    std::vector<NConstraintInterface*>& _constraints,            // linear constraints
+                    std::vector<PairIndexVtype>&        _discrete_constraints,   // discrete constraints
+                    const double                        _time_limit = 60     );  // time limit in seconds
 
 //  void set_problem_output_path    ( const std::string &_problem_output_path);
 //  void set_problem_env_output_path( const std::string &_problem_env_output_path);
 //  void set_solution_input_path    ( const std::string &_solution_input_path);
+
 
 protected:
   double* P(std::vector<double>& _v)
@@ -74,7 +75,7 @@ protected:
 private:
 
   // CPLEX environment
-  IloEnv env_;
+//  IloEnv env_;
 
   // filenames for exporting/importing gurobi solutions
   // if string is empty nothing is imported or exported
@@ -90,6 +91,11 @@ private:
 
 //=============================================================================
 #endif // COMISO_CPLEX_AVAILABLE
+//=============================================================================
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_CPLEXSOLVER_C)
+#define COMISO_CPLEXSOLVER_TEMPLATES
+#include "CPLEXSolverT.cc"
+#endif
 //=============================================================================
 #endif // ACG_CPLEXSOLVER_HH defined
 //=============================================================================
