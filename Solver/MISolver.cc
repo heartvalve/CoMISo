@@ -103,7 +103,7 @@ MISolver::solve(
     solve_gurobi(_A, _x, _rhs, _to_round);
   else
     if( cplex_rounding_)
-      solve_gurobi(_A, _x, _rhs, _to_round);
+      solve_cplex(_A, _x, _rhs, _to_round);
     else
       if( no_rounding_ || _to_round.size() == 0)
         solve_no_rounding( _A, _x, _rhs);
