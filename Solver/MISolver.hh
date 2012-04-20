@@ -101,7 +101,7 @@ public:
    *  @param _fixed_order specifies if _to_round indices shall be rounded in the
    *  given order (\b true) or be greedily selected (\b false)
 	 *  */
-  void solve(
+  inline void solve(
     CSCMatrix& _A, 
     Vecd&      _x, 
     Vecd&      _rhs, 
@@ -307,7 +307,7 @@ private:
     Vecd&      _rhs,
     Veci&      _to_round );
 
-  void solve_cplex(
+  inline void solve_cplex(
     CSCMatrix& _A,
     Vecd&      _x,
     Vecd&      _rhs,
