@@ -51,12 +51,18 @@ solve(NProblemInterface*                  _problem,
     // determine variable types: 0->real, 1->integer, 2->bool
     std::vector<char> vtypes(_problem->n_unknowns(),0);
     for(unsigned int i=0; i<_discrete_constraints.size(); ++i)
-      switch(_discrete_constraints[i].second)
+      if(_discrete_constraints[i].first < vtypes.size())
       {
-        case Integer: vtypes[_discrete_constraints[i].first] = 1; break;
-        case Binary : vtypes[_discrete_constraints[i].first] = 2; break;
-        default     : break;
+        switch(_discrete_constraints[i].second)
+        {
+          case Integer: vtypes[_discrete_constraints[i].first] = 1; break;
+          case Binary : vtypes[_discrete_constraints[i].first] = 2; break;
+          default     : break;
+        }
       }
+      else
+        std::cerr << "ERROR: requested a discrete variable which is above the total number of variables"
+                  << _discrete_constraints[i].first << " vs " << vtypes.size() << std::endl;
 
     // CPLEX variables
     std::vector<IloNumVar> vars;
@@ -146,12 +152,17 @@ solve(NProblemInterface*                  _problem,
     //----------------------------------------------
     // 4. solve problem
     //----------------------------------------------
-    std::cerr << "cplex -> solve1...\n";
-
+    std::cerr << "cplex -> generate model...\n";
     IloCplex cplex(model);
-    std::cerr << "cplex -> solve2...\n";
     cplex.setParam(IloCplex::TiLim, _time_limit);
-    std::cerr << "cplex -> solve3...\n";
+    { // hack
+//    0 [CPX_NODESEL_DFS] Depth-first search
+//    1 [CPX_NODESEL_BESTBOUND] Best-bound search
+//    2 [CPX_NODESEL_BESTEST] Best-estimate search
+//    3 [CPX_NODESEL_BESTEST_ALT] Alternative best-estimate search
+//    cplex.setParam(IloCplex::NodeSel , 0);
+    }
+    std::cerr << "cplex -> solve...\n";
     cplex.solve();
 
 
@@ -183,6 +194,7 @@ solve(NProblemInterface*                  _problem,
     // store computed result
     for(unsigned int i=0; i<vars.size(); ++i)
       x[i] = cplex.getValue(vars[i]);
+
 
     _problem->store_result(P(x));
 

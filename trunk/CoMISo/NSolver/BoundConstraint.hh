@@ -62,6 +62,7 @@ public:
   unsigned int& idx();
   double&       bound();
   unsigned int& n();
+  void resize(const unsigned int _n);
 
 private:
   // variable idx
