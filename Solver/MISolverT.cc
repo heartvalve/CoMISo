@@ -142,6 +142,15 @@ MISolver::solve_cplex(
     // 4. solve
     IloCplex cplex(model);
     cplex.setParam(IloCplex::TiLim, gurobi_max_time_);
+
+//    // set parameters comparable to CoMISo
+//    {
+//      cplex.setParam(IloCplex::MIPSearch  , 1);  // Traditional Branch-and-Cut
+//      cplex.setParam(IloCplex::NodeSel    , 0);  // Depth-First
+//      cplex.setParam(IloCplex::VarSel     , -1);  // closest to integer
+//      cplex.setParam(IloCplex::MIPEmphasis, 1);  // concentrate on feasibility
+//    }
+
     cplex.solve();
 
     // 5. store result
