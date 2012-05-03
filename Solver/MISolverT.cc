@@ -58,6 +58,9 @@ MISolver::solve(
     Veci&      _to_round,
     bool       _fixed_order )
 {
+  std::cerr << "# integer    variables: " << _to_round.size() << std::endl;
+  std::cerr << "# continuous variables: " << _x.size()-_to_round.size() << std::endl;
+  
   // nothing to solve?
   if( gmm::mat_ncols(_A) == 0 || gmm::mat_nrows(_A) == 0)
     return;
