@@ -23,97 +23,80 @@
 \*===========================================================================*/ 
 
 
-//=============================================================================
-//
-//  CLASS CholmodSolver
-//
-//=============================================================================
-
-#ifndef COMISO_CHOLMOD_SOLVER_HH
-#define COMISO_CHOLMOD_SOLVER_HH
+#ifndef COMISO_Eigen_TOOLS_HH
+#define COMISO_Eigen_TOOLS_HH
 
 
 //== INCLUDES =================================================================
 
-
-#include <CoMISo/Config/CoMISoDefines.hh>
-#include <CoMISo/Utils/StopWatch.hh>
-
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <limits>
+#include <cmath>
 
-#include "cholmod.h"
+//#ifdef COMISO_Eigen3_AVAILABLE
+//#include <Eigen/Eigen>
+//#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+//#include <Eigen/Sparse>
+//#endif
 
-// typedef struct cholmod_common_struct cholmod_common;
-// typedef struct cholmod_factor_struct cholmod_factor;
+#ifndef COMISO_NCHOLMOD
+#include <cholmod.h>
+#endif
 
+
+//== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
 
-namespace COMISO {
-
-//== CLASS DEFINITION =========================================================
-class COMISODLLEXPORT CholmodSolver
+namespace COMISO_EIGEN
 {
-public:
 
-    // _size is maximal size this instance can handle (smaller problems are possible!!!)
-    CholmodSolver();
-    ~CholmodSolver();
-    
-    bool calc_system( const std::vector<int>&    _colptr, 
-		      const std::vector<int>&    _rowind, 
-		      const std::vector<double>& _values );
+/** \class EigenTools Eigen_Tools.hh
+
+    A collection of helper functions for manipulating (Eigen) matrices.
+*/
 
 
-    template< class GMM_MatrixT>
-    bool calc_system_gmm( const GMM_MatrixT& _mat);
+//== FUNCTION DEFINITION ======================================================
 
-    template< class Eigen_MatrixT>
-    bool calc_system_eigen( const Eigen_MatrixT& _mat);
+/// Get matrix data (CSC matrix format) from matrix
+/** Used by Cholmod wrapper  
+ *  @param _mat matrix
+ *  @param _c uplo parameter (l, L, u, U, c, C)
+ *  @param _values values vector
+ *  @param _rowind row indices 
+ *  @param _colptr column pointer  */
+template<class MatrixT, class REALT, class INTT>
+void get_ccs_symmetric_data( const MatrixT&      _mat,
+                             const char          _c,
+                             std::vector<REALT>& _values,
+                             std::vector<INTT>&  _rowind,
+                             std::vector<INTT>&  _colptr );
+
+/// Inspect the matrix (print)
+/** Prints useful matrix informations such as, dimension, symmetry, zero_rows, zero_cols, nnz, max, min, max_abs, min_abs, NAN, INF
+  * @param _A matrix */
+template<class MatrixT>
+void inspect_matrix( const MatrixT& _A);
+
+/** checks for symmetry
+  * @param _A matrix 
+  * @return symmetric? (bool)*/
+template<class MatrixT>
+bool is_symmetric( const MatrixT& _A);
 
 
-    bool update_system( const std::vector<int>&    _colptr, 
- 			const std::vector<int>&    _rowind, 
- 			const std::vector<double>& _values );
-
-
-    template< class GMM_MatrixT>
-    bool update_system_gmm( const GMM_MatrixT& _mat);
-
-    template< class Eigen_MatrixT>
-    bool update_system_eigen( const Eigen_MatrixT& _mat);
-
-
-    bool solve ( double *             _x0, double *             _b);
-
-    bool solve ( std::vector<double>& _x0, std::vector<double>& _b);
-
-    bool& show_timings();
-    
-    int dimension();
-    
-private:
-
-    cholmod_common * mp_cholmodCommon;
-
-    cholmod_factor * mp_L;
-
-    std::vector<double> values_;
-    std::vector<int>    colptr_;
-    std::vector<int>    rowind_;
-
-    bool show_timings_;
-    StopWatch sw_;
-};
 
 //=============================================================================
-} // namespace COMISO
+} // namespace COMISO_Eigen
 //=============================================================================
-#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_CHOLMOD_SOLVER_TEMPLATES_C)
-#define COMISO_CHOLMOD_SOLVER_TEMPLATES
-#include "CholmodSolverT.cc"
+#if defined(INCLUDE_TEMPLATES) && !defined(COMISO_Eigen_TOOLS_C)
+#define COMISO_Eigen_TOOLS_TEMPLATES
+#include "Eigen_Tools.cc"
 #endif
 //=============================================================================
-#endif // COMISO_CHOLMOD_SOLVER_HH defined
+#endif // Eigen_TOOLS_HH defined
 //=============================================================================
+
