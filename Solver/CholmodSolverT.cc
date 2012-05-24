@@ -27,6 +27,7 @@
 #define COMISO_CHOLMOD_SOLVER_TEMPLATES_C
 
 #include <CoMISo/Solver/GMM_Tools.hh>
+#include <CoMISo/Solver/Eigen_Tools.hh>
 #include <CoMISo/Solver/CholmodSolver.hh>
 
 
@@ -59,7 +60,7 @@ bool CholmodSolver::calc_system_gmm( const GMM_MatrixT& _mat)
 }
   
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
 template< class GMM_MatrixT>
@@ -70,6 +71,43 @@ bool CholmodSolver::update_system_gmm( const GMM_MatrixT& _mat)
 //   std::vector<double> values;
     
   COMISO_GMM::get_ccs_symmetric_data( _mat,
+				      'u',
+				       values_, 
+				       rowind_, 
+				       colptr_ );
+
+  return update_system( colptr_, rowind_, values_);
+}
+
+//-----------------------------------------------------------------------------
+  
+template< class Eigen_MatrixT>
+bool CholmodSolver::calc_system_eigen( const Eigen_MatrixT& _mat)
+{
+    if(show_timings_) sw_.start();
+
+    COMISO_EIGEN::get_ccs_symmetric_data( _mat,
+					 'u',
+					 values_, 
+					 rowind_, 
+					 colptr_ );
+    
+    if(show_timings_)
+    {
+      std::cerr << "Cholmod Timing EIGEN convert: " << sw_.stop()/1000.0 << "s\n";
+      std::cerr << "#nnz: " << values_.size() << std::endl;
+    }
+
+    return calc_system( colptr_, rowind_, values_);
+}
+  
+//-----------------------------------------------------------------------------
+
+template< class Eigen_MatrixT>
+bool CholmodSolver::update_system_eigen( const Eigen_MatrixT& _mat)
+{
+    
+  COMISO_EIGEN::get_ccs_symmetric_data( _mat,
 				      'u',
 				       values_, 
 				       rowind_, 
