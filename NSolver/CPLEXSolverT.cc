@@ -163,7 +163,7 @@ solve(NProblemInterface*                  _problem,
 //    cplex.setParam(IloCplex::NodeSel , 0);
     }
     std::cerr << "cplex -> solve...\n";
-    cplex.solve();
+    IloBool solution_found = cplex.solve();
 
 
 //    if (solution_input_path_.empty())
@@ -190,10 +190,13 @@ solve(NProblemInterface*                  _problem,
     // 5. store result
     //----------------------------------------------
 
-    std::cerr << "cplex -> store result...\n";
-    // store computed result
-    for(unsigned int i=0; i<vars.size(); ++i)
-      x[i] = cplex.getValue(vars[i]);
+    if(solution_found != IloFalse)
+    {
+      std::cerr << "cplex -> store result...\n";
+      // store computed result
+      for(unsigned int i=0; i<vars.size(); ++i)
+        x[i] = cplex.getValue(vars[i]);
+    }
 
 
     _problem->store_result(P(x));
