@@ -84,6 +84,9 @@ public:
 
   int solve(NProblemInterface*    _problem, const std::vector<NConstraintInterface*>& _constraints);
 
+  // for convenience, if no constraints are given
+  int solve(NProblemInterface*    _problem);
+
   // deprecated interface for backwards compatibility
   int solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints);
 
