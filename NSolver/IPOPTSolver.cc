@@ -100,6 +100,18 @@ solve(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _co
 
 int
 IPOPTSolver::
+solve(NProblemInterface*    _problem)
+{
+  std::vector<NConstraintInterface*> constraints;
+  return this->solve(_problem, constraints);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+int
+IPOPTSolver::
 solve(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
 {
   std::cerr << "****** Warning: NProblemGmmInterface is deprecated!!! -> use NProblemInterface *******\n";
