@@ -35,7 +35,7 @@ if (APPLE)
    # no install needed here, because the whole bundle will be installed in the
    # toplevel CMakeLists.txt
    set_target_properties (
-      Example PROPERTIES
+      small_miqp PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Build"
       MACOSX_BUNDLE_INFO_STRING "CoMISo small_miqp"
    )
