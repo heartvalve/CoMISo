@@ -230,7 +230,7 @@ public:
     bool add( int _id, double _rd_val)
     {
       // empty set? -> always add one element
-      if( rset_.size() == 0 || cur_sum_+_rd_val <= threshold_)
+      if( rset_.empty() || cur_sum_+_rd_val <= threshold_)
       {
 	rset_.insert( PairDI(_rd_val,_id) );
 	cur_sum_ += _rd_val;

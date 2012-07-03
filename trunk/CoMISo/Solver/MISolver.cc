@@ -524,7 +524,7 @@ MISolver::solve_multiple_rounding(
     time_search_next_integer += sw.stop();
   
     // nothing more to do?
-    if( tr_best.size() == 0)
+    if( tr_best.empty() )
       break;
 
     if( noisy_ > 5)
@@ -668,7 +668,7 @@ MISolver::solve_gurobi(
     std::cout << "GUROBI objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
 
   }
-  catch(GRBException e)
+  catch(GRBException& e)
   {
     std::cout << "Error code = " << e.getErrorCode() << std::endl;
     std::cout << e.getMessage() << std::endl;

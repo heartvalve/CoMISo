@@ -198,7 +198,7 @@ solve(NProblemInterface*                  _problem,
         std::cout << "GUROBI Objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
     return true;
   }
-  catch(GRBException e)
+  catch(GRBException& e)
   {
     std::cout << "Error code = " << e.getErrorCode() << std::endl;
     std::cout << e.getMessage() << std::endl;
