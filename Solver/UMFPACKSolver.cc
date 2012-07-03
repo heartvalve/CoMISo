@@ -168,8 +168,6 @@ bool UMFPACKSolver::update_system( const std::vector<int>& _colptr,
   rowind_ = _rowind;
   values_ = _values;
 
-  int n   = colptr_.size()-1;
-
   if( numeric_ )
   {
     umfpack_di_free_numeric( &numeric_);
