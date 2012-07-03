@@ -19,8 +19,7 @@ if( WIN32 )
    # Find cholmod part of the suitesparse library collection
 
    FIND_PATH( CHOLMOD_INCLUDE_DIR cholmod.h
-              PATHS 
-               "C:\\libs\\win32\\SuiteSparse\\Include"  )
+              PATHS "C:\\libs\\win32\\SuiteSparse\\Include"  )
 
    # Add cholmod include directory to collection include directories
    IF ( CHOLMOD_INCLUDE_DIR )
