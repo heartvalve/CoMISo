@@ -15,9 +15,8 @@
 //== INCLUDES =================================================================
 #include <CoMISo/Config/CoMISoDefines.hh>
 
+#include <Eigen/Eigen>
 #include "EigenArpackMatrixT.hh"
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-#include <Eigen/Sparse>
 
 #if COMISO_ARPACK_AVAILABLE
   #include <arpack++/arssym.h>

@@ -13,9 +13,14 @@
 
 #include <iostream>
 #include <Eigen/Eigen>
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+
+#if EIGEN_VERSION_AT_LEAST(3,1,0)
+  #include <Eigen/CholmodSupport>
+#else
+  #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+  #include <unsupported/Eigen/CholmodSupport>
+#endif
 #include <Eigen/Sparse>
-#include <unsupported/Eigen/CholmodSupport>
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -50,7 +55,12 @@ public:
     if(_use_inverse)
     {
       sllt_.compute(mat_);
+
+#if EIGEN_VERSION_AT_LEAST(3,1,0)      
+      if ( !sllt_.info() != Eigen::Success )
+#else
       if ( !sllt_.succeeded() )
+#endif      
         std::cout << "[ERROR] EigenArpackMatrix(): Could not compute llt factorization." << std::endl;
     }
   }
@@ -88,7 +98,11 @@ private:
 
   Matrix mat_;
 
+#if EIGEN_VERSION_AT_LEAST(3,1,0) 
+  Eigen::CholmodSupernodalLLT<Eigen::SparseMatrix<Real> > sllt_;
+#else
   Eigen::SparseLLT<Eigen::SparseMatrix<Real>, Eigen::Cholmod> sllt_;
+#endif
 };
 
 
