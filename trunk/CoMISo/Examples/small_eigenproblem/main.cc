@@ -38,7 +38,11 @@
 int main(void)
 {
   // matrix types
+#if EIGEN_VERSION_AT_LEAST(3,1,0)
+  typedef Eigen::SparseMatrix<double,Eigen::ColMajor>           SMatrix;
+#else
   typedef Eigen::DynamicSparseMatrix<double,Eigen::ColMajor>    SMatrix;
+#endif
   typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>  Matrix;
   
   std::cout << "---------- 1) Setting up matrix..." << std::endl;

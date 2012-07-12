@@ -11,7 +11,10 @@
 
 //== INCLUDES =================================================================
 
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+#include <Eigen/Eigen>
+#if !(EIGEN_VERSION_AT_LEAST(3,1,0))
+  #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+#endif
 #include <Eigen/Sparse>
 
 #include <CoMISo/Config/CoMISoDefines.hh>
@@ -37,8 +40,12 @@ class COMISODLLEXPORT NProblemInterface
 public:
   
   // Sparse Matrix Type
+#if EIGEN_VERSION_AT_LEAST(3,1,0)  
+  typedef Eigen::SparseMatrix<double,Eigen::ColMajor> SMatrixNP;
+#else
   typedef Eigen::DynamicSparseMatrix<double,Eigen::ColMajor> SMatrixNP;
-
+#endif
+  
   /// Default constructor
   NProblemInterface();
  
