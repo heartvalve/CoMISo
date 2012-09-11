@@ -117,7 +117,7 @@ public:
       }
     }
 
-    std::cerr << "############## Gradient Checker #############\n";
+    std::cerr << "############## Gradient Checker Summary #############\n";
     std::cerr << "#ok   : " << n_ok << std::endl;
     std::cerr << "#error: " << n_errors << std::endl;
 
@@ -173,7 +173,7 @@ public:
         }
     }
 
-    std::cerr << "############## Hessian Checker #############\n";
+    std::cerr << "############## Hessian Checker Summary #############\n";
     std::cerr << "#ok   : " << n_ok << std::endl;
     std::cerr << "#error: " << n_errors << std::endl;
 
