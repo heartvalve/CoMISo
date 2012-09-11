@@ -15,12 +15,13 @@
 //== INCLUDES =================================================================
 
 #include <CoMISo/Config/CoMISoDefines.hh>
+#include "NProblemGmmInterface.hh"
+#include "NProblemInterface.hh"
+
 #include <mpi.h>
 #include <tao.h>
 #include <gmm/gmm.h>
 
-#include "NProblemGmmInterface.hh"
-#include "NProblemInterface.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
