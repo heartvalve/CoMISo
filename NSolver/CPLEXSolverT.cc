@@ -30,24 +30,28 @@ CPLEXSolver::
 solve(NProblemInterface*                  _problem,
       std::vector<NConstraintInterface*>& _constraints,
       std::vector<PairIndexVtype>&        _discrete_constraints,
-      const double                        _time_limit)
+      const double                        _time_limit,
+      const bool                          _silent)
 {
   try
   {
     //----------------------------------------------
     // 0. set up environment
     //----------------------------------------------
-    std::cerr << "cplex -> get environment...\n";
+    if(!_silent)
+      std::cerr << "cplex -> get environment...\n";
     IloEnv env_;
 
-    std::cerr << "cplex -> get model...\n";
+    if(!_silent)
+      std::cerr << "cplex -> get model...\n";
     IloModel model(env_);
     //    model.getEnv().set(GRB_DoubleParam_TimeLimit, _time_limit);
 
     //----------------------------------------------
     // 1. allocate variables
     //----------------------------------------------
-    std::cerr << "cplex -> allocate variables...\n";
+    if(!_silent)
+      std::cerr << "cplex -> allocate variables...\n";
     // determine variable types: 0->real, 1->integer, 2->bool
     std::vector<char> vtypes(_problem->n_unknowns(),0);
     for(unsigned int i=0; i<_discrete_constraints.size(); ++i)
@@ -82,7 +86,8 @@ solve(NProblemInterface*                  _problem,
     //----------------------------------------------
     // 2. setup constraints
     //----------------------------------------------
-    std::cerr << "cplex -> setup constraints...\n";
+    if(!_silent)
+      std::cerr << "cplex -> setup constraints...\n";
 
     // get zero vector
     std::vector<double> x(_problem->n_unknowns(), 0.0);
@@ -90,7 +95,7 @@ solve(NProblemInterface*                  _problem,
     for(unsigned int i=0; i<_constraints.size();  ++i)
     {
       if(!_constraints[i]->is_linear())
-        std::cerr << "Warning: GUROBISolver received a problem with non-linear constraints!!!" << std::endl;
+        std::cerr << "Warning: CPLEXSolver received a problem with non-linear constraints!!!" << std::endl;
 
       IloExpr lin_expr(env_);
       NConstraintInterface::SVectorNC gc;
@@ -117,7 +122,8 @@ solve(NProblemInterface*                  _problem,
     //----------------------------------------------
     // 3. setup energy
     //----------------------------------------------
-    std::cerr << "cplex -> setup energy...\n";
+    if(!_silent)
+      std::cerr << "cplex -> setup energy...\n";
 
     if(!_problem->constant_hessian())
       std::cerr << "Warning: CPLEXSolver received a problem with non-constant hessian!!!" << std::endl;
@@ -152,7 +158,8 @@ solve(NProblemInterface*                  _problem,
     //----------------------------------------------
     // 4. solve problem
     //----------------------------------------------
-    std::cerr << "cplex -> generate model...\n";
+    if(!_silent)
+      std::cerr << "cplex -> generate model...\n";
     IloCplex cplex(model);
     cplex.setParam(IloCplex::TiLim, _time_limit);
     { // hack
@@ -162,7 +169,13 @@ solve(NProblemInterface*                  _problem,
 //    3 [CPX_NODESEL_BESTEST_ALT] Alternative best-estimate search
 //    cplex.setParam(IloCplex::NodeSel , 0);
     }
-    std::cerr << "cplex -> solve...\n";
+    if(!_silent)
+      std::cerr << "cplex -> solve...\n";
+
+    // silent mode?
+    if(_silent)
+      cplex.setOut(env_.getNullStream());
+
     IloBool solution_found = cplex.solve();
 
 
@@ -192,14 +205,14 @@ solve(NProblemInterface*                  _problem,
 
     if(solution_found != IloFalse)
     {
-      std::cerr << "cplex -> store result...\n";
+      if(!_silent)
+        std::cerr << "cplex -> store result...\n";
       // store computed result
       for(unsigned int i=0; i<vars.size(); ++i)
         x[i] = cplex.getValue(vars[i]);
+
+      _problem->store_result(P(x));
     }
-
-
-    _problem->store_result(P(x));
 
 /*
     if (solution_input_path_.empty())
@@ -227,7 +240,7 @@ solve(NProblemInterface*                  _problem,
 //    // ObjVal is only available if the optimize was called.
 //    if (solution_input_path_.empty())
 //        std::cout << "GUROBI Objective: " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
-    return true;
+    return solution_found;
   }
   catch (IloException& e)
   {
