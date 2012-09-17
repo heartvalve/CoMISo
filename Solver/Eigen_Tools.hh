@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
-#include <Eigen/Eigen>
+#include <Eigen/Dense>
 #include <Eigen/Sparse>
 
 //#ifdef COMISO_Eigen3_AVAILABLE
