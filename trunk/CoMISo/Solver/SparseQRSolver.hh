@@ -83,13 +83,20 @@ public:
     bool calc_system_gmm( const GMM_MatrixT& _mat);
 
 
+    template< class GMM_MatrixT>
+    bool update_system_gmm( const GMM_MatrixT& _mat);
+
+    template< class Eigen_MatrixT>
+    bool calc_system_eigen( const Eigen_MatrixT& _mat);
+
+
+    template< class Eigen_MatrixT>
+    bool update_system_eigen( const Eigen_MatrixT& _mat);
+
     bool update_system( const std::vector<Int>&    _colptr,
  			const std::vector<Int>&    _rowind,
  			const std::vector<double>& _values );
 
-
-    template< class GMM_MatrixT>
-    bool update_system_gmm( const GMM_MatrixT& _mat);
 
 
     bool solve ( double *             _x0, double *             _b);
@@ -106,6 +113,19 @@ public:
     // factorize _A*P = _Q*_R and return rank
     template< class GMM_MatrixT, class GMM_MatrixT2, class GMM_MatrixT3, class IntT>
     int factorize_system_gmm( const GMM_MatrixT& _A, GMM_MatrixT2& _Q, GMM_MatrixT3& _R, std::vector<IntT>& _P);
+
+    // factorize _A*P = _Q*_R and return rank
+    template< class Eigen_MatrixT, class IntT >
+    int factorize_system_eigen( const Eigen_MatrixT& _A, Eigen_MatrixT& _Q, Eigen_MatrixT& _R, std::vector<IntT>& _P);
+
+    // Solve Ax=b, not the most efficient as it uses SparseMatrices also for _b and _x
+    template< class Eigen_MatrixT>
+    void solve_system_eigen( const Eigen_MatrixT& _A, const Eigen_MatrixT& _b, Eigen_MatrixT& _x);
+
+    // Solve Ax=b, min( ||x||_2) not the most efficient as it uses SparseMatrices also for _b and _x
+    template< class Eigen_MatrixT>
+    void solve_system_eigen_min2norm( const Eigen_MatrixT& _A, const Eigen_MatrixT& _b, Eigen_MatrixT& _x);
+
 
 private:
 

@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
+#include <Eigen/Eigen>
+#include <Eigen/Sparse>
 
 //#ifdef COMISO_Eigen3_AVAILABLE
 //#include <Eigen/Eigen>
@@ -87,6 +89,23 @@ void inspect_matrix( const MatrixT& _A);
 template<class MatrixT>
 bool is_symmetric( const MatrixT& _A);
 
+template< class Eigen_MatrixT, class IntT >
+void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_MatrixT& _A);
+
+
+#ifndef COMISO_NCHOLMOD
+
+/// Eigen to Cholmod_sparse interface
+template<class MatrixT>
+void cholmod_to_eigen( const cholmod_sparse& _AC, MatrixT& _A);
+
+template<class MatrixT>
+void eigen_to_cholmod( const MatrixT&  _A,
+                     cholmod_sparse* &_AC,
+                     cholmod_common* _common,
+                     int             _sparsity_type = 0,
+                     bool            _long_int      = false);
+#endif
 
 
 //=============================================================================

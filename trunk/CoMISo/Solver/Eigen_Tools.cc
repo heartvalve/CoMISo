@@ -276,6 +276,367 @@ bool is_symmetric( const MatrixT& _A)
   return symmetric;
 }
 
+//-----------------------------------------------------------------------------
+
+
+template< class Eigen_MatrixT, class IntT >
+void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_MatrixT& _A)
+{
+  typedef typename Eigen_MatrixT::Scalar Scalar;
+
+  int m = _QR.innerSize();
+  int n = _QR.outerSize();
+  
+  if( _Pvec.size() == 0)
+  {
+    _A = _QR;
+    return;
+  }
+    
+  if( _Pvec.size() != (size_t)_QR.cols() && _Pvec.size() != 0)
+  {
+    std::cerr << __FUNCTION__ << " wrong size of permutation vector, should have #cols length (or zero)" << std::endl;
+  }
+
+  // build sparse permutation matrix
+  typedef Eigen::Triplet< Scalar > Triplet;
+  std::vector< Triplet > triplets;
+  triplets.reserve(_QR.nonZeros());
+  _A = Eigen_MatrixT( m, n);
+
+  typedef typename Eigen_MatrixT::InnerIterator It;
+
+  
+  for( int c = 0; c < n; ++c) // cols
+  {
+    for( It it(_QR,c); it; ++it) // rows
+    {
+      int r(it.index());
+
+      Scalar val(it.value());
+
+      int newcol( _Pvec[c]);
+
+      triplets.push_back( Triplet( r, newcol, val));
+    }
+  }
+  _A.setFromTriplets( triplets.begin(), triplets.end());
+}
+
+//-----------------------------------------------------------------------------
+
+#ifndef COMISO_NCHOLMOD
+
+/// Eigen to Cholmod_sparse interface
+template<class MatrixT>
+void cholmod_to_eigen( const cholmod_sparse& _AC, MatrixT& _A)
+{
+  // initialize dimensions
+  typedef typename MatrixT::Scalar Scalar;
+  typedef Eigen::Triplet< Scalar > Triplet;
+  size_t nzmax( _AC.nzmax);
+  std::cerr << __FUNCTION__ << " row " << _AC.nrow << " col " << _AC.ncol << " stype " << _AC.stype << std::endl;
+  _A = MatrixT(_AC.nrow, _AC.ncol);
+  std::vector< Triplet > triplets;
+  triplets.reserve(nzmax);
+
+  if(!_AC.packed)
+  {
+    std::cerr << "Warning: " << __FUNCTION__ << " does not support unpacked matrices yet!!!" << std::endl;
+    return;
+  }
+
+  // Pointer to data
+  double* X((double*)_AC.x);
+
+  // complete matrix stored
+  if(_AC.stype == 0)
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j= P[i]; j< P[i+1]; ++j)
+          //_A( I[j], i) += X[j]; // += really needed?
+          triplets.push_back( Triplet( I[j], i, X[j]));
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j= P[i]; j< P[i+1]; ++j)
+          triplets.push_back( Triplet( I[j], i, X[j]));
+      //_A( I[j], i) += X[j];
+    }
+
+  }
+  else // only upper or lower diagonal stored
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j=P[i]; j<P[i+1]; ++j)
+        {
+          //_A(I[j], i) += X[j];
+          triplets.push_back( Triplet( I[j], i, X[j]));
+
+          // add up symmetric part
+          if( I[j] != i)
+            triplets.push_back( Triplet( i, I[j], X[j]));
+          //_A(i,I[j]) += X[j];
+        }
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j=P[i]; j<P[i+1]; ++j)
+        {
+          //_A(I[j], i) += X[j];
+          triplets.push_back( Triplet( I[j], i, X[j]));
+
+          // add up symmetric part
+          if( I[j] != i)
+            //  _A(i,I[j]) += X[j];
+            triplets.push_back( Triplet( i, I[j], X[j]));
+        }
+    }
+  }
+  _A.setFromTriplets( triplets.begin(), triplets.end());
+}
+
+
+/// GMM to Cholmod_sparse interface
+template<class MatrixT>
+void eigen_to_cholmod( const MatrixT& _A, cholmod_sparse* &_AC, cholmod_common* _common, int _sparsity_type, bool _long_int)
+{
+  /* _sparsity_type
+          * 0:  matrix is "unsymmetric": use both upper and lower triangular parts
+          *     (the matrix may actually be symmetric in pattern and value, but
+          *     both parts are explicitly stored and used).  May be square or
+          *     rectangular.
+          * >0: matrix is square and symmetric, use upper triangular part.
+          *     Entries in the lower triangular part are ignored.
+          * <0: matrix is square and symmetric, use lower triangular part.
+          *     Entries in the upper triangular part are ignored. */
+
+  int m = _A.innerSize();
+  int n = _A.outerSize();
+
+  // get upper or lower
+  char uplo = 'c';
+  if(_sparsity_type < 0) uplo = 'l';
+  if(_sparsity_type > 0) uplo = 'u';
+
+
+  if( _long_int) // long int version
+  {
+    std::vector<double> values;
+    std::vector<UF_long> rowind;
+    std::vector<UF_long> colptr;
+
+    // get data of gmm matrix
+    COMISO_EIGEN::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+    // allocate cholmod matrix
+    _AC = cholmod_l_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+    // copy data to cholmod matrix
+    for(UF_long i=0; i<(UF_long)values.size(); ++i)
+    {
+      ((double*) (_AC->x))[i] = values[i];
+      ((UF_long*)(_AC->i))[i] = rowind[i];
+    }
+
+    for(UF_long i=0; i<(UF_long)colptr.size(); ++i)
+      ((UF_long*)(_AC->p))[i] = colptr[i];
+  }
+  else // int version
+  {
+     std::vector<double> values;
+     std::vector<int> rowind;
+     std::vector<int> colptr;
+
+     // get data of gmm matrix
+     COMISO_EIGEN::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+     // allocate cholmod matrix
+     _AC = cholmod_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+     // copy data to cholmod matrix
+     for(unsigned int i=0; i<values.size(); ++i)
+     {
+       ((double*)(_AC->x))[i] = values[i];
+       ((int*)   (_AC->i))[i] = rowind[i];
+     }
+     for(unsigned int i=0; i<colptr.size(); ++i)
+       ((int*)(_AC->p))[i] = colptr[i];
+  }
+
+}
+
+/*
+/// Eigen to Cholmod_dense interface
+template<class MatrixT>
+void cholmod_to_eigen_dense( const cholmod_dense& _AC, MatrixT& _A)
+{
+  // initialize dimensions
+  typedef typename MatrixT::Scalar Scalar;
+  typedef Eigen::Triplet< Scalar > Triplet;
+  size_t nzmax( _AC.nzmax);
+  _A = MatrixT(_AC.nrow, _AC.ncol);
+  std::vector< Triplet > triplets;
+  triplets.reserve(nzmax);
+
+  if(!_AC.packed)
+  {
+    std::cerr << "Warning: " << __FUNCTION__ << " does not support unpacked matrices yet!!!" << std::endl;
+    return;
+  }
+
+  // Pointer to data
+  double* X((double*)_AC.x);
+
+  // complete matrix stored
+  if(_AC.stype == 0)
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j= P[i]; j< P[i+1]; ++j)
+          //_A( I[j], i) += X[j]; // += really needed?
+          triplets.push_back( Triplet( I[j], i, X[j]));
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j= P[i]; j< P[i+1]; ++j)
+          triplets.push_back( Triplet( I[j], i, X[j]));
+      //_A( I[j], i) += X[j];
+    }
+
+  }
+  else // only upper or lower diagonal stored
+  {
+    // which integer type?
+    if(_AC.itype == CHOLMOD_LONG)
+    {
+      UF_long* P((UF_long*)_AC.p);
+      UF_long* I((UF_long*)_AC.i);
+
+      for(UF_long i=0; i<(UF_long)_AC.ncol; ++i)
+        for(UF_long j=P[i]; j<P[i+1]; ++j)
+        {
+          //_A(I[j], i) += X[j];
+          triplets.push_back( Triplet( I[j], i, X[j]));
+
+          // add up symmetric part
+          if( I[j] != i)
+            triplets.push_back( Triplet( i, I[j], X[j]));
+          //_A(i,I[j]) += X[j];
+        }
+    }
+    else
+    {
+      int* P((int*)_AC.p);
+      int* I((int*)_AC.i);
+
+      for(int i=0; i<(int)_AC.ncol; ++i)
+        for(int j=P[i]; j<P[i+1]; ++j)
+        {
+          //_A(I[j], i) += X[j];
+          triplets.push_back( Triplet( I[j], i, X[j]));
+
+          // add up symmetric part
+          if( I[j] != i)
+            //  _A(i,I[j]) += X[j];
+            triplets.push_back( Triplet( i, I[j], X[j]));
+        }
+    }
+  }
+  _A.setFromTriplets( triplets.begin(), triplets.end());
+}
+
+
+/// GMM to Cholmod_sparse interface
+template<class MatrixT>
+void eigen_to_cholmod_dense( const MatrixT& _A, cholmod_dense* &_AC, cholmod_common* _common, bool _long_int)
+{
+  int m = _A.innerSize();
+  int n = _A.outerSize();
+
+  // allocate cholmod matrix
+  _AC = cholmod_l_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+  _AC = cholmod_l_allocate_dense (m,n,n, xtype, cc) 
+
+  if( _long_int) // long int version
+  {
+    std::vector<double> values;
+    std::vector<UF_long> rowind;
+    std::vector<UF_long> colptr;
+
+    // get data of gmm matrix
+    COMISO_EIGEN::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+    // allocate cholmod matrix
+    _AC = cholmod_l_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+    // copy data to cholmod matrix
+    for(UF_long i=0; i<(UF_long)values.size(); ++i)
+    {
+      ((double*) (_AC->x))[i] = values[i];
+      ((UF_long*)(_AC->i))[i] = rowind[i];
+    }
+
+    for(UF_long i=0; i<(UF_long)colptr.size(); ++i)
+      ((UF_long*)(_AC->p))[i] = colptr[i];
+  }
+  else // int version
+  {
+     std::vector<double> values;
+     std::vector<int> rowind;
+     std::vector<int> colptr;
+
+     // get data of gmm matrix
+     COMISO_EIGEN::get_ccs_symmetric_data( _A, uplo, values, rowind, colptr);
+
+     // allocate cholmod matrix
+     _AC = cholmod_allocate_sparse(m,n,values.size(),true,true,_sparsity_type,CHOLMOD_REAL, _common);
+
+     // copy data to cholmod matrix
+     for(unsigned int i=0; i<values.size(); ++i)
+     {
+       ((double*)(_AC->x))[i] = values[i];
+       ((int*)   (_AC->i))[i] = rowind[i];
+     }
+     for(unsigned int i=0; i<colptr.size(); ++i)
+       ((int*)(_AC->p))[i] = colptr[i];
+  }
+
+}*/
+
+
+
+
+#endif
 
 //=============================================================================
 } // namespace COMISO

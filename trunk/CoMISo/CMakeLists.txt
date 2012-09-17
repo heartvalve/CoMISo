@@ -336,6 +336,10 @@ endif()
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_miqp/CMakeLists.txt" )
 	add_subdirectory (Examples/small_miqp)
 endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_sparseqr/CMakeLists.txt" )
+	add_subdirectory (Examples/small_sparseqr)
+endif()
+
 
 
 
