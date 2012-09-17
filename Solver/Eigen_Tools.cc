@@ -282,6 +282,7 @@ bool is_symmetric( const MatrixT& _A)
 template< class Eigen_MatrixT, class IntT >
 void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_MatrixT& _A)
 {
+#ifdef COMISO_Eigen3_AVAILABLE
   typedef typename Eigen_MatrixT::Scalar Scalar;
 
   int m = _QR.innerSize();
@@ -321,6 +322,7 @@ void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_M
     }
   }
   _A.setFromTriplets( triplets.begin(), triplets.end());
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -331,6 +333,7 @@ void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_M
 template<class MatrixT>
 void cholmod_to_eigen( const cholmod_sparse& _AC, MatrixT& _A)
 {
+#ifdef COMISO_Eigen3_AVAILABLE
   // initialize dimensions
   typedef typename MatrixT::Scalar Scalar;
   typedef Eigen::Triplet< Scalar > Triplet;
@@ -414,6 +417,7 @@ void cholmod_to_eigen( const cholmod_sparse& _AC, MatrixT& _A)
     }
   }
   _A.setFromTriplets( triplets.begin(), triplets.end());
+#endif
 }
 
 

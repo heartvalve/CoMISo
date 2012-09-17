@@ -34,10 +34,11 @@
 #include <algorithm>
 #include <limits>
 #include <cmath>
+
+#ifdef COMISO_Eigen3_AVAILABLE
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-
-//#ifdef COMISO_Eigen3_AVAILABLE
+#endif
 //#include <Eigen/Eigen>
 //#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 //#include <Eigen/Sparse>
