@@ -14,18 +14,18 @@ acg_append_files (sources "*.cc" ${directories})
 acg_drop_templates (sources)
 
 if (WIN32)
-  acg_add_executable (small_nsolver WIN32 ${sources} ${headers} )
+  acg_add_executable (small_nleast_squares WIN32 ${sources} ${headers} )
 elseif (APPLE)
   # generate bundle on mac
-  acg_add_executable (small_nsolver MACOSX_BUNDLE ${sources} ${headers} )
+  acg_add_executable (small_nleast_squares MACOSX_BUNDLE ${sources} ${headers} )
 else ()
-  acg_add_executable (small_nsolver ${sources} ${headers} )
+  acg_add_executable (small_nleast_squares ${sources} ${headers} )
 endif ()
 
 # enable rpath linking
-set_target_properties(small_nsolver PROPERTIES INSTALL_RPATH_USE_LINK_PATH 1)
+set_target_properties(small_nleast_squares PROPERTIES INSTALL_RPATH_USE_LINK_PATH 1)
 
-target_link_libraries (small_nsolver
+target_link_libraries (small_nleast_squares
   CoMISo
   ${COMISO_LINK_LIBRARIES}
 )
@@ -37,6 +37,6 @@ if (APPLE)
    set_target_properties (
       small_nsolver PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Build"
-      MACOSX_BUNDLE_INFO_STRING "CoMISo small_nsolver"
+      MACOSX_BUNDLE_INFO_STRING "CoMISo small_nleast_squares"
    )
 endif ()
