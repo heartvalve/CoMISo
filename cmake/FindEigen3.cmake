@@ -15,6 +15,7 @@ GET_FILENAME_COMPONENT(module_file_path ${CMAKE_CURRENT_LIST_FILE} PATH )
 FIND_PATH(Eigen3_INCLUDE_DIR NAMES Eigen/Dense 
                              PATHS /usr/include/eigen3
                                    /usr/local/include
+                                   /usr/local/include/eigen3/
                                    /opt/local/include/eigen3/
                                    "c:\\libs\\eigen3\\include"
 		                   "c:\\libs\\eigen\\include"

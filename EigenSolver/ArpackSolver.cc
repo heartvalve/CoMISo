@@ -28,8 +28,11 @@ solve(const MatrixT&       _A,
 {
 #if COMISO_ARPACK_AVAILABLE
     Matrix A(_A);
+//    ARSymStdEig<double, Matrix> eig_prob(A.matrix().cols(), _n_eigvalues, &A, &Matrix::mult_Mv, (char*)_which_eigs,
+//                                         0, 0.0, 2000);
+
     ARSymStdEig<double, Matrix> eig_prob(A.matrix().cols(), _n_eigvalues, &A, &Matrix::mult_Mv, (char*)_which_eigs,
-                                         0, 0.0, 2000);
+                                         0, 0.0, 100000);
 
     int n_converged = eig_prob.FindEigenvectors();
 
