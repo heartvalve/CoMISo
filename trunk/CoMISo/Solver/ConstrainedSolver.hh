@@ -117,15 +117,22 @@ public:
   void resolve(
        VectorT&  _x,
        VectorT&  _rhs,
-       bool      _show_miso_settings = true,
        bool      _show_timings = true );
+
+//  // efficent re-solve with modified _constraint_rhs and/or _rhs (if not modified use 0 pointer)
+//  // by keeping previous _constraints and _A fixed
+//  template<class VectorT >
+//  void resolve(
+//       VectorT&  _x,
+//       VectorT*  _constraint_rhs = 0,
+//       VectorT*  _rhs            = 0,
+//       bool      _show_timings = true );
 
   // const version of above function
   template<class VectorT >
   void resolve_const(
        VectorT&  _x,
        const VectorT&  _rhs,
-       bool      _show_miso_settings = true,
        bool      _show_timings = true );
 
 /// Non-Quadratic matrix constrained solver
@@ -167,7 +174,6 @@ public:
     void resolve(
       const RMatrixT& _B,
       VectorT&  _x,
-      bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
   // const version of above function
@@ -175,7 +181,6 @@ public:
   void resolve_const(
       const RMatrixT& _B,
       VectorT&  _x,
-      bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
 /*@}*/

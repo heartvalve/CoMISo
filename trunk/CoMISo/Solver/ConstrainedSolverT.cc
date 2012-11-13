@@ -277,7 +277,6 @@ ConstrainedSolver::
 resolve_const(
      VectorT&  _x,
      const VectorT&  _rhs,
-     bool      _show_miso_settings,
      bool      _show_timings )
 {
   VectorT  rhs(_rhs);
@@ -285,7 +284,6 @@ resolve_const(
   // call non-const function
   resolve(_x,
   rhs,
-  _show_miso_settings,
   _show_timings);
 }
 
@@ -298,12 +296,10 @@ void
 ConstrainedSolver::
 resolve_const( const RMatrixT& _B,
        VectorT&  _x,
-       bool      _show_miso_settings,
        bool      _show_timings )
 {
   resolve(_B,
   _x,
-  _show_miso_settings,
   _show_timings);
 }
 
@@ -317,7 +313,6 @@ ConstrainedSolver::
 resolve(
     const RMatrixT& _B,
     VectorT&  _x,
-    bool      _show_miso_settings,
     bool      _show_timings )
 {
   // extract rhs from quadratic system
@@ -356,7 +351,6 @@ resolve(
 
   // solve
   resolve(_x, rhs,
-   _show_miso_settings,
    _show_timings);
 }
 
@@ -370,7 +364,6 @@ ConstrainedSolver::
 resolve(
     VectorT&  _x,
     VectorT&  _rhs,
-    bool      _show_miso_settings,
     bool      _show_timings )
 {
   // show options dialog
