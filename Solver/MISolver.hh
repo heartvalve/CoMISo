@@ -108,6 +108,10 @@ public:
     Veci&      _to_round,
     bool       _fixed_order = false );
 
+  void resolve(
+    Vecd&      _x,
+    Vecd&      _rhs );
+
   /// Compute greedy approximation to a mixed integer problem.
 	/** @param _B mx(n+1) matrix with (still non-squared) equations of the energy,
    * including the right hand side (Will be \b destroyed!)
@@ -122,6 +126,7 @@ public:
     Vecd&     _x,
     Veci&     _to_round,
     bool      _fixed_order = false );
+
 
   /// show Qt-Options-Dialog for setting algorithm parameters
   /** Requires a Qt Application running and COMISO_GUI to be defined */

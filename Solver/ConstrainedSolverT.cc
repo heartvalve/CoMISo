@@ -87,10 +87,10 @@ solve_const(	 const RMatrixT& _constraints,
 template<class RMatrixT, class VectorT, class VectorIT >
 void 
 ConstrainedSolver::
-solve_const( RMatrixT& _constraints,
-	     RMatrixT& _B, 
+solve_const( const RMatrixT& _constraints,
+	     const RMatrixT& _B,
 	     VectorT&  _x,
-	     VectorIT& _idx_to_round,
+	     const VectorIT& _idx_to_round,
 	     double    _reg_factor,
 	     bool      _show_miso_settings,
 	     bool      _show_timings )
@@ -253,6 +253,7 @@ solve(
   miso_.solve( Acsc, _x, _rhs, _idx_to_round);
   double time_miso = sw.stop()/1000.0; sw.start();
 
+  rhs_update_table_.store(_constraints, c_elim, new_idx);
   // restore eliminated vars to fulfill the given conditions
   restore_eliminated_vars( _constraints, _x, c_elim, new_idx);
 
@@ -263,6 +264,145 @@ solve(
     "\tSystem Elimination " << time_eliminate      << " s\n\t" <<
     "\tMi-Solver          " << time_miso           << " s\n\t" <<
     "\tResubstitution     " << time_resubstitute   << " s\n\t" << 
+    "\tTotal              " << time_total          << std::endl << std::endl;
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorT >
+void
+ConstrainedSolver::
+resolve_const(
+     VectorT&  _x,
+     const VectorT&  _rhs,
+     double    _reg_factor,
+     bool      _show_miso_settings,
+     bool      _show_timings )
+{
+  VectorT  rhs(_rhs);
+
+  // call non-const function
+  resolve<RMatrixT>(_x,
+  rhs,
+  _reg_factor,
+  _show_miso_settings,
+  _show_timings);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorT >
+void
+ConstrainedSolver::
+resolve_const( const RMatrixT& _B,
+       VectorT&  _x,
+       double    _reg_factor,
+       bool      _show_miso_settings,
+       bool      _show_timings )
+{
+  resolve(_B,
+  _x,
+  _reg_factor,
+  _show_miso_settings,
+  _show_timings);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorT >
+void
+ConstrainedSolver::
+resolve(
+    const RMatrixT& _B,
+    VectorT&  _x,
+    double    _reg_factor,
+    bool      _show_miso_settings,
+    bool      _show_timings )
+{
+  // extract rhs from quadratic system
+  VectorT rhs;
+ // gmm::col_matrix< gmm::rsvector< double > > A;
+ // COMISO_GMM::factored_to_quadratic(_B, A, rhs);
+  //TODO only compute rhs, not complete A for efficiency
+
+  unsigned int m = gmm::mat_nrows(_B);
+  unsigned int n = gmm::mat_ncols(_B);
+
+  typedef typename gmm::linalg_traits<RMatrixT>::const_sub_row_type CRowT;
+  typedef typename gmm::linalg_traits<RMatrixT>::sub_row_type       RowT;
+  typedef typename gmm::linalg_traits<CRowT>::const_iterator        RIter;
+  typedef typename gmm::linalg_traits<CRowT>::value_type            VecValT;
+
+  gmm::resize(rhs, n-1);
+  gmm::clear(rhs);
+  for(unsigned int i = 0; i < m; ++i)
+  {
+    // get current condition row
+    CRowT row       = gmm::mat_const_row( _B, i);
+    RIter row_it    = gmm::vect_const_begin( row);
+    RIter row_end   = gmm::vect_const_end( row);
+
+    if(row_end == row_it) continue;
+    --row_end;
+    if(row_end.index() != n-1) continue;
+    VecValT n_i = *row_end;
+    while(row_end != row_it)
+    {
+      --row_end;
+      rhs[row_end.index()] -= (*row_end) * n_i;
+    }
+  }
+
+  // solve
+  resolve<RMatrixT>(_x, rhs, _reg_factor,
+   _show_miso_settings,
+   _show_timings);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+template<class RMatrixT, class VectorT >
+void
+ConstrainedSolver::
+resolve(
+    VectorT&  _x,
+    VectorT&  _rhs,
+    double    _reg_factor,
+    bool      _show_miso_settings,
+    bool      _show_timings )
+{
+  // show options dialog
+  if( _show_miso_settings)
+    miso_.show_options_dialog();
+
+  // StopWatch for Timings
+  COMISO::StopWatch sw;
+
+  sw.start();
+  // apply stored updates and eliminations to exchanged rhs
+  rhs_update_table_.apply(_rhs);
+  rhs_update_table_.eliminate(_rhs);
+
+  miso_.resolve(_x, _rhs);
+
+  double time_miso = sw.stop()/1000.0; sw.start();
+
+  // restore eliminated vars to fulfill the given conditions
+  restore_eliminated_vars( rhs_update_table_.constraints_p_, _x, rhs_update_table_.c_elim_, rhs_update_table_.new_idx_);
+
+  double time_resubstitute = sw.stop()/1000.0; sw.start();
+  double time_total = time_miso + time_resubstitute;
+  if( _show_timings) std::cerr << "Timings: \n\t" <<
+    "\tMi-Solver          " << time_miso           << " s\n\t" <<
+    "\tResubstitution     " << time_resubstitute   << " s\n\t" <<
     "\tTotal              " << time_total          << std::endl << std::endl;
 }
 
@@ -833,6 +973,8 @@ eliminate_constraints(
   std::vector<int> elim_varids;
   elim_varids.reserve( _v_elim.size());
 
+  rhs_update_table_.clear();
+
   for( unsigned int i=0; i < _v_elim.size(); ++i)
   {
     int cur_j = _v_elim[i];
@@ -842,7 +984,8 @@ eliminate_constraints(
       double cur_val = _constraints(i, cur_j);
 
       // store index
-      elim_varids.push_back(_v_elim[i]);
+      elim_varids.push_back(cur_j);
+      rhs_update_table_.add_elim_id(cur_j);
 
       // copy col
       SVector2T col ( _A.col( cur_j));
@@ -876,7 +1019,9 @@ eliminate_constraints(
         for ( ; col_it != col_end; ++col_it )
           _A( con_it.index(), col_it.index() ) -= ( *col_it )*(( *con_it )/cur_val);
 
-        _rhs[con_it.index()] -= cur_rhs * (( *con_it )/cur_val);
+        //_rhs[con_it.index()] -= cur_rhs * (( *con_it )/cur_val);
+        rhs_update_table_.append(con_it.index(), -1.0 * (( *con_it )/cur_val), cur_j);
+        //std::cerr << con_it.index() << " += " << -1.0*(( *con_it )/cur_val) << " * " << cur_rhs << " (["<<cur_j<<"] = "<<_rhs[cur_j]<<") " << std::endl;
       }
 
       // TODO FIXME must use copy col (referens sometimes yields infinite loop below no col_it++?!?)
@@ -894,13 +1039,18 @@ eliminate_constraints(
 
         for ( ; con_it != con_end; ++con_it )
           _A( col_it.index(), con_it.index() ) -= ( *col_it )*(( *con_it )/cur_val);
-        _rhs[col_it.index()] += constraint_rhs*( *col_it )/cur_val;
+        //_rhs[col_it.index()] += constraint_rhs*( *col_it )/cur_val;
+        rhs_update_table_.append(col_it.index(), constraint_rhs*( *col_it )/cur_val);
+        //std::cerr << col_it.index() << " += " << constraint_rhs*( *col_it )/cur_val << std::endl;
       }
 
       // reset last constraint entry to real value
       constraint[ constraint.size()-1] = constraint_rhs;
     }
   }
+
+  rhs_update_table_.apply(_rhs);
+
   if( noisy_ > 2)
     std::cerr << __FUNCTION__ << " Constraints integrated " << sw.stop()/1000.0 << std::endl;
 
@@ -1112,9 +1262,12 @@ restore_eliminated_vars( RMatrixT&         _constraints,
     {
       // get variable value and set to zero
       double cur_val = _constraints(i, cur_var);
-      _constraints(i, cur_var) = 0.0;
 
-      _x[cur_var] = -gmm::vect_sp(_x, _constraints.row(i))/cur_val;
+      //_constraints(i, cur_var) = 0.0;
+      //_x[cur_var] = -gmm::vect_sp(_x, _constraints.row(i))/cur_val;
+      //reformulated to keep _constraints intact for further use:
+      _x[cur_var] -= gmm::vect_sp(_x, _constraints.row(i))/cur_val;
+
     }
   }
 

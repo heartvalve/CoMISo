@@ -97,6 +97,18 @@ MISolver::solve_no_rounding(
 
 
 void 
+MISolver::resolve(
+    Vecd&      _x,
+    Vecd&      _rhs )
+{
+  chol_.solve(_x, _rhs);
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+void
 MISolver::solve_direct_rounding( 
     CSCMatrix& _A, 
     Vecd&      _x, 

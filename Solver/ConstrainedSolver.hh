@@ -58,7 +58,8 @@ namespace COMISO {
 class COMISODLLEXPORT ConstrainedSolver
 {
 public:
-  typedef gmm::csc_matrix<double>  CSCMatrix;
+  typedef gmm::csc_matrix<double>                    CSCMatrix;
+  typedef gmm::row_matrix< gmm::wsvector< double > > RowMatrix;
 
 
   /// default Constructor
@@ -111,6 +112,23 @@ public:
             bool      _show_miso_settings = true,
             bool      _show_timings = true );
 
+  // efficent re-solve with modified _rhs by keeping previous _constraints and _A fixed
+  template<class RMatrixT, class VectorT >
+  void resolve(
+       VectorT&  _x,
+       VectorT&  _rhs,
+       double    _reg_factor = 0.0,
+       bool      _show_miso_settings = true,
+       bool      _show_timings = true );
+
+  // const version of above function
+  template<class RMatrixT, class VectorT >
+  void resolve_const(
+       VectorT&  _x,
+       const VectorT&  _rhs,
+       double    _reg_factor = 0.0,
+       bool      _show_miso_settings = true,
+       bool      _show_timings = true );
 
 /// Non-Quadratic matrix constrained solver
 /**  
@@ -138,15 +156,34 @@ public:
   // const version of above function
   template<class RMatrixT, class VectorT, class VectorIT >
   void solve_const(
-      RMatrixT& _constraints,
-      RMatrixT& _B, 
+      const RMatrixT& _constraints,
+      const RMatrixT& _B,
       VectorT&  _x,
-      VectorIT& _idx_to_round,
+      const VectorIT& _idx_to_round,
+      double    _reg_factor = 0.0,
+      bool      _show_miso_settings = true,
+      bool      _show_timings = true );
+
+  // efficent re-solve with modified _rhs by keeping previous _constraints and _A fixed
+  template<class RMatrixT, class VectorT >
+    void resolve(
+      const RMatrixT& _B,
+      VectorT&  _x,
+      double    _reg_factor = 0.0,
+      bool      _show_miso_settings = true,
+      bool      _show_timings = true );
+
+  // const version of above function
+  template<class RMatrixT, class VectorT >
+  void resolve_const(
+      const RMatrixT& _B,
+      VectorT&  _x,
       double    _reg_factor = 0.0,
       bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
 /*@}*/
+
 
 /** @name Eliminate constraints
  * Functions to eliminate (or integrate) linear constraints from an equation system. These functions are used internally by the \a solve functions.
@@ -342,6 +379,77 @@ private:
   double epsilon_;
   int    noisy_;
   bool   do_gcd_;
+
+  // --------------- Update by Marcel to enable efficient re-solve with changed rhs ----------------------
+  // Store for symbolic elimination information for rhs
+  class rhsUpdateTable {
+  public:
+
+    void append(int _i, double _f, int _j = -1) { table_.push_back(rhsUpdateTableEntry(_i, _j, _f)); }
+    void add_elim_id(int _i) { elim_var_ids_.push_back(_i); }
+    void clear() { table_.clear(); elim_var_ids_.clear(); }
+    // apply stored transformations to _rhs
+    void apply(std::vector<double>& _rhs)
+    {
+      std::vector<rhsUpdateTableEntry>::const_iterator t_it, t_end;
+      t_end = table_.end();
+      int cur_j = -1;
+      double cur_rhs = 0.0;
+      for(t_it = table_.begin(); t_it != t_end; ++t_it)
+      {
+        if(t_it->j >= 0) {
+          if(t_it->j != cur_j) { cur_j = t_it->j; cur_rhs = _rhs[cur_j]; }
+          _rhs[t_it->i] += t_it->f * cur_rhs;
+        }
+        else
+          _rhs[t_it->i] += t_it->f;
+      }
+    }
+    // remove eliminated elements from _rhs
+    void eliminate(std::vector<double>& _rhs)
+    {
+      std::vector<int> evar( elim_var_ids_ );
+      std::sort( evar.begin(), evar.end() );
+      evar.push_back( std::numeric_limits<int>::max() );
+
+      int cur_evar_idx=0;
+      unsigned int nc = _rhs.size();
+      for( unsigned int i=0; i<nc; ++i )
+      {
+        unsigned int next_i = evar[cur_evar_idx];
+
+        if ( i != next_i ) _rhs[i-cur_evar_idx] = _rhs[i];
+        else ++cur_evar_idx;
+      }
+      _rhs.resize( nc - cur_evar_idx );
+    }
+    // store transformed constraint matrix and index map to allow for later re-substitution
+    template<class RMatrixT>
+    void store(const RMatrixT& _constraints, const std::vector<int>& _c_elim, const std::vector<int>& _new_idx)
+    {
+      constraints_p_.resize( gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
+      gmm::copy(_constraints, constraints_p_);
+      c_elim_ = _c_elim;
+      new_idx_ = _new_idx;
+    }
+
+  private:
+    class rhsUpdateTableEntry {
+    public:
+      rhsUpdateTableEntry(int _i, int _j, double _f) : i(_i), j(_j), f(_f) {}
+      int i;
+      int j;
+      double f;
+    };
+
+    std::vector<rhsUpdateTableEntry> table_;
+    std::vector<int> elim_var_ids_;
+  public:
+    std::vector<int> c_elim_;
+    std::vector<int> new_idx_;
+    RowMatrix constraints_p_;
+  } rhs_update_table_;
+
 };
 
 
