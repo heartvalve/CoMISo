@@ -23,10 +23,15 @@
 \*===========================================================================*/ 
 
 #include <CoMISo/Config/config.hh>
-
-#include <CoMISo/Utils/StopWatch.hh>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
+
+//------------------------------------------------------------------------------------------------------
+#if COMISO_SUITESPARSE_SPQR_AVAILABLE // additional spqr library required
+//------------------------------------------------------------------------------------------------------
+
+#include <CoMISo/Utils/StopWatch.hh>
 #include <Eigen/Sparse>
 #include <CoMISo/Solver/SparseQRSolver.hh>
 #include <CoMISo/Solver/Eigen_Tools.hh>
@@ -158,4 +163,14 @@ int main(void)
 
   return 0;
 }
+
+#else // COMISO_SUITESPARSE_SPQR_AVAILABLE
+
+int main(void)
+{
+  std::cerr << " SUITESPARSE_SPQR not available, please re-configure!\n";
+  return 0;
+}
+
+#endif  // COMISO_SUITESPARSE_SPQR_AVAILABLE
 

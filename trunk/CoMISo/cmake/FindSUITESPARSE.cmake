@@ -40,11 +40,13 @@ if( WIN32 )
 else( WIN32 )
    IF( APPLE)
 	   FIND_PATH( CHOLMOD_INCLUDE_DIR cholmod.h
-        	      PATHS  /opt/local/include/ufsparse )
+        	      PATHS  /opt/local/include/ufsparse
+        	             /usr/local/include)
 
            FIND_PATH( SUITESPARSE_LIBRARY_DIR
                       NAMES libcholmod.a 
-                      PATHS /opt/local/lib )
+                      PATHS /opt/local/lib
+                            /usr/local/lib)
 
 	  
 
@@ -85,6 +87,11 @@ else( WIN32 )
        list ( APPEND SUITESPARSE_LIBRARIES klu)
 #       list ( APPEND SUITESPARSE_LIBRARIES spqr)
        list ( APPEND SUITESPARSE_LIBRARIES umfpack)
+   
+       IF( APPLE )
+         list ( APPEND SUITESPARSE_LIBRARIES tbb)
+         list ( APPEND SUITESPARSE_LIBRARIES suitesparseconfig)
+       ENDIF( APPLE )
    
        # Metis and spqr are optional
        FIND_LIBRARY( SUITESPARSE_METIS_LIBRARY

@@ -133,6 +133,8 @@ MISolver::solve_cplex(
     for(unsigned int i=0; i<n; ++i)
       objective -= 2*_rhs[i]*vars[i];
 
+    // ToDo: objective correction!!!
+
     //    _A.jc[c+1]
     //    _A.pr[write]
     //    _A.ir[write]
