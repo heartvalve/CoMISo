@@ -113,20 +113,18 @@ public:
             bool      _show_timings = true );
 
   // efficent re-solve with modified _rhs by keeping previous _constraints and _A fixed
-  template<class RMatrixT, class VectorT >
+  template<class VectorT >
   void resolve(
        VectorT&  _x,
        VectorT&  _rhs,
-       double    _reg_factor = 0.0,
        bool      _show_miso_settings = true,
        bool      _show_timings = true );
 
   // const version of above function
-  template<class RMatrixT, class VectorT >
+  template<class VectorT >
   void resolve_const(
        VectorT&  _x,
        const VectorT&  _rhs,
-       double    _reg_factor = 0.0,
        bool      _show_miso_settings = true,
        bool      _show_timings = true );
 
@@ -169,7 +167,6 @@ public:
     void resolve(
       const RMatrixT& _B,
       VectorT&  _x,
-      double    _reg_factor = 0.0,
       bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
@@ -178,7 +175,6 @@ public:
   void resolve_const(
       const RMatrixT& _B,
       VectorT&  _x,
-      double    _reg_factor = 0.0,
       bool      _show_miso_settings = true,
       bool      _show_timings = true );
 
@@ -397,7 +393,8 @@ private:
       double cur_rhs = 0.0;
       for(t_it = table_.begin(); t_it != t_end; ++t_it)
       {
-        if(t_it->j >= 0) {
+        if(t_it->j >= 0)
+        {
           if(t_it->j != cur_j) { cur_j = t_it->j; cur_rhs = _rhs[cur_j]; }
           _rhs[t_it->i] += t_it->f * cur_rhs;
         }
