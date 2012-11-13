@@ -366,10 +366,6 @@ resolve(
     VectorT&  _rhs,
     bool      _show_timings )
 {
-  // show options dialog
-  if( _show_miso_settings)
-    miso_.show_options_dialog();
-
   // StopWatch for Timings
   COMISO::StopWatch sw;
 
