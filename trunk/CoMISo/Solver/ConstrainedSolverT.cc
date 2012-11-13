@@ -271,22 +271,20 @@ solve(
 //-----------------------------------------------------------------------------
 
 
-template<class RMatrixT, class VectorT >
+template<class VectorT >
 void
 ConstrainedSolver::
 resolve_const(
      VectorT&  _x,
      const VectorT&  _rhs,
-     double    _reg_factor,
      bool      _show_miso_settings,
      bool      _show_timings )
 {
   VectorT  rhs(_rhs);
 
   // call non-const function
-  resolve<RMatrixT>(_x,
+  resolve(_x,
   rhs,
-  _reg_factor,
   _show_miso_settings,
   _show_timings);
 }
@@ -300,13 +298,11 @@ void
 ConstrainedSolver::
 resolve_const( const RMatrixT& _B,
        VectorT&  _x,
-       double    _reg_factor,
        bool      _show_miso_settings,
        bool      _show_timings )
 {
   resolve(_B,
   _x,
-  _reg_factor,
   _show_miso_settings,
   _show_timings);
 }
@@ -321,7 +317,6 @@ ConstrainedSolver::
 resolve(
     const RMatrixT& _B,
     VectorT&  _x,
-    double    _reg_factor,
     bool      _show_miso_settings,
     bool      _show_timings )
 {
@@ -360,7 +355,7 @@ resolve(
   }
 
   // solve
-  resolve<RMatrixT>(_x, rhs, _reg_factor,
+  resolve(_x, rhs,
    _show_miso_settings,
    _show_timings);
 }
@@ -369,13 +364,12 @@ resolve(
 //-----------------------------------------------------------------------------
 
 
-template<class RMatrixT, class VectorT >
+template<class VectorT >
 void
 ConstrainedSolver::
 resolve(
     VectorT&  _x,
     VectorT&  _rhs,
-    double    _reg_factor,
     bool      _show_miso_settings,
     bool      _show_timings )
 {
