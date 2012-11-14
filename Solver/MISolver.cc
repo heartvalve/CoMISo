@@ -42,6 +42,7 @@
 // hack for testing only
 #include "SparseQRSolver.hh"
 #include "UMFPACKSolver.hh"
+#include "EigenLDLTSolver.hh"
 
 #define ROUND(x) ((x)<0?int((x)-0.5):int((x)+0.5))
 
@@ -88,8 +89,8 @@ MISolver::solve_no_rounding(
     Vecd&      _x, 
     Vecd&      _rhs )
 {
-  chol_.calc_system_gmm(_A);
-  chol_.solve(_x, _rhs);
+  direct_solver_.calc_system_gmm(_A);
+  direct_solver_.solve(_x, _rhs);
 }
 
 
@@ -101,7 +102,7 @@ MISolver::resolve(
     Vecd&      _x,
     Vecd&      _rhs )
 {
-  chol_.solve(_x, _rhs);
+  direct_solver_.solve(_x, _rhs);
 }
 
 
@@ -127,13 +128,14 @@ MISolver::solve_direct_rounding(
   Veci old_idx(_rhs.size());
   for(unsigned int i=0; i<old_idx.size(); ++i)
     old_idx[i] = i;
-  chol_.calc_system_gmm(_A);
-  chol_.solve(_x, _rhs);
+  direct_solver_.calc_system_gmm(_A);
+  direct_solver_.solve(_x, _rhs);
 
   // check solver performance (only for testing!!!)
   {
     StopWatch sw;
 
+    // hack
     const bool enable_performance_test = false;
 
     // performance comparison code
@@ -155,6 +157,7 @@ MISolver::solve_direct_rounding(
 #endif
 
     // performance comparison code
+#if(COMISO_SUITESPARSE_AVAILABLE)
     if(enable_performance_test)
     {
       sw.start();
@@ -185,6 +188,25 @@ MISolver::solve_direct_rounding(
       gmm::add(_x,gmm::scaled(x4,-1.0),res);
       std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
     }
+#endif
+
+#if(COMISO_Eigen3_AVAILABLE)
+    // performance comparison code
+    if(enable_performance_test)
+    {
+      sw.start();
+      COMISO::EigenLDLTSolver ldlt;
+      ldlt.calc_system_gmm(_A);
+      std::cerr << "Eigen LDLT factor took: " << sw.stop()/1000.0 << "s\n";
+      Vecd x5(_x);
+      sw.start();
+      ldlt.solve(x5,_rhs);
+      std::cerr << "Eigen LDLT solve took: " << sw.stop()/1000.0 << "s\n";
+      Vecd res(_x);
+      gmm::add(_x,gmm::scaled(x5,-1.0),res);
+      std::cerr << "DIFFERENCE IN RESULT: " << gmm::vect_norm2(res) << std::endl;
+    }
+#endif
   }
 
   // round and eliminate variables
@@ -213,9 +235,9 @@ MISolver::solve_direct_rounding(
   // final full solution
   if( gmm::mat_ncols( _A) > 0)
   {
-    //    chol_.update_system_gmm(_A);
-    chol_.calc_system_gmm(_A);
-    chol_.solve( xr, _rhs);
+    //    direct_solver_.update_system_gmm(_A);
+    direct_solver_.calc_system_gmm(_A);
+    direct_solver_.solve( xr, _rhs);
   }
 
   // store solution values to result vector
@@ -269,8 +291,8 @@ MISolver::solve_iterative(
   if( initial_full_solution_)
   {
     if( noisy_ > 2) std::cerr << "initial full solution" << std::endl;
-    chol_.calc_system_gmm(_A);
-    chol_.solve(_x, _rhs);
+    direct_solver_.calc_system_gmm(_A);
+    direct_solver_.solve(_x, _rhs);
 
     cholmod_step_done_ = true;
 
@@ -355,11 +377,11 @@ MISolver::solve_iterative(
     if( gmm::mat_ncols( _A) > 0)
     {
       if(cholmod_step_done_)
-	chol_.update_system_gmm(_A);
+	direct_solver_.update_system_gmm(_A);
       else
-	chol_.calc_system_gmm(_A);
+	direct_solver_.calc_system_gmm(_A);
 
-      chol_.solve( xr, _rhs);
+      direct_solver_.solve( xr, _rhs);
       ++n_full_;
     }
   }
@@ -434,13 +456,13 @@ MISolver::update_solution(
     if( gmm::mat_ncols( _A) > 0)
     {
       if(cholmod_step_done_)
-	chol_.update_system_gmm(_A);
+	direct_solver_.update_system_gmm(_A);
       else
       {
-	chol_.calc_system_gmm(_A);
+	direct_solver_.calc_system_gmm(_A);
 	cholmod_step_done_ = true;
       }
-      chol_.solve(_x,_rhs);
+      direct_solver_.solve(_x,_rhs);
 
       ++n_full_;
     }
@@ -487,8 +509,8 @@ MISolver::solve_multiple_rounding(
   if( initial_full_solution_)
   {
     if( noisy_ > 2) std::cerr << "initial full solution" << std::endl;
-    chol_.calc_system_gmm(_A);
-    chol_.solve(_x, _rhs);
+    direct_solver_.calc_system_gmm(_A);
+    direct_solver_.solve(_x, _rhs);
 
     cholmod_step_done_ = true;
 
@@ -579,11 +601,11 @@ MISolver::solve_multiple_rounding(
     if( gmm::mat_ncols( _A) > 0)
     {
       if(cholmod_step_done_)
-	chol_.update_system_gmm(_A);
+	direct_solver_.update_system_gmm(_A);
       else
-	chol_.calc_system_gmm(_A);
+	direct_solver_.calc_system_gmm(_A);
 
-      chol_.solve( xr, _rhs);
+      direct_solver_.solve( xr, _rhs);
       ++n_full_;
     }
   }

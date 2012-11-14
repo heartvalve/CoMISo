@@ -637,7 +637,36 @@ void eigen_to_cholmod_dense( const MatrixT& _A, cholmod_dense* &_AC, cholmod_com
 
 }*/
 
+// convert a gmm col-sparse matrix into an eigen sparse matrix
+template<class GMM_MatrixT, class EIGEN_MatrixT>
+void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E)
+{
+#ifdef COMISO_Eigen3_AVAILABLE
+  typedef typename EIGEN_MatrixT::Scalar Scalar;
 
+  typedef typename gmm::linalg_traits<GMM_MatrixT>::const_sub_col_type ColT;
+  typedef typename gmm::linalg_traits<ColT>::const_iterator CIter;
+
+  // build matrix triplets
+  typedef Eigen::Triplet< Scalar > Triplet;
+  std::vector< Triplet > triplets;
+  triplets.reserve(gmm::nnz(_G));
+
+  for(unsigned int i=0; i<gmm::mat_ncols(_G); ++i)
+  {
+     ColT col = mat_const_col( _G, i );
+
+     CIter it  = gmm::vect_const_begin( col );
+     CIter ite = gmm::vect_const_end( col );
+     for ( ; it!=ite; ++it )
+       triplets.push_back( Triplet( it.index(), i, *it));
+  }
+
+  // generate eigen matrix
+  _E = EIGEN_MatrixT( gmm::mat_nrows(_G), gmm::mat_ncols(_G));
+  _E.setFromTriplets( triplets.begin(), triplets.end());
+#endif
+}
 
 
 #endif

@@ -37,12 +37,9 @@
 
 #ifdef COMISO_Eigen3_AVAILABLE
 #include <Eigen/Dense>
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
 #endif
-//#include <Eigen/Eigen>
-//#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-//#include <Eigen/Sparse>
-//#endif
 
 #ifndef COMISO_NCHOLMOD
 #include <cholmod.h>
@@ -107,6 +104,10 @@ void eigen_to_cholmod( const MatrixT&  _A,
                      int             _sparsity_type = 0,
                      bool            _long_int      = false);
 #endif
+
+// convert a gmm column-sparse matrix into an eigen sparse matrix
+template<class GMM_MatrixT, class EIGEN_MatrixT>
+void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E);
 
 
 //=============================================================================

@@ -38,8 +38,15 @@
 #include <CoMISo/Config/CoMISoDefines.hh>
 #include <CoMISo/Config/config.hh>
 
+#if COMISO_SUITESPARSE_AVAILABLE
+  #include "CholmodSolver.hh"
+#elif COMISO_Eigen3_AVAILABLE
+  #include "EigenLDLTSolver.hh"
+#else
+  #print "Warning: MISolver requires Suitesparse or Eigen3 support"
+#endif
+
 #include "GMM_Tools.hh"
-#include "CholmodSolver.hh"
 #include "IterativeSolverT.hh"
 
 #include <vector>
@@ -360,7 +367,14 @@ private:
   // flag
   bool         cholmod_step_done_;
 
-  COMISO::CholmodSolver chol_;
+  // declar direct solver depending on availability
+#if COMISO_SUITESPARSE_AVAILABLE
+  COMISO::CholmodSolver   direct_solver_;
+#elif COMISO_Eigen3_AVAILABLE
+  COMISO::EigenLDLTSolver direct_solver_;
+#else
+  #print "Warning: MISolver requires Suitesparse or Eigen3 support"
+#endif
 
   IterativeSolverT<double> siter_;
 
