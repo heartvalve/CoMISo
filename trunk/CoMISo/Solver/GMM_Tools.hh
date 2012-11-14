@@ -27,6 +27,9 @@
 #define COMISO_GMM_TOOLS_HH
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+
 //== INCLUDES =================================================================
 
 #include <iostream>
