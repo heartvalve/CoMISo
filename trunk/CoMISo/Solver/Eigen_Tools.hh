@@ -27,6 +27,10 @@
 #define COMISO_Eigen_TOOLS_HH
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_Eigen3_AVAILABLE
+
 //== INCLUDES =================================================================
 
 #include <iostream>
@@ -35,13 +39,12 @@
 #include <limits>
 #include <cmath>
 
-#ifdef COMISO_Eigen3_AVAILABLE
+
 #include <Eigen/Dense>
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
-#endif
 
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 #include <cholmod.h>
 #endif
 
@@ -91,7 +94,7 @@ template< class Eigen_MatrixT, class IntT >
 void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_MatrixT& _A);
 
 
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 
 /// Eigen to Cholmod_sparse interface
 template<class MatrixT>
@@ -117,7 +120,10 @@ void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E);
 #define COMISO_Eigen_TOOLS_TEMPLATES
 #include "Eigen_Tools.cc"
 #endif
+
 //=============================================================================
+#endif // COMISO_Eigen3_AVAILABLE
+//=============================================================================//=============================================================================
 #endif // Eigen_TOOLS_HH defined
 //=============================================================================
 

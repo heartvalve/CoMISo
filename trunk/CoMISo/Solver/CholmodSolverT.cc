@@ -23,6 +23,11 @@
 \*===========================================================================*/ 
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_SUITESPARSE_AVAILABLE
+//=============================================================================
+
 
 #define COMISO_CHOLMOD_SOLVER_TEMPLATES_C
 
@@ -86,11 +91,13 @@ bool CholmodSolver::calc_system_eigen( const Eigen_MatrixT& _mat)
 {
     if(show_timings_) sw_.start();
 
+#if COMISO_Eigen3_AVAILABLE
     COMISO_EIGEN::get_ccs_symmetric_data( _mat,
 					 'u',
 					 values_, 
 					 rowind_, 
 					 colptr_ );
+#endif
     
     if(show_timings_)
     {
@@ -106,15 +113,19 @@ bool CholmodSolver::calc_system_eigen( const Eigen_MatrixT& _mat)
 template< class Eigen_MatrixT>
 bool CholmodSolver::update_system_eigen( const Eigen_MatrixT& _mat)
 {
-    
+#if COMISO_Eigen3_AVAILABLE    
   COMISO_EIGEN::get_ccs_symmetric_data( _mat,
 				      'u',
 				       values_, 
 				       rowind_, 
 				       colptr_ );
-
+#endif
   return update_system( colptr_, rowind_, values_);
 }
 
 
 }
+
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
+//=============================================================================

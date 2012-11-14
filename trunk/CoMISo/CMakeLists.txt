@@ -207,7 +207,7 @@ if (CPLEX_FOUND )
    add_definitions(-DIL_STD)
 else ()
   message (STATUS "CPLEX not found!")
-  set (COMISO_ARPACK_CONFIG_FILE_SETTINGS "#define COMISO_CPLEX_AVAILABLE 0" )
+  set (COMISO_CPLEX_CONFIG_FILE_SETTINGS "#define COMISO_CPLEX_AVAILABLE 0" )
 endif ()
 
 include_directories (

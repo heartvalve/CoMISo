@@ -8,13 +8,19 @@
 #ifndef COMISO_NCONSTRAINTINTERFACE_HH
 #define COMISO_NCONSTRAINTINTERFACE_HH
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_Eigen3_AVAILABLE
 
 //== INCLUDES =================================================================
 
 #include <CoMISo/Config/CoMISoDefines.hh>
 #include "SuperSparseMatrixT.hh"
+
+
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
+
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -96,6 +102,8 @@ private:
 
 //=============================================================================
 } // namespace COMISO
+//=============================================================================
+#endif // COMISO_Eigen3_AVAILABLE
 //=============================================================================
 #endif // ACG_NCONSTRAINTINTERFACE_HH defined
 //=============================================================================

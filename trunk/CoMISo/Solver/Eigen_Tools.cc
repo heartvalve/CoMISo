@@ -30,6 +30,11 @@
 //
 //=============================================================================
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_Eigen3_AVAILABLE
+
+
 #define COMISO_Eigen_TOOLS_C
 
 //== INCLUDES =================================================================
@@ -38,6 +43,7 @@
 #include <queue>
 #include <CoMISo/Utils/StopWatch.hh>
 #include <CoMISo/Utils/VSToolsT.hh>
+#include <gmm/gmm.h>
 
 
 //== NAMESPACES ===============================================================
@@ -327,7 +333,7 @@ void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_M
 
 //-----------------------------------------------------------------------------
 
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 
 /// Eigen to Cholmod_sparse interface
 template<class MatrixT>
@@ -489,6 +495,7 @@ void eigen_to_cholmod( const MatrixT& _A, cholmod_sparse* &_AC, cholmod_common* 
   }
 
 }
+#endif
 
 /*
 /// Eigen to Cholmod_dense interface
@@ -668,9 +675,10 @@ void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E)
 #endif
 }
 
-
-#endif
-
 //=============================================================================
 } // namespace COMISO
+//=============================================================================
+
+//=============================================================================
+#endif // COMISO_Eigen3_AVAILABLE
 //=============================================================================

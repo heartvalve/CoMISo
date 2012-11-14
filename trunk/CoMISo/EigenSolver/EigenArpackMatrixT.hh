@@ -8,6 +8,11 @@
 #ifndef COMISO_EIGENARPACKMATRIXT_HH
 #define COMISO_EIGENARPACKMATRIXT_HH
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if (COMISO_SUITESPARSE_AVAILABLE && COMISO_Eigen3_AVAILABLE)
+//=============================================================================
+
 
 //== INCLUDES =================================================================
 
@@ -113,6 +118,8 @@ private:
 #define COMISO_EIGENARPACKMATRIXT_TEMPLATES
 #include "EigenArpackMatrixT.cc"
 #endif
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
 //=============================================================================
 #endif // COMISO_EIGENARPACKMATRIXT_HH defined
 //=============================================================================

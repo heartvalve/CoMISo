@@ -33,6 +33,9 @@
 #define COMISO_EIGEN_LDLT_SOLVER_HH
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if (COMISO_Eigen3_AVAILABLE)
 //== INCLUDES =================================================================
 
 
@@ -42,10 +45,10 @@
 #include <iostream>
 #include <vector>
 
+
 #include <Eigen/Eigen>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
-
 
 
 //== NAMESPACES ===============================================================
@@ -111,6 +114,8 @@ private:
 #define COMISO_EIGEN_LDLT_SOLVER_TEMPLATES
 #include "EigenLDLTSolverT.cc"
 #endif
+//=============================================================================
+#endif // COMISO_Eigen3_AVAILABLE
 //=============================================================================
 #endif // COMISO_EIGEN_LDLT_SOLVER_HH defined
 //=============================================================================

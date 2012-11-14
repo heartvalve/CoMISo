@@ -1104,7 +1104,7 @@ void print_dense( const MatrixT& _A)
 
 
 //-----------------------------------------------------------------------------
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 
 /// GMM to Cholmod_sparse interface
 template<class MatrixT>
