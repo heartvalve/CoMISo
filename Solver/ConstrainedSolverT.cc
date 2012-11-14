@@ -271,48 +271,13 @@ solve(
 //-----------------------------------------------------------------------------
 
 
-template<class VectorT >
-void
-ConstrainedSolver::
-resolve_const(
-     VectorT&  _x,
-     const VectorT&  _rhs,
-     bool      _show_timings )
-{
-  VectorT  rhs(_rhs);
-
-  // call non-const function
-  resolve(_x,
-  rhs,
-  _show_timings);
-}
-
-
-//-----------------------------------------------------------------------------
-
-
-template<class RMatrixT, class VectorT >
-void
-ConstrainedSolver::
-resolve_const( const RMatrixT& _B,
-       VectorT&  _x,
-       bool      _show_timings )
-{
-  resolve(_B,
-  _x,
-  _show_timings);
-}
-
-
-//-----------------------------------------------------------------------------
-
-
 template<class RMatrixT, class VectorT >
 void
 ConstrainedSolver::
 resolve(
     const RMatrixT& _B,
     VectorT&  _x,
+    VectorT*  _constraint_rhs,
     bool      _show_timings )
 {
   // extract rhs from quadratic system
@@ -350,7 +315,7 @@ resolve(
   }
 
   // solve
-  resolve(_x, rhs,
+  resolve(_x, _constraint_rhs, &rhs,
    _show_timings);
 }
 
@@ -362,19 +327,43 @@ template<class VectorT >
 void
 ConstrainedSolver::
 resolve(
-    VectorT&  _x,
-    VectorT&  _rhs,
-    bool      _show_timings )
+     VectorT&  _x,
+     VectorT*  _constraint_rhs,
+     VectorT*  _rhs           ,
+     bool      _show_timings   )
 {
   // StopWatch for Timings
   COMISO::StopWatch sw;
 
   sw.start();
   // apply stored updates and eliminations to exchanged rhs
-  rhs_update_table_.apply(_rhs);
-  rhs_update_table_.eliminate(_rhs);
+  if(_constraint_rhs)
+  {
+    // apply linear transformation of Gaussian elimination
+    rhs_update_table_.cur_constraint_rhs_.resize(gmm::mat_nrows(rhs_update_table_.D_));
+    gmm::mult(rhs_update_table_.D_, *_constraint_rhs, rhs_update_table_.cur_constraint_rhs_);
 
-  miso_.resolve(_x, _rhs);
+    // update rhs of stored constraints
+    unsigned int nc = gmm::mat_ncols(rhs_update_table_.constraints_p_);
+    for(unsigned int i=0; i<rhs_update_table_.cur_constraint_rhs_.size(); ++i)
+      rhs_update_table_.constraints_p_(i,nc-1) = -rhs_update_table_.cur_constraint_rhs_[i];
+  }
+  if(_rhs)
+    rhs_update_table_.cur_rhs_ = *_rhs;
+
+  std::vector<double> rhs_red = rhs_update_table_.cur_rhs_;
+
+  rhs_update_table_.apply(rhs_update_table_.cur_constraint_rhs_, rhs_red);
+  rhs_update_table_.eliminate(rhs_red);
+
+  //  std::cerr << "############### Resolve info ##############" << std::endl;
+  //  std::cerr << rhs_update_table_.D_ << std::endl;
+  //  std::cerr << rhs_update_table_.cur_rhs_ << std::endl;
+  //  std::cerr << rhs_update_table_.cur_constraint_rhs_ << std::endl;
+  //  std::cerr << rhs_update_table_.table_.size() << std::endl;
+  //  std::cerr << "rhs_red: " << rhs_red << std::endl;
+
+  miso_.resolve(_x, rhs_red);
 
   double time_miso = sw.stop()/1000.0; sw.start();
 
@@ -401,6 +390,12 @@ make_constraints_independent(
 		VectorIT&         _idx_to_round,
 		std::vector<int>& _c_elim)
 {
+  // setup linear transformation for rhs, start with identity
+  unsigned int nr = gmm::mat_nrows(_constraints);
+  gmm::resize(rhs_update_table_.D_, nr, nr);
+  gmm::clear(rhs_update_table_.D_);
+  for(unsigned int i=0; i<nr; ++i) rhs_update_table_.D_(i,i) = 1.0;
+
   //  COMISO::StopWatch sw;
   // number of variables
   int n_vars = gmm::mat_ncols(_constraints);
@@ -559,10 +554,16 @@ make_constraints_independent(
         if( c_it.index() > i)
         {
 	  //          sw.start();
-          add_row_simultaneously( c_it.index(), -(*c_it)/elim_val_cur, gmm::mat_row(_constraints, i), _constraints, constraints_c);
+          double val = -(*c_it)/elim_val_cur;
+
+          add_row_simultaneously( c_it.index(), val, gmm::mat_row(_constraints, i), _constraints, constraints_c);
           // make sure the eliminated entry is 0 on all other rows and not 1e-17
           _constraints( c_it.index(), elim_j) = 0;
           constraints_c(c_it.index(), elim_j) = 0;
+
+          // update linear transition of rhs
+          gmm::add(gmm::scaled(gmm::mat_row(rhs_update_table_.D_, i), val),
+                   gmm::mat_row(rhs_update_table_.D_, c_it.index()));
         }
     }
   }
@@ -581,6 +582,12 @@ make_constraints_independent_reordering(
 		VectorIT&         _idx_to_round,
 		std::vector<int>& _c_elim)
 {
+  // setup linear transformation for rhs, start with identity
+  unsigned int nr = gmm::mat_nrows(_constraints);
+  gmm::resize(rhs_update_table_.D_, nr, nr);
+  gmm::clear(rhs_update_table_.D_);
+  for(unsigned int i=0; i<nr; ++i) rhs_update_table_.D_(i,i) = 1.0;
+
   //  COMISO::StopWatch sw;
   // number of variables
   int n_vars = gmm::mat_ncols(_constraints);
@@ -602,7 +609,6 @@ make_constraints_independent_reordering(
   gmm::copy(_constraints, constraints_c);
 
   // init priority queue
-  unsigned int nr = gmm::mat_nrows(_constraints);
   MutablePriorityQueueT<unsigned int, unsigned int> queue;
   queue.clear( nr );
   for(unsigned int i=0; i<nr; ++i)
@@ -762,7 +768,8 @@ make_constraints_independent_reordering(
 	if( !row_visited[c_it.index()])
         {
 	  //          sw.start();
-          add_row_simultaneously( c_it.index(), -(*c_it)/elim_val_cur, gmm::mat_row(_constraints, i), _constraints, constraints_c);
+          double val = -(*c_it)/elim_val_cur;
+          add_row_simultaneously( c_it.index(), val, gmm::mat_row(_constraints, i), _constraints, constraints_c);
           // make sure the eliminated entry is 0 on all other rows and not 1e-17
           _constraints( c_it.index(), elim_j) = 0;
           constraints_c(c_it.index(), elim_j) = 0;
@@ -772,6 +779,10 @@ make_constraints_independent_reordering(
 	  if( _constraints(cur_idx,n_vars-1) != 0.0) --cur_nnz;
 
 	  queue.update(cur_idx, cur_nnz);
+
+          // update linear transition of rhs
+          gmm::add(gmm::scaled(gmm::mat_row(rhs_update_table_.D_, i), val),
+                   gmm::mat_row(rhs_update_table_.D_, c_it.index()));
         }
     }
   }
@@ -785,6 +796,8 @@ make_constraints_independent_reordering(
   // correct ordering
   RMatrixT c_tmp(gmm::mat_nrows(_constraints), gmm::mat_ncols(_constraints));
   gmm::copy(_constraints,c_tmp);
+  RowMatrix d_tmp(gmm::mat_nrows(rhs_update_table_.D_),gmm::mat_ncols(rhs_update_table_.D_));
+  gmm::copy(rhs_update_table_.D_,d_tmp);
 
   // std::vector<int> elim_temp2(_c_elim);
   // std::sort(elim_temp2.begin(), elim_temp2.end());
@@ -797,6 +810,8 @@ make_constraints_independent_reordering(
   for(unsigned int i=0; i<nr; ++i)
   {
     gmm::copy(gmm::mat_row(c_tmp,row_ordering[i]), gmm::mat_row(_constraints,i));
+    gmm::copy(gmm::mat_row(d_tmp,row_ordering[i]), gmm::mat_row(rhs_update_table_.D_,i));
+
     _c_elim[i] = elim_temp[row_ordering[i]];
   }
 
@@ -957,6 +972,7 @@ eliminate_constraints(
   elim_varids.reserve( _v_elim.size());
 
   rhs_update_table_.clear();
+  std::vector<double> constraint_rhs_vec(_constraints.nrows());
 
   for( unsigned int i=0; i < _v_elim.size(); ++i)
   {
@@ -980,18 +996,19 @@ eliminate_constraints(
       // iterator of matrix column
       AIter col_it, col_end;
       
-      // iterator of constraint
-      CIter con_it  = gmm::vect_const_begin( constraint);
-      CIter con_end = gmm::vect_const_end( constraint);
-
       // constraint rhs
       double constraint_rhs = constraint[ constraint.size()-1];
+      constraint_rhs_vec[i] = -constraint_rhs;
 
       //std::cerr << "constraint_rhs " << constraint_rhs << std::endl;
       // temporarliy set last element to zero (to avoid iterator finding it)
       constraint[ constraint.size()-1] = 0;
 
       double cur_rhs = _rhs[cur_j];
+
+      // iterator of constraint
+      CIter con_it  = gmm::vect_const_begin( constraint);
+      CIter con_end = gmm::vect_const_end( constraint);
 
       // loop over all constraint entries over all column entries
       // should not hit last element (rhs) since set to zero
@@ -1003,7 +1020,8 @@ eliminate_constraints(
           _A( con_it.index(), col_it.index() ) -= ( *col_it )*(( *con_it )/cur_val);
 
         //_rhs[con_it.index()] -= cur_rhs * (( *con_it )/cur_val);
-        rhs_update_table_.append(con_it.index(), -1.0 * (( *con_it )/cur_val), cur_j);
+//        rhs_update_table_.append(con_it.index(), -1.0 * (( *con_it )/cur_val), cur_j);
+        rhs_update_table_.append(con_it.index(), -1.0 * (( *con_it )/cur_val), cur_j, false);
         //std::cerr << con_it.index() << " += " << -1.0*(( *con_it )/cur_val) << " * " << cur_rhs << " (["<<cur_j<<"] = "<<_rhs[cur_j]<<") " << std::endl;
       }
 
@@ -1023,7 +1041,8 @@ eliminate_constraints(
         for ( ; con_it != con_end; ++con_it )
           _A( col_it.index(), con_it.index() ) -= ( *col_it )*(( *con_it )/cur_val);
         //_rhs[col_it.index()] += constraint_rhs*( *col_it )/cur_val;
-        rhs_update_table_.append(col_it.index(), constraint_rhs*( *col_it )/cur_val);
+//        rhs_update_table_.append(col_it.index(), constraint_rhs*( *col_it )/cur_val);
+        rhs_update_table_.append(col_it.index(), -( *col_it )/cur_val, i, true);
         //std::cerr << col_it.index() << " += " << constraint_rhs*( *col_it )/cur_val << std::endl;
       }
 
@@ -1032,7 +1051,11 @@ eliminate_constraints(
     }
   }
 
-  rhs_update_table_.apply(_rhs);
+  // cache current rhs's
+  rhs_update_table_.cur_constraint_rhs_ = constraint_rhs_vec;
+  rhs_update_table_.cur_rhs_            = _rhs;
+  // apply transformation due to elimination
+  rhs_update_table_.apply(constraint_rhs_vec, _rhs);
 
   if( noisy_ > 2)
     std::cerr << __FUNCTION__ << " Constraints integrated " << sw.stop()/1000.0 << std::endl;
