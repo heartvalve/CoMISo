@@ -32,6 +32,9 @@
 #ifndef COMISO_CHOLMOD_SOLVER_HH
 #define COMISO_CHOLMOD_SOLVER_HH
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_SUITESPARSE_AVAILABLE
 
 //== INCLUDES =================================================================
 
@@ -114,6 +117,8 @@ private:
 #define COMISO_CHOLMOD_SOLVER_TEMPLATES
 #include "CholmodSolverT.cc"
 #endif
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
 //=============================================================================
 #endif // COMISO_CHOLMOD_SOLVER_HH defined
 //=============================================================================

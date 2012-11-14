@@ -21,6 +21,8 @@ int
 NewtonSolver::
 solve(NProblemGmmInterface* _problem)
 {
+#if COMISO_SUITESPARSE_AVAILABLE  
+  
   // get problem size
   int n = _problem->n_unknowns();
 
@@ -99,17 +101,19 @@ solve(NProblemGmmInterface* _problem)
       }
     }
   }
-
   _problem->store_result(P(x));
   std::cerr << "Newton Solver did not converge!!! after "
             << max_iter_ << " iterations." << std::endl;
   return false;
+
+#else
+  std::cerr << "Warning: NewtonSolver requires not-available CholmodSolver...\n";
+  return false;
+#endif	    
 }
 
 
 //-----------------------------------------------------------------------------
-
-
 
 
 

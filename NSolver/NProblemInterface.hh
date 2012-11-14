@@ -9,7 +9,12 @@
 #define COMISO_NPROBLEMINTERFACE_HH
 
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
+#if COMISO_Eigen3_AVAILABLE
+
 //== INCLUDES =================================================================
+
 
 #include <Eigen/Eigen>
 #if !(EIGEN_VERSION_AT_LEAST(3,1,0))
@@ -38,13 +43,13 @@ namespace COMISO {
 class COMISODLLEXPORT NProblemInterface
 {
 public:
-  
+
   // Sparse Matrix Type
-#if EIGEN_VERSION_AT_LEAST(3,1,0)  
+ #if EIGEN_VERSION_AT_LEAST(3,1,0)  
   typedef Eigen::SparseMatrix<double,Eigen::ColMajor> SMatrixNP;
-#else
+ #else
   typedef Eigen::DynamicSparseMatrix<double,Eigen::ColMajor> SMatrixNP;
-#endif
+ #endif
   
   /// Default constructor
   NProblemInterface();
@@ -68,6 +73,8 @@ public:
 
 //=============================================================================
 } // namespace COMISO
+//=============================================================================
+#endif // COMISO_Eigen3_AVAILABLE
 //=============================================================================
 #endif // COMISO_NPROBLEMGMMINTERFACE_HH defined
 //=============================================================================

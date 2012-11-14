@@ -8,9 +8,9 @@
 #ifndef COMISO_ARPACKSOLVER_HH
 #define COMISO_ARPACKSOLVER_HH
 
-
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
+#if (COMISO_ARPACK_AVAILABLE && COMISO_SUITESPARSE_AVAILABLE && COMISO_Eigen3_AVAILABLE)
 
 //== INCLUDES =================================================================
 #include <CoMISo/Config/CoMISoDefines.hh>
@@ -18,9 +18,7 @@
 #include <Eigen/Eigen>
 #include "EigenArpackMatrixT.hh"
 
-#if COMISO_ARPACK_AVAILABLE
-  #include <arpack++/arssym.h>
-#endif
+#include <arpack++/arssym.h>
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -44,9 +42,10 @@ namespace COMISO {
 class COMISODLLEXPORT ArpackSolver
 {
 public:
-   
+
   // sparse matrix type
   typedef EigenArpackMatrixT<double,Eigen::SparseMatrix<double,Eigen::ColMajor> > Matrix;
+
 
   /// Constructor
   ArpackSolver() {}
@@ -91,6 +90,8 @@ private:
 #define COMISO_ARPACKSOLVER_TEMPLATES
 #include "ArpackSolver.cc"
 #endif
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
 //=============================================================================
 #endif // ACG_ARPACKSOLVER_HH defined
 //=============================================================================

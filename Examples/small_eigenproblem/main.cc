@@ -22,7 +22,13 @@
  *                                                                           *
 \*===========================================================================*/ 
 
+#include <iostream>
+
+
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
+#if (COMISO_ARPACK_AVAILABLE && COMISO_SUITESPARSE_AVAILABLE && COMISO_Eigen3_AVAILABLE)
+//=============================================================================
 
 #include <CoMISo/Utils/StopWatch.hh>
 #include <vector>
@@ -86,3 +92,16 @@ int main(void)
   return 0;
 }
 
+//=============================================================================
+#else
+//=============================================================================
+
+// Example main
+int main(void)
+{
+  std::cerr << "Info: required dependencies are missing, abort...\n";
+  return 0;
+}
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
+//=============================================================================

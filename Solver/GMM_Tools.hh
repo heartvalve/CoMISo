@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <gmm/gmm.h>
 
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 #include <cholmod.h>
 #endif
 
@@ -245,7 +245,7 @@ template<class MatrixT>
 void print_dense( const MatrixT& _A);
 
 
-#ifndef COMISO_NCHOLMOD
+#if COMISO_SUITESPARSE_AVAILABLE
 
 /// GMM to Cholmod_sparse interface
 template<class MatrixT>

@@ -8,6 +8,8 @@
 #ifndef COMISO_NEWTONSOLVER_HH
 #define COMISO_NEWTONSOLVER_HH
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#include <CoMISo/Config/config.hh>
 
 //== INCLUDES =================================================================
 

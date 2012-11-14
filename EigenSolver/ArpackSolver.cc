@@ -10,6 +10,9 @@
 
 #include "ArpackSolver.hh"
 
+//== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
+#if (COMISO_ARPACK_AVAILABLE && COMISO_SUITESPARSE_AVAILABLE && COMISO_Eigen3_AVAILABLE)
+
 //== NAMESPACES ===============================================================
 
 namespace COMISO {
@@ -26,7 +29,6 @@ solve(const MatrixT&       _A,
       const int            _n_eigvalues,
       const char*          _which_eigs  )
 {
-#if COMISO_ARPACK_AVAILABLE
     Matrix A(_A);
 //    ARSymStdEig<double, Matrix> eig_prob(A.matrix().cols(), _n_eigvalues, &A, &Matrix::mult_Mv, (char*)_which_eigs,
 //                                         0, 0.0, 2000);
@@ -46,7 +48,6 @@ solve(const MatrixT&       _A,
       for(int j = 0; j<A.matrix().rows(); ++j)
         _eigenvectors.coeffRef(j,i) = eig_prob.RawEigenvector(i)[j];
     }
-#endif
 }
 
 
@@ -62,7 +63,6 @@ solve_inverse(const MatrixT&       _A,
     const int            _n_eigvalues,
     const char*          _which_eigs)
 {
-#if COMISO_ARPACK_AVAILABLE
   Matrix A(_A,true);
   ARSymStdEig<double, Matrix> eig_prob(A.matrix().cols(), _n_eigvalues, &A, &Matrix::mult_M_inv_v, (char*)_which_eigs,
       0, 0.0, 2000);
@@ -84,7 +84,6 @@ solve_inverse(const MatrixT&       _A,
     for(int j = 0; j<A.matrix().rows(); ++j)
       _eigenvectors.coeffRef(j,i) = eig_prob.RawEigenvector(i)[j];
   }
-#endif
 }
 
 
@@ -125,4 +124,8 @@ check_result(const MatrixT& _A, std::vector<double>& _eigenvalues, MatrixT2& _ei
 
 //=============================================================================
 } // namespace COMISO
+//=============================================================================
+
+//=============================================================================
+#endif // COMISO_SUITESPARSE_AVAILABLE
 //=============================================================================
