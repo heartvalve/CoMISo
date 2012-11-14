@@ -112,28 +112,16 @@ public:
             bool      _show_miso_settings = true,
             bool      _show_timings = true );
 
-  // efficent re-solve with modified _rhs by keeping previous _constraints and _A fixed
+  // efficent re-solve with modified _constraint_rhs and/or _rhs (if not modified use 0 pointer)
+  // by keeping previous _constraints and _A fixed
+  // _constraint_rhs and _rhs are constant, i.e. not changed
   template<class VectorT >
   void resolve(
        VectorT&  _x,
-       VectorT&  _rhs,
+       VectorT*  _constraint_rhs = 0,
+       VectorT*  _rhs            = 0,
        bool      _show_timings = true );
 
-//  // efficent re-solve with modified _constraint_rhs and/or _rhs (if not modified use 0 pointer)
-//  // by keeping previous _constraints and _A fixed
-//  template<class VectorT >
-//  void resolve(
-//       VectorT&  _x,
-//       VectorT*  _constraint_rhs = 0,
-//       VectorT*  _rhs            = 0,
-//       bool      _show_timings = true );
-
-  // const version of above function
-  template<class VectorT >
-  void resolve_const(
-       VectorT&  _x,
-       const VectorT&  _rhs,
-       bool      _show_timings = true );
 
 /// Non-Quadratic matrix constrained solver
 /**  
@@ -170,17 +158,12 @@ public:
       bool      _show_timings = true );
 
   // efficent re-solve with modified _rhs by keeping previous _constraints and _A fixed
+  // ATTENTION: only the rhs resulting from B^TB can be changed!!! otherwise use solve
   template<class RMatrixT, class VectorT >
     void resolve(
       const RMatrixT& _B,
       VectorT&  _x,
-      bool      _show_timings = true );
-
-  // const version of above function
-  template<class RMatrixT, class VectorT >
-  void resolve_const(
-      const RMatrixT& _B,
-      VectorT&  _x,
+      VectorT*  _constraint_rhs = 0,
       bool      _show_timings = true );
 
 /*@}*/
@@ -386,11 +369,15 @@ private:
   class rhsUpdateTable {
   public:
 
-    void append(int _i, double _f, int _j = -1) { table_.push_back(rhsUpdateTableEntry(_i, _j, _f)); }
+    void append(int _i, double _f, int _j, bool _flag)
+    {
+//      std::cerr << "append " << _i << ", " << _j << ", " << _f << ", " << int(_flag) << std::endl;
+      table_.push_back(rhsUpdateTableEntry(_i, _j, _f, _flag));
+    }
     void add_elim_id(int _i) { elim_var_ids_.push_back(_i); }
     void clear() { table_.clear(); elim_var_ids_.clear(); }
     // apply stored transformations to _rhs
-    void apply(std::vector<double>& _rhs)
+    void apply(std::vector<double>& _constraint_rhs, std::vector<double>& _rhs)
     {
       std::vector<rhsUpdateTableEntry>::const_iterator t_it, t_end;
       t_end = table_.end();
@@ -398,13 +385,13 @@ private:
       double cur_rhs = 0.0;
       for(t_it = table_.begin(); t_it != t_end; ++t_it)
       {
-        if(t_it->j >= 0)
+        if(t_it->rhs_flag)
+            _rhs[t_it->i] += t_it->f*_constraint_rhs[t_it->j];
+        else
         {
           if(t_it->j != cur_j) { cur_j = t_it->j; cur_rhs = _rhs[cur_j]; }
           _rhs[t_it->i] += t_it->f * cur_rhs;
         }
-        else
-          _rhs[t_it->i] += t_it->f;
       }
     }
     // remove eliminated elements from _rhs
@@ -438,18 +425,26 @@ private:
   private:
     class rhsUpdateTableEntry {
     public:
-      rhsUpdateTableEntry(int _i, int _j, double _f) : i(_i), j(_j), f(_f) {}
+      rhsUpdateTableEntry(int _i, int _j, double _f, bool _rhs_flag) : i(_i), j(_j), f(_f), rhs_flag(_rhs_flag) {}
       int i;
       int j;
       double f;
+      bool rhs_flag;
     };
 
     std::vector<rhsUpdateTableEntry> table_;
     std::vector<int> elim_var_ids_;
+
   public:
     std::vector<int> c_elim_;
     std::vector<int> new_idx_;
     RowMatrix constraints_p_;
+
+    // cache current rhs_ and constraint_rhs_ and linear transformation of constraint_rhs_ D_
+    RowMatrix D_;
+    std::vector<double> cur_rhs_;
+    // constraint_rhs after Gaussian elimination update D*constraint_rhs_orig_
+    std::vector<double> cur_constraint_rhs_;
   } rhs_update_table_;
 
 };
