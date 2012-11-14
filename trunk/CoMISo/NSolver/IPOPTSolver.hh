@@ -263,7 +263,8 @@ public:
 
   /** default constructor */
   NProblemGmmIPOPT(NProblemGmmInterface* _problem, std::vector<NConstraintInterface*>& _constraints)
-   : problem_(_problem), constraints_(_constraints) {}
+   : problem_(_problem), constraints_(_constraints), nnz_jac_g_(0), nnz_h_lag_(0) 
+   {}
 
   /** default destructor */
   virtual ~NProblemGmmIPOPT() {};

@@ -91,7 +91,7 @@ int main(void)
   int nullity(dimc-rank);
   // setup permutation matrix
   SpMatrix Pm( n, n);
-  if( P.size() != 0)
+  if( !P.empty())
   {
     for( size_t i = 0; i < P.size(); ++i)
     {
