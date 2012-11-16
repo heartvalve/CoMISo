@@ -3,6 +3,10 @@ www.rwth-graphics.de
 zimmer@informatik.rwth-aachen.de
 bommes@informatik.rwth-aachen.de
 
+Update! Version 1.1
+-------------------
+For the CoMISo to work only Eigen3 and GMM++ are needed.
+
 What is
 -------
 This is a short readme file to get you started with the Constrained Mixed-Integer Solver (CoMISo). It shortly overviews the system prerequisites and explains how to build the package. See the examples and the HarmonicExample OpenFlipper plugin for usage examples and ideas.
