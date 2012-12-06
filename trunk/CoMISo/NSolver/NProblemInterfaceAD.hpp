@@ -241,7 +241,7 @@ public:
         }
     }
 
-    bool use_tape() const {
+    virtual bool use_tape() const {
         return use_tape_;
     }
 
@@ -250,7 +250,7 @@ public:
      * is discontinuous (so that the operator tree
      * has to be re-established at each evaluation)
      */
-    void use_tape(bool _b) {
+    virtual void use_tape(bool _b) {
         use_tape_ = _b;
     }
 
