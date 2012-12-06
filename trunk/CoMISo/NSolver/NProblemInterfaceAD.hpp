@@ -138,6 +138,8 @@ public:
         // Do some status output here...
 #endif
 
+        function_evaluated_ = true;
+
         return y;
     }
 
@@ -146,7 +148,6 @@ public:
         if(!function_evaluated_ || !use_tape_) {
             // Evaluate original functional
             eval_f(_x);
-            function_evaluated_ = true;
         }
 
         gradient(1, n_unknowns_, _x, _g);
@@ -165,7 +166,6 @@ public:
         if(!function_evaluated_ || !use_tape_) {
             // Evaluate original functional
             eval_f(_x);
-            function_evaluated_ = true;
         }
 
         if(sparse_hessian()) {
