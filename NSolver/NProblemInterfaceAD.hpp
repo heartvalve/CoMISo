@@ -115,30 +115,46 @@ public:
 
     virtual double eval_f(const double* _x) {
 
-        adouble y_d = 0.0;
         double y = 0.0;
 
-        trace_on(1); // Start taping
+        if(!function_evaluated_ || !use_tape_) {
 
-        // Fill data vector
-        for(int i = 0; i < n_unknowns_; ++i) {
-            x_d_[i] <<= _x[i];
-        }
+            adouble y_d = 0.0;
 
-        // Call virtual function to compute
-        // functional value
-        y_d = evaluate(x_d_);
+            trace_on(1); // Start taping
 
-        y_d >>= y;
+            // Fill data vector
+            for(int i = 0; i < n_unknowns_; ++i) {
+                x_d_[i] <<= _x[i];
+            }
 
-        trace_off();
+            // Call virtual function to compute
+            // functional value
+            y_d = evaluate(x_d_);
+
+            y_d >>= y;
+
+            trace_off();
+
+    #ifndef NDEBUG
+            tapestats(1, tape_stats_);
+            // Do some status output here...
+    #endif
+
+            function_evaluated_ = true;
+
+        } else {
+
+            double ay[1] = {0.0};
+
+            int ec = function(1, 1, n_unknowns_, const_cast<double*>(_x), ay);
 
 #ifndef NDEBUG
-        tapestats(1, tape_stats_);
-        // Do some status output here...
+            std::cout << "Info: function() returned code " << ec << std::endl;
 #endif
 
-        function_evaluated_ = true;
+            y = ay[0];
+        }
 
         return y;
     }
