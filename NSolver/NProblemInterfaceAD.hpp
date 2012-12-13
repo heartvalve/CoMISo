@@ -61,15 +61,42 @@ public:
     NProblemInterfaceAD(int _n_unknowns) :
     n_unknowns_(_n_unknowns),
     x_d_(new adouble[_n_unknowns]),
+    r_ind_(NULL),
+    c_ind_(NULL),
+    val_(NULL),
+    H_(NULL),
     function_evaluated_(false),
     use_tape_(true),
     constant_hessian_evaluated_(false) {
 
         for(size_t i = 0; i < 11; ++i) tape_stats_[i] = -1;
+
+        if(sparse_hessian()) {
+            r_ind_ = new unsigned int[n_unknowns_];
+            c_ind_ = new unsigned int[n_unknowns_];
+            val_ = new double[n_unknowns_];
+        } else {
+            H_ = new double*[n_unknowns_];
+            for(int i = 0; i < n_unknowns_; ++i) {
+                H_[i] = new double[i+1];
+            }
+        }
     }
 
     /// Destructor
     virtual ~NProblemInterfaceAD() {
+
+        if(sparse_hessian()) {
+            delete[] r_ind_;
+            delete[] c_ind_;
+            delete[] val_;
+        } else {
+            for(int i = 0; i < n_unknowns_; ++i) {
+                delete[] H_[i];
+            }
+            delete[] H_;
+        }
+
         delete[] x_d_;
     }
 
@@ -86,16 +113,6 @@ public:
     // ================================================
     // Optionally override these methods, too
     // ================================================
-
-    /**
-     * \brief If the hessian is constant it only
-     * has to be computed once if the function
-     * is continuous over the entire domain and
-     * taping is activated.
-     */
-    virtual bool constant_hessian() {
-        return false;
-    }
 
     /**
      * \brief Indicate whether the hessian is sparse.
@@ -166,7 +183,11 @@ public:
             eval_f(_x);
         }
 
-        gradient(1, n_unknowns_, _x, _g);
+        int ec = gradient(1, n_unknowns_, _x, _g);
+
+#ifndef NDEBUG
+        std::cout << "Info: gradient() returned code " << ec << std::endl;
+#endif
     }
 
     virtual void eval_hessian(const double* _x, SMatrixNP& _H) {
@@ -189,12 +210,7 @@ public:
             int nz = 0;
             int opt[2] = {0, 0};
 
-            unsigned int* r_ind = NULL;
-            unsigned int* c_ind = NULL;
-
-            double* val = NULL;
-
-            int ec = sparse_hess(1, n_unknowns_, 0, _x, &nz, &r_ind, &c_ind, &val, opt);
+            int ec = sparse_hess(1, n_unknowns_, 0, _x, &nz, &r_ind_, &c_ind_, &val_, opt);
 
             assert(*nz >= 0);
             assert(r_ind != NULL);
@@ -207,7 +223,7 @@ public:
 
             for(int i = 0; i < nz; ++i) {
 
-                _H.coeffRef(r_ind[i], c_ind[i]) = val[i];
+                _H.coeffRef(r_ind_[i], c_ind_[i]) = val_[i];
             }
 
             if(constant_hessian()) {
@@ -215,20 +231,9 @@ public:
                 constant_hessian_evaluated_ = true;
             }
 
-            delete[] val;
-            delete[] r_ind;
-            delete[] c_ind;
-
         } else {
 
-            double** H;
-
-            H = new double*[n_unknowns_];
-            for(int i = 0; i < n_unknowns_; ++i) {
-                H[i] = new double[i+1];
-            }
-
-            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), H);
+            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), H_);
 
 #ifndef NDEBUG
             std::cout << "Info: hessian() returned code " << ec << std::endl;
@@ -237,10 +242,10 @@ public:
             for(int i = 0; i < n_unknowns_; ++i) {
                 for(int j = 0; j <= i; ++j) {
 
-                    _H.coeffRef(i, j) = H[i][j];
+                    _H.coeffRef(i, j) = H_[i][j];
 
                     if(i != j) {
-                        _H.coeffRef(j, i) = H[i][j];
+                        _H.coeffRef(j, i) = H_[i][j];
                     }
                 }
             }
@@ -249,11 +254,6 @@ public:
                 constant_hessian_ = _H;
                 constant_hessian_evaluated_ = true;
             }
-
-            for(int i = 0; i < n_unknowns_; ++i) {
-                delete[] H[i];
-            }
-            delete[] H;
         }
     }
 
@@ -275,6 +275,14 @@ private:
     int n_unknowns_;
 
     adouble* x_d_;
+
+    // Sparse hessian data
+    unsigned int* r_ind_;
+    unsigned int* c_ind_;
+    double* val_;
+
+    // Non-sparse hessian data
+    double** H_;
 
     int tape_stats_[11];
 
