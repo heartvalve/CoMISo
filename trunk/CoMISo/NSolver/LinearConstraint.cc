@@ -14,7 +14,7 @@
 #include <CoMISo/Config/CoMISoDefines.hh>
 #include "NConstraintInterface.hh"
 #include <gmm/gmm.h>
-#include <CoMISo/NSolver/LinearConstraint.hh>
+#include "LinearConstraint.hh"
 
 //== FORWARDDECLARATIONS ======================================================
 
@@ -48,6 +48,13 @@ void LinearConstraint::resize(const unsigned int _n)
 {
   coeffs_.m_size = _n;
 }
+
+void LinearConstraint::clear()
+{
+  coeffs_.setZero();
+  b_ = 0.0;
+}
+
 
 const LinearConstraint::SVectorNC& LinearConstraint::coeffs() const
 {

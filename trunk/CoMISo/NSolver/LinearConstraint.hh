@@ -53,7 +53,11 @@ public:
 
   virtual int n_unknowns();
 
+  // resize coefficient vector = #unknowns
   void  resize(const unsigned int _n);
+
+  // clear to zero constraint 0 =_type 0
+  void  clear();
 
   const SVectorNC& coeffs() const;
         SVectorNC& coeffs();
