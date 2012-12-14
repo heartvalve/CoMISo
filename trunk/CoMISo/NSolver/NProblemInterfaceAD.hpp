@@ -61,7 +61,7 @@ public:
     /// Default constructor
     NProblemInterfaceAD(int _n_unknowns) :
     n_unknowns_(_n_unknowns),
-    x_d_(new adouble[_n_unknowns]),
+    dense_hessian_(NULL),
     function_evaluated_(false),
     use_tape_(true),
     constant_hessian_evaluated_(false) {
@@ -71,6 +71,13 @@ public:
 
     /// Destructor
     virtual ~NProblemInterfaceAD() {
+
+        if(dense_hessian_ != NULL) {
+            for(int i = 0; i < n_unknowns_; ++i) {
+                delete[] dense_hessian_[i];
+            }
+            delete[] dense_hessian_;
+        }
     }
 
     // ================================================
@@ -111,16 +118,18 @@ public:
 
             adouble y_d = 0.0;
 
+            boost::shared_array<adouble> x_d = x_d_ptr();
+
             trace_on(1); // Start taping
 
             // Fill data vector
             for(int i = 0; i < n_unknowns_; ++i) {
-                x_d_[i] <<= _x[i];
+                x_d[i] <<= _x[i];
             }
 
             // Call virtual function to compute
             // functional value
-            y_d = evaluate(x_d_.get());
+            y_d = evaluate(x_d.get());
 
             y_d >>= y;
 
@@ -180,20 +189,19 @@ public:
 
         if(sparse_hessian()) {
 
-            // Sparse hessian data
-            unsigned int* r_ind = NULL;
-            unsigned int* c_ind = NULL;
-            double* val = NULL;
-
             int nz = 0;
             int opt[2] = {0, 0};
 
-            int ec = sparse_hess(1, n_unknowns_, 0, _x, &nz, &r_ind, &c_ind, &val, opt);
+            unsigned int* r_ind_p = NULL;
+            unsigned int* c_ind_p = NULL;
+            double* val_p = NULL;
+
+            int ec = sparse_hess(1, n_unknowns_, 0, _x, &nz, &r_ind_p, &c_ind_p, &val_p, opt);
 
             assert(*nz >= 0);
-            assert(r_ind != NULL);
-            assert(c_ind != NULL);
-            assert(val != NULL);
+            assert(r_ind_p != NULL);
+            assert(c_ind_p != NULL);
+            assert(val_p != NULL);
 
 #ifndef NDEBUG
             std::cout << "Info: sparse_hessian() returned code " << ec << std::endl;
@@ -201,7 +209,7 @@ public:
 
             for(int i = 0; i < nz; ++i) {
 
-                _H.coeffRef(r_ind[i], c_ind[i]) = val[i];
+                _H.coeffRef(r_ind_p[i], c_ind_p[i]) = val_p[i];
             }
 
             if(constant_hessian()) {
@@ -209,21 +217,16 @@ public:
                 constant_hessian_evaluated_ = true;
             }
 
-            delete[] r_ind;
-            delete[] c_ind;
-            delete[] val;
+            delete[] r_ind_p;
+            delete[] c_ind_p;
+            delete[] val_p;
 
         } else {
 
-            // Non-sparse hessian data
-            double** H;
+            // Dense hessian data
+            double** h_ptr = dense_hessian_ptr();
 
-            H = new double*[n_unknowns_];
-            for(int i = 0; i < n_unknowns_; ++i) {
-                H[i] = new double[i+1];
-            }
-
-            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), H);
+            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), h_ptr);
 
 #ifndef NDEBUG
             std::cout << "Info: hessian() returned code " << ec << std::endl;
@@ -232,10 +235,10 @@ public:
             for(int i = 0; i < n_unknowns_; ++i) {
                 for(int j = 0; j <= i; ++j) {
 
-                    _H.coeffRef(i, j) = H[i][j];
+                    _H.coeffRef(i, j) = h_ptr[i][j];
 
                     if(i != j) {
-                        _H.coeffRef(j, i) = H[i][j];
+                        _H.coeffRef(j, i) = h_ptr[i][j];
                     }
                 }
             }
@@ -244,11 +247,6 @@ public:
                 constant_hessian_ = _H;
                 constant_hessian_evaluated_ = true;
             }
-
-            for(int i = 0; i < n_unknowns_; ++i) {
-                delete[] H[i];
-            }
-            delete[] H;
         }
     }
 
@@ -265,11 +263,54 @@ public:
         use_tape_ = _b;
     }
 
+    /**
+     * \brief Get sample point vector's address
+     *
+     * The objective function class allocates the
+     * memory for this vector at construction.
+     * Get the pointer to this vector and inject it
+     * into the constraint classes in order to
+     * prevent them from allocating their own vectors
+     * (which can be inefficient in terms of memory
+     * consumption in case there are many constraints)
+     */
+
+    boost::shared_array<adouble> x_d_ptr() {
+        if(x_d_.get() == NULL) {
+            x_d_.reset(new adouble[n_unknowns_]);
+        }
+        return x_d_;
+    }
+
+    boost::shared_array<double> grad_ptr() {
+        if(grad_.get() == NULL) {
+            grad_.reset(new double[n_unknowns_]);
+        }
+        return grad_;
+    }
+
+    double** dense_hessian_ptr() {
+        if(dense_hessian_ == NULL) {
+            dense_hessian_ = new double*[n_unknowns_];
+            for(int i = 0; i < n_unknowns_; ++i) {
+                dense_hessian_[i] = new double[i+1];
+            }
+        }
+        return dense_hessian_;
+    }
+
 private:
 
     int n_unknowns_;
 
+    // Shared data
     boost::shared_array<adouble> x_d_;
+
+    // Gradient vector
+    boost::shared_array<double> grad_;
+
+    // Dense hessian
+    double** dense_hessian_;
 
     int tape_stats_[11];
 

@@ -26,6 +26,7 @@
 #include <adolc/taping.h>
 
 #include "NConstraintInterface.hh"
+#include "NProblemInterfaceAD.hpp"
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Sparse>
@@ -52,12 +53,11 @@ public:
     typedef NConstraintInterface::ConstraintType ConstraintType;
 
     /// Default constructor
-    NConstraintInterfaceAD(int _n_unknowns, const ConstraintType _type = NC_EQUAL) :
+    NConstraintInterfaceAD(NProblemInterfaceAD& _problem, int _n_unknowns, const ConstraintType _type = NC_EQUAL) :
         NConstraintInterface(_type),
+        problem_(_problem),
         n_unknowns_(_n_unknowns),
         type_(_type),
-        x_d_(new adouble[n_unknowns_]),
-        grad_(new double[n_unknowns_]),
         function_evaluated_(false),
         use_tape_(true),
         constant_hessian_evaluated_(false) {
@@ -88,16 +88,18 @@ public:
 
             adouble y_d = 0.0;
 
+            boost::shared_array<adouble> x_d_ptr = problem_.x_d_ptr();
+
             trace_on(1); // Start taping
 
             // Fill data vector
             for(int i = 0; i < n_unknowns_; ++i) {
-                x_d_[i] <<= _x[i];
+                x_d_ptr[i] <<= _x[i];
             }
 
             // Call virtual function to compute
             // functional value
-            y_d = evaluate(x_d_.get());
+            y_d = evaluate(x_d_ptr.get());
 
             y_d >>= y;
 
@@ -133,17 +135,19 @@ public:
             eval_constraint(_x);
         }
 
+        boost::shared_array<double> grad_p = problem_.grad_ptr();
+
         _g.resize(n_unknowns_);
         _g.setZero();
 
-        int ec = gradient(1, n_unknowns_, _x, grad_.get());
+        int ec = gradient(1, n_unknowns_, _x, grad_p.get());
 
 #ifndef NDEBUG
         std::cout << "Info: gradient() returned code " << ec << std::endl;
 #endif
 
         for(int i = 0; i < n_unknowns_; ++i) {
-            _g.coeffRef(i) = grad_[i];
+            _g.coeffRef(i) = grad_p[i];
         }
     }
 
@@ -197,14 +201,9 @@ public:
 
         } else {
 
-            double** H;
+            double** h_ptr = problem_.dense_hessian_ptr();
 
-            H = new double*[n_unknowns_];
-            for(int i = 0; i < n_unknowns_; ++i) {
-                H[i] = new double[i+1];
-            }
-
-            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), H);
+            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), h_ptr);
 
 #ifndef NDEBUG
             std::cout << "Info: hessian() returned code " << ec << std::endl;
@@ -213,10 +212,10 @@ public:
             for(int i = 0; i < n_unknowns_; ++i) {
                 for(int j = 0; j <= i; ++j) {
 
-                    _H(i, j) = H[i][j];
+                    _H(i, j) = h_ptr[i][j];
 
                     if(i != j) {
-                        _H(j, i) = H[i][j];
+                        _H(j, i) = h_ptr[i][j];
                     }
                 }
             }
@@ -225,11 +224,6 @@ public:
                 constant_hessian_ = _H;
                 constant_hessian_evaluated_ = true;
             }
-
-            for(int i = 0; i < n_unknowns_; ++i) {
-                delete[] H[i];
-            }
-            delete[] H;
         }
     }
 
@@ -268,15 +262,14 @@ public:
 
 private:
 
+    // Reference to associated objective function
+    NProblemInterfaceAD& problem_;
+
     // Number of unknowns
     int n_unknowns_;
 
     // Constraint type
     ConstraintType type_;
-
-    boost::shared_array<adouble> x_d_;
-
-    boost::shared_array<double> grad_;
 
     int tape_stats_[11];
 
