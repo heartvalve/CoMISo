@@ -66,7 +66,8 @@ public:
   virtual void   store_result ( const double* _x               ) = 0;
 
   // advanced properties
-  virtual bool   constant_hessian() { return false; }
+  virtual bool   constant_gradient() const { return false; }
+  virtual bool   constant_hessian()  const { return false; }
 
 };
 
