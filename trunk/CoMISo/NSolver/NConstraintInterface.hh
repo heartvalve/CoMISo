@@ -73,7 +73,10 @@ public:
     return false;
   }
 
-  virtual bool   is_linear() { return false;}
+  // provide special properties
+  virtual bool   is_linear()         const { return false;}
+  virtual bool   constant_gradient() const { return false;}
+  virtual bool   constant_hessian () const { return false;}
 
   virtual double gradient_update_factor( const double* _x, double _eps = 1e-6 )
   {
