@@ -241,17 +241,6 @@ public:
     }
 
     /**
-     * \brief Override this function and let it return
-     * true if you want to speed up the computation
-     * by exploiting the fact that the hessian
-     * matrix is constant and thus has to be evaluated
-     * only once.
-     */
-    virtual bool constant_hessian() {
-        return false;
-    }
-
-    /**
      * \brief Indicate whether the hessian is sparse.
      * If so, the computations (as well as the memory
      * consumption) can be performed more efficiently.
