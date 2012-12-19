@@ -63,8 +63,7 @@ public:
     n_unknowns_(_n_unknowns),
     dense_hessian_(NULL),
     function_evaluated_(false),
-    use_tape_(true),
-    constant_hessian_evaluated_(false) {
+    use_tape_(true) {
 
         for(size_t i = 0; i < 11; ++i) tape_stats_[i] = -1;
     }
@@ -177,11 +176,6 @@ public:
         _H.resize(n_unknowns_, n_unknowns_);
         _H.setZero();
 
-        if(constant_hessian() && constant_hessian_evaluated_) {
-            _H = constant_hessian_;
-            return;
-        }
-
         if(!function_evaluated_ || !use_tape_) {
             // Evaluate original functional
             eval_f(_x);
@@ -212,11 +206,6 @@ public:
                 _H.coeffRef(r_ind_p[i], c_ind_p[i]) = val_p[i];
             }
 
-            if(constant_hessian()) {
-                constant_hessian_ = _H;
-                constant_hessian_evaluated_ = true;
-            }
-
             delete[] r_ind_p;
             delete[] c_ind_p;
             delete[] val_p;
@@ -242,15 +231,10 @@ public:
                     }
                 }
             }
-
-            if(constant_hessian()) {
-                constant_hessian_ = _H;
-                constant_hessian_evaluated_ = true;
-            }
         }
     }
 
-    virtual bool use_tape() const {
+    bool use_tape() const {
         return use_tape_;
     }
 
@@ -259,7 +243,7 @@ public:
      * is discontinuous (so that the operator tree
      * has to be re-established at each evaluation)
      */
-    virtual void use_tape(bool _b) {
+    void use_tape(bool _b) {
         use_tape_ = _b;
     }
 
@@ -316,9 +300,6 @@ private:
 
     bool function_evaluated_;
     bool use_tape_;
-
-    SMatrixNP constant_hessian_;
-    bool constant_hessian_evaluated_;
 };
 
 //=============================================================================
