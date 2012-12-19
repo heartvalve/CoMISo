@@ -232,11 +232,11 @@ public:
      * is discontinuous (so that the operator tree
      * has to be re-established at each evaluation)
      */
-    virtual bool use_tape() const {
+    bool use_tape() const {
         return use_tape_;
     }
 
-    virtual void use_tape(bool _b) {
+    void use_tape(bool _b) {
         use_tape_ = _b;
     }
 
