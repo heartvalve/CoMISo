@@ -169,7 +169,7 @@ solve(NProblemInterface*                        _problem,
     // 2. exploit special characteristics of problem
     //----------------------------------------------------------------------------
 
-    std::cerr << "exploit detected special properties: ";
+    std::cerr << "detected special properties which will be exploit: ";
     if(np2->hessian_constant())
     {
       std::cerr << "*constant hessian* ";
