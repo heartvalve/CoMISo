@@ -15,9 +15,6 @@ acg_drop_templates (sources)
 
 if (WIN32)
   acg_add_executable (small_sparseqr WIN32 ${sources} ${headers} )
-elseif (APPLE)
-  # generate bundle on mac
-  acg_add_executable (small_sparseqr MACOSX_BUNDLE ${sources} ${headers} )
 else ()
   acg_add_executable (small_sparseqr ${sources} ${headers} )
 endif ()
@@ -29,14 +26,3 @@ target_link_libraries (small_sparseqr
   CoMISo
   ${COMISO_LINK_LIBRARIES}
 )
-
-if (APPLE)
-   # create bundle in "Build" directory and set icon
-   # no install needed here, because the whole bundle will be installed in the
-   # toplevel CMakeLists.txt
-   set_target_properties (
-      small_sparseqr PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Build"
-      MACOSX_BUNDLE_INFO_STRING "CoMISo small_sparseqr"
-   )
-endif ()
