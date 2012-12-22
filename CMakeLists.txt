@@ -29,6 +29,18 @@ set(COMISO_INCLUDE_DIRECTORIES "")
 set(COMISO_LINK_DIRECTORIES "")
 set(COMISO_LINK_LIBRARIES "")
 
+FIND_PACKAGE( Boost 1.42.0 COMPONENTS system filesystem regex )
+if(Boost_FOUND)
+  set (COMISO_BOOST_CONFIG_FILE_SETTINGS "#define COMISO_BOOST_AVAILABLE 1" )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS} )
+#  list( APPEND COMISO_LINK_DIRECTORIES    ${Boost_LIBRARY_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${Boost_LIBRARIES} )
+else()
+  set (COMISO_BOOST_CONFIG_FILE_SETTINGS "#define COMISO_BOOST_AVAILABLE 0" )
+  message (STATUS "Boost not found!")
+endif ()
+
+
 find_package (GMM)
 if (GMM_FOUND)
   set (COMISO_GMM_CONFIG_FILE_SETTINGS "#define COMISO_GMM_AVAILABLE 1" )
@@ -187,9 +199,9 @@ endif ()
 find_package (GUROBI)
 if (GUROBI_FOUND )
   set (COMISO_GUROBI_CONFIG_FILE_SETTINGS "#define COMISO_GUROBI_AVAILABLE 1" )
-  list( APPEND COMISO_INCLUDE_DIRECTORIES ${GUROBI_INCLUDE_DIR} )
-  list( APPEND COMISO_LINK_DIRECTORIES    ${GUROBI_LIBRARY_DIR} )
-  list( APPEND COMISO_LINK_LIBRARIES  ${GUROBI_LIBRARY} )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${GUROBI_INCLUDE_DIRS} )
+#  list( APPEND COMISO_LINK_DIRECTORIES    ${GUROBI_LIBRARY_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${GUROBI_LIBRARIES} )
 else ()
   message (STATUS "GUROBI not found!")
   set (COMISO_GUROBI_CONFIG_FILE_SETTINGS "#define COMISO_GUROBI_AVAILABLE 0" )
@@ -316,6 +328,7 @@ configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
 # Configure the examples last to be sure, that all configure files
 # of the library are already there
 #######################################################################
+
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/factored_solver/CMakeLists.txt" )
 	add_subdirectory (Examples/factored_solver)
 endif()

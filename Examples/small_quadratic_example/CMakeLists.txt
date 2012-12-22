@@ -1,17 +1,4 @@
-include (ACGCommon)
 include (CoMISoExample)
-
-# source code directories
-set (directories 
-  . 
-)
-
-# collect all header and source files
-acg_append_files (headers "*.hh" ${directories})
-acg_append_files (sources "*.cc" ${directories})
-
-# remove template cc files from source file list
-acg_drop_templates (sources)
 
 if (WIN32)
   acg_add_executable (small_quadratic_solver WIN32 ${sources} ${headers} )
