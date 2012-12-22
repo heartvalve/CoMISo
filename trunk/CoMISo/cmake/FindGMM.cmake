@@ -24,7 +24,8 @@ FIND_PATH(GMM_INCLUDE_DIR NAMES gmm/gmm.h
                                  ../../External/include
                                  /ACG/acgdev/gcc-4.3-i686/gmm-4.1/include/
                                  /ACG/acgdev/gcc-4.3-i686/gmm-3/include/
-                                 ${module_file_path}/../../../External/include)
+                                 ${module_file_path}/../../../External/include
+                                 $ENV{HOME}/opt/gmm/gmm-4.2/include)
 
 
 # Copy the results to the output variables.

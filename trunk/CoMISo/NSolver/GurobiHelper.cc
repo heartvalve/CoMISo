@@ -7,7 +7,7 @@
 
 #include "GurobiHelper.hh"
 
-#if COMISO_GUROBI_AVAILABLE
+#if (COMISO_GUROBI_AVAILABLE && COMISO_BOOST_AVAILABLE)
 
 #include <QTemporaryFile>
 #include <QFileInfo>
