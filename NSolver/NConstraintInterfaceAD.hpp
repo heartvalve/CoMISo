@@ -160,10 +160,12 @@ public:
 
         int ec = gradient(tape_, n_unknowns_, _x, grad_p.get());
 
-        if(ec <= 0) {
+        if(ec < 0) {
             // Retape function if return code indicates discontinuity
             function_evaluated_ = false;
+#ifdef ADOLC_RET_CODES
             std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+#endif
             eval_constraint(_x);
             ec = gradient(tape_, n_unknowns_, _x, grad_p.get());
         }
@@ -201,10 +203,12 @@ public:
             double* val = NULL;
 
             int ec = sparse_hess(tape_, n_unknowns_, 0, _x, &nz, &r_ind, &c_ind, &val, opt);
-            if(ec <= 0) {
+            if(ec < 0) {
                 // Retape function if return code indicates discontinuity
                 function_evaluated_ = false;
+#ifdef ADOLC_RET_CODES
                 std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+#endif
                 eval_constraint(_x);
                 ec = sparse_hess(tape_, n_unknowns_, 0, _x, &nz, &r_ind, &c_ind, &val, opt);
             }
@@ -238,10 +242,12 @@ public:
 
             int ec = hessian(tape_, n_unknowns_, const_cast<double*>(_x), h_ptr);
 
-            if(ec <= 0) {
+            if(ec < 0) {
                 // Retape function if return code indicates discontinuity
                 function_evaluated_ = false;
+#ifdef ADOLC_RET_CODES
                 std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+#endif
                 eval_constraint(_x);
                 ec = hessian(tape_, n_unknowns_, const_cast<double*>(_x), h_ptr);
             }
