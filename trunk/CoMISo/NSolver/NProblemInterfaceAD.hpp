@@ -152,7 +152,6 @@ public:
             std::cout << "Other stats [8]:\t\t\t" << tape_stats_[8] << std::endl;
             std::cout << "Other stats [9]:\t\t\t" << tape_stats_[9] << std::endl;
             std::cout << "Other stats [10]:\t\t\t" << tape_stats_[10] << std::endl;
-            std::cout << "Other stats [11]:\t\t\t" << tape_stats_[11] << std::endl;
             std::cout << "===============================================" << std::endl;
 #endif
 
