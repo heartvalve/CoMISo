@@ -33,6 +33,8 @@
 
 #include <CoMISo/Config/CoMISoDefines.hh>
 
+#include "TapeIDSingleton.hh"
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
@@ -63,9 +65,10 @@ public:
     n_unknowns_(_n_unknowns),
     dense_hessian_(NULL),
     function_evaluated_(false),
-    use_tape_(true) {
+    use_tape_(true),
+    tape_(TapeIDSingleton::Instance()->uniqueTapeID()) {
 
-        for(size_t i = 0; i < 11; ++i) tape_stats_[i] = -1;
+        for(size_t i = 0; i < 11; ++i) tape_stats_[i] = 0;
     }
 
     /// Destructor
@@ -119,7 +122,7 @@ public:
 
             boost::shared_array<adouble> x_d = x_d_ptr();
 
-            trace_on(1); // Start taping
+            trace_on(tape_); // Start taping
 
             // Fill data vector
             for(int i = 0; i < n_unknowns_; ++i) {
@@ -134,10 +137,24 @@ public:
 
             trace_off();
 
-    #ifndef NDEBUG
-            tapestats(1, tape_stats_);
-            // Do some status output here...
-    #endif
+#ifdef ADOLC_STATS
+            tapestats(tape_, tape_stats_);
+            std::cout << "Status values for tape " << tape_ << std::endl;
+            std::cout << "===============================================" << std::endl;
+            std::cout << "Number of independent variables:\t" << tape_stats_[0] << std::endl;
+            std::cout << "Number of dependent variables:\t\t" << tape_stats_[1] << std::endl;
+            std::cout << "Max. number of live active variables:\t" << tape_stats_[2] << std::endl;
+            std::cout << "Size of value stack:\t\t\t" << tape_stats_[3] << std::endl;
+            std::cout << "Buffer size:\t\t\t\t" << tape_stats_[4] << std::endl;
+            std::cout << "Total number of operations recorded:\t" << tape_stats_[5] << std::endl;
+            std::cout << "Other stats [6]:\t\t\t" << tape_stats_[6] << std::endl;
+            std::cout << "Other stats [7]:\t\t\t" << tape_stats_[7] << std::endl;
+            std::cout << "Other stats [8]:\t\t\t" << tape_stats_[8] << std::endl;
+            std::cout << "Other stats [9]:\t\t\t" << tape_stats_[9] << std::endl;
+            std::cout << "Other stats [10]:\t\t\t" << tape_stats_[10] << std::endl;
+            std::cout << "Other stats [11]:\t\t\t" << tape_stats_[11] << std::endl;
+            std::cout << "===============================================" << std::endl;
+#endif
 
             function_evaluated_ = true;
 
@@ -145,9 +162,9 @@ public:
 
             double ay[1] = {0.0};
 
-            int ec = function(1, 1, n_unknowns_, const_cast<double*>(_x), ay);
+            int ec = function(tape_, 1, n_unknowns_, const_cast<double*>(_x), ay);
 
-#ifndef NDEBUG
+#ifdef ADOLC_RET_CODES
             std::cout << "Info: function() returned code " << ec << std::endl;
 #endif
 
@@ -164,9 +181,17 @@ public:
             eval_f(_x);
         }
 
-        int ec = gradient(1, n_unknowns_, _x, _g);
+        int ec = gradient(tape_, n_unknowns_, _x, _g);
 
-#ifndef NDEBUG
+        if(ec <= 0) {
+            // Retape function if return code indicates discontinuity
+            function_evaluated_ = false;
+            std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+            eval_f(_x);
+            ec = gradient(tape_, n_unknowns_, _x, _g);
+        }
+
+#ifdef ADOLC_RET_CODES
         std::cout << "Info: gradient() returned code " << ec << std::endl;
 #endif
     }
@@ -190,14 +215,22 @@ public:
             unsigned int* c_ind_p = NULL;
             double* val_p = NULL;
 
-            int ec = sparse_hess(1, n_unknowns_, 0, _x, &nz, &r_ind_p, &c_ind_p, &val_p, opt);
+            int ec = sparse_hess(tape_, n_unknowns_, 0, _x, &nz, &r_ind_p, &c_ind_p, &val_p, opt);
+
+            if(ec <= 0) {
+                // Retape function if return code indicates discontinuity
+                function_evaluated_ = false;
+                std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+                eval_f(_x);
+                ec = sparse_hess(tape_, n_unknowns_, 0, _x, &nz, &r_ind_p, &c_ind_p, &val_p, opt);
+            }
 
             assert(*nz >= 0);
             assert(r_ind_p != NULL);
             assert(c_ind_p != NULL);
             assert(val_p != NULL);
 
-#ifndef NDEBUG
+#ifdef ADOLC_RET_CODES
             std::cout << "Info: sparse_hessian() returned code " << ec << std::endl;
 #endif
 
@@ -215,9 +248,17 @@ public:
             // Dense hessian data
             double** h_ptr = dense_hessian_ptr();
 
-            int ec = hessian(1, n_unknowns_, const_cast<double*>(_x), h_ptr);
+            int ec = hessian(tape_, n_unknowns_, const_cast<double*>(_x), h_ptr);
 
-#ifndef NDEBUG
+            if(ec <= 0) {
+                // Retape function if return code indicates discontinuity
+                function_evaluated_ = false;
+                std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+                eval_f(_x);
+                ec = hessian(tape_, n_unknowns_, const_cast<double*>(_x), h_ptr);
+            }
+
+#ifdef ADOLC_RET_CODES
             std::cout << "Info: hessian() returned code " << ec << std::endl;
 #endif
 
@@ -296,10 +337,12 @@ private:
     // Dense hessian
     double** dense_hessian_;
 
-    int tape_stats_[11];
+    size_t tape_stats_[11];
 
     bool function_evaluated_;
     bool use_tape_;
+
+    const short int tape_;
 };
 
 //=============================================================================

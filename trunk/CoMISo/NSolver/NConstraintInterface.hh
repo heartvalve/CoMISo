@@ -50,7 +50,7 @@ public:
   enum ConstraintType {NC_EQUAL, NC_LESS_EQUAL, NC_GREATER_EQUAL};
 
   /// Default constructor
-  NConstraintInterface(const ConstraintType _type = NC_EQUAL) : type_(_type) {}
+  NConstraintInterface(const ConstraintType _type = NC_EQUAL, double _eps = 1e-6) : type_(_type), eps_(_eps) {}
  
   /// Destructor
   virtual ~NConstraintInterface() {}
@@ -62,13 +62,13 @@ public:
 
   virtual ConstraintType  constraint_type (                                      ) { return type_; }
 
-  virtual bool            is_satisfied    ( const double* _x, double _eps = 1e-6 )
+  virtual bool            is_satisfied    ( const double* _x )
   {
     switch( type_)
     {
-      case NC_EQUAL        : return (fabs(eval_constraint(_x)) <=  _eps); break;
-      case NC_LESS_EQUAL   : return (     eval_constraint(_x)  <=  _eps); break;
-      case NC_GREATER_EQUAL: return (     eval_constraint(_x)  >= -_eps); break;
+      case NC_EQUAL        : return (fabs(eval_constraint(_x)) <=  eps_); break;
+      case NC_LESS_EQUAL   : return (     eval_constraint(_x)  <=  eps_); break;
+      case NC_GREATER_EQUAL: return (     eval_constraint(_x)  >= -eps_); break;
     }
     return false;
   }
@@ -78,11 +78,11 @@ public:
   virtual bool   constant_gradient() const { return false;}
   virtual bool   constant_hessian () const { return false;}
 
-  virtual double gradient_update_factor( const double* _x, double _eps = 1e-6 )
+  virtual double gradient_update_factor( const double* _x )
   {
     double val = eval_constraint(_x);
-    bool   upper_bound_ok = ( val <=  _eps);
-    bool   lower_bound_ok = ( val >= -_eps);
+    bool   upper_bound_ok = ( val <=  eps_);
+    bool   lower_bound_ok = ( val >= -eps_);
 
     if(upper_bound_ok)
     {
@@ -100,6 +100,8 @@ public:
 private:
   // constraint type
   ConstraintType type_;
+
+  double eps_;
 };
 
 
