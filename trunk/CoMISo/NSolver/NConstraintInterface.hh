@@ -73,6 +73,17 @@ public:
     return false;
   }
 
+  virtual bool            is_satisfied    ( const double* _x, double _eps )
+  {
+    switch( type_)
+    {
+      case NC_EQUAL        : return (fabs(eval_constraint(_x)) <=  _eps); break;
+      case NC_LESS_EQUAL   : return (     eval_constraint(_x)  <=  _eps); break;
+      case NC_GREATER_EQUAL: return (     eval_constraint(_x)  >= -_eps); break;
+    }
+    return false;
+  }
+
   // provide special properties
   virtual bool   is_linear()         const { return false;}
   virtual bool   constant_gradient() const { return false;}
@@ -83,6 +94,24 @@ public:
     double val = eval_constraint(_x);
     bool   upper_bound_ok = ( val <=  eps_);
     bool   lower_bound_ok = ( val >= -eps_);
+
+    if(upper_bound_ok)
+    {
+      if(lower_bound_ok || type_ == NC_LESS_EQUAL) return 0.0;
+      else                                         return 1.0;
+    }
+    else
+    {
+      if(lower_bound_ok && type_ == NC_GREATER_EQUAL) return  0.0;
+      else                                            return -1.0;
+    }
+  }
+
+  virtual double gradient_update_factor( const double* _x, double _eps )
+  {
+    double val = eval_constraint(_x);
+    bool   upper_bound_ok = ( val <=  _eps);
+    bool   lower_bound_ok = ( val >= -_eps);
 
     if(upper_bound_ok)
     {
