@@ -66,6 +66,13 @@ public:
                     const bool                          _silent = false)  // time limit in seconds
   { std::vector<PairIndexVtype> dc; return solve(_problem, _constraints, dc, _time_limit, _silent);}
 
+  // with handling of cone constrints
+  inline bool solve2(NProblemInterface*                  _problem,                // problem instance
+                    std::vector<NConstraintInterface*>& _constraints,            // linear constraints
+                    std::vector<PairIndexVtype>&        _discrete_constraints,   // discrete constraints
+                    const double                        _time_limit = 60,
+                    const bool                          _silent = false);  // time limit in seconds
+
 
 //  void set_problem_output_path    ( const std::string &_problem_output_path);
 //  void set_problem_env_output_path( const std::string &_problem_env_output_path);

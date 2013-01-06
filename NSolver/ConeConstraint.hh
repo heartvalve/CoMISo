@@ -1,12 +1,12 @@
 //=============================================================================
 //
-//  CLASS LinearConstraint
+//  CLASS ConeConstraint
 //
 //=============================================================================
 
 
-#ifndef COMISO_LINEARCONSTRAINT_HH
-#define COMISO_LINEARCONSTRAINT_HH
+#ifndef COMISO_CONECONSTRAINT_HH
+#define COMISO_CONECONSTRAINT_HH
 
 
 //== INCLUDES =================================================================
@@ -25,31 +25,22 @@ namespace COMISO {
 //== CLASS DEFINITION =========================================================
 
 	      
-
-/** \class NProblemGmmInterface NProblemGmmInterface.hh <ACG/.../NPRoblemGmmInterface.hh>
-
-    Brief Description.
-  
-    A more elaborate description follows.
-*/
-class COMISODLLEXPORT LinearConstraint : public NConstraintInterface
+class COMISODLLEXPORT ConeConstraint : public NConstraintInterface
 {
 public:
 
   // sparse vector type
   typedef NConstraintInterface::SVectorNC SVectorNC;
-
-  // different types of constraints
-//  enum ConstraintType {NC_EQUAL, NC_LESS_EQUAL, NC_GREATER_EQUAL};
+  typedef NConstraintInterface::SMatrixNC SMatrixNC;
 
   /// Default constructor
-  LinearConstraint(const ConstraintType _type = NC_EQUAL);
+  ConeConstraint();
 
-  // linear equation of the form -> coeffs_^T *x  + b_=_type= 0
-  LinearConstraint(const SVectorNC& _coeffs, const double _b, const ConstraintType _type = NC_EQUAL);
+  // cone constraint of the form -> 0.5*(c_ * x(i_)^2 - x^T Q_ x) >= 0
+  ConeConstraint(const double _c, const int _i, const SMatrixNC& _Q);
 
   /// Destructor
-  virtual ~LinearConstraint();
+  virtual ~ConeConstraint();
 
   virtual int n_unknowns();
 
@@ -59,11 +50,15 @@ public:
   // clear to zero constraint 0 =_type 0
   void  clear();
 
-  const SVectorNC& coeffs() const;
-        SVectorNC& coeffs();
+  const double&    c() const;
+        double&    c();
 
-  const double&    b() const;
-        double&    b();
+  const int&       i() const;
+        int&       i();
+
+  const SMatrixNC& Q() const;
+        SMatrixNC& Q();
+
 
   virtual double eval_constraint ( const double* _x );
   
@@ -71,18 +66,16 @@ public:
 
   virtual void eval_hessian    ( const double* _x, SMatrixNC& _h      );
 
-  virtual bool   is_linear()         const { return true;}
-  virtual bool   constant_gradient() const { return true;}
+  virtual bool   is_linear()         const { return false;}
+  virtual bool   constant_gradient() const { return false;}
   virtual bool   constant_hessian () const { return true;}
-
-  // inherited from base
-//  virtual ConstraintType  constraint_type (                                      ) { return type_; }
 
 private:
 
-  // linear equation of the form -> coeffs_^T * x + b_
-  SVectorNC coeffs_;
-  double    b_;
+  // cone constraint of the form -> 0.5*(c_ * x(i_)^2 - x^T Q_ x) >= 0
+  double    c_;
+  int       i_;
+  SMatrixNC Q_;
 };
 
 
@@ -90,8 +83,8 @@ private:
 } // namespace COMISO
 //=============================================================================
 // support std vectors
-EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(COMISO::LinearConstraint);
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(COMISO::ConeConstraint);
 //=============================================================================
-#endif // ACG_LINEARCONSTRAINT_HH defined
+#endif // ACG_CONECONSTRAINT_HH defined
 //=============================================================================
 

@@ -60,7 +60,7 @@ public:
   virtual void            eval_gradient   ( const double* _x, SVectorNC& _g      ) = 0;
   virtual void            eval_hessian    ( const double* _x, SMatrixNC& _h      ) = 0;
 
-  virtual ConstraintType  constraint_type (                                      ) { return type_; }
+  virtual ConstraintType& constraint_type (                                      ) { return type_; }
 
   virtual bool            is_satisfied    ( const double* _x )
   {
