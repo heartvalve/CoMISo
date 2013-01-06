@@ -13,7 +13,6 @@
 
 #include <CoMISo/Config/CoMISoDefines.hh>
 #include "NConstraintInterface.hh"
-#include <gmm/gmm.h>
 #include "LinearConstraint.hh"
 
 //== FORWARDDECLARATIONS ======================================================
