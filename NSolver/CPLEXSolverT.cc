@@ -310,7 +310,7 @@ solve(NProblemInterface*                  _problem,
                   << _discrete_constraints[i].first << " vs " << vtypes.size() << std::endl;
 
     // CPLEX variables
-    std::vector<IloNumVar> vars;
+    std::vector<IloNumVar> vars; vars.reserve(_problem->n_unknowns());
     // first all
     for( int i=0; i<_problem->n_unknowns(); ++i)
       switch(vtypes[i])
