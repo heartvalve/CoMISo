@@ -140,6 +140,14 @@ public:
     }
   }
 
+  // scale matrix by scalar
+  void scale(const VT _s)
+  {
+    typename std::map<PII, VT>::iterator m_it = data_.begin();
+    for(; m_it != data_.end(); ++m_it)
+      m_it->second *=_s;
+  }
+
   void print()
   {
     iterator it  = begin();

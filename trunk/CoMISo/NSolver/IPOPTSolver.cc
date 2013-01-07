@@ -751,7 +751,7 @@ bool NProblemIPOPT::eval_h(Index n, const Number* x, bool new_x,
         // store lower triangular part only
         if(it.row() >= it.col())
         {
-          values[gi] = it.value();
+          values[gi] = obj_factor*it.value();
           ++gi;
         }
       }
@@ -778,7 +778,7 @@ bool NProblemIPOPT::eval_h(Index n, const Number* x, bool new_x,
 
     // error check
     if( gi != nele_hess)
-      std::cerr << "Warning: number of non-zeros in Hessian of Lagrangian is incorrect: "
+      std::cerr << "Warning: number of non-zeros in Hessian of Lagrangian is incorrect2: "
                 << gi << " vs " << nele_hess << std::endl;
   }
   return true;

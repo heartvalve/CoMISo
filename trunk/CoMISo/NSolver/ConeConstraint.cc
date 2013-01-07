@@ -30,7 +30,7 @@ ConeConstraint::ConeConstraint()
 {
   Q_.clear();
   i_ = 1.0;
-
+  c_ = 1.0;
 }
 
 // cone constraint of the form -> 0.5*(c_ * x(i_)^2 - x^T Q_ x) >= 0
@@ -121,7 +121,8 @@ void ConeConstraint::eval_gradient( const double* _x, SVectorNC& _g      )
 void ConeConstraint::eval_hessian    ( const double* _x, SMatrixNC& _h      )
 {
   _h = Q_;
-  Q_(i_,i_) += c_;
+  _h.scale(-1.0);
+  _h(i_,i_) += c_;
 }
 
 
