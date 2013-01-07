@@ -30,7 +30,7 @@
 #include <CoMISo/NSolver/LinearConstraint.hh>
 #include <CoMISo/NSolver/NPDerivativeChecker.hh>
 #include <CoMISo/NSolver/CPLEXSolver.hh>
-
+#include <CoMISo/NSolver/IPOPTSolver.hh>
 
 // solve least squares problem for x=1, y=2 and x-2y+z = 1
 // with hard constraints x =-3, z>=3, z^2 >= x^2+y^2
@@ -86,19 +86,27 @@ int main(void)
   cc.Q()(0,0) = 1.0;
   cc.Q()(1,1) = 1.0;
 
-// check if IPOPT solver available in current configuration
-#if( COMISO_CPLEX_AVAILABLE)
-  std::cout << "---------- 3) Get CPLEX solver... " << std::endl;
-  COMISO::CPLEXSolver cplx;
-
-  std::cout << "---------- 4) Solve..." << std::endl;
   // fill constraint vector
   std::vector<COMISO::NConstraintInterface*> constraints;
   constraints.push_back(&lc);
   constraints.push_back(&bc);
   constraints.push_back(&cc);
 
+// check if CPLEX solver available in current configuration
+#if( COMISO_CPLEX_AVAILABLE)
+  std::cout << "---------- 3) Solve with CPLEX solver... " << std::endl;
+
+  COMISO::CPLEXSolver cplx;
   cplx.solve(&lsqp, constraints);
+#endif
+
+  // check if IPOPT solver available in current configuration
+#if( COMISO_IPOPT_AVAILABLE)
+  std::cout << "---------- 3) Solve with IPOPT solver... " << std::endl;
+
+  COMISO::IPOPTSolver ipopt;
+  ipopt.app().Options()->SetStringValue("derivative_test", "second-order");
+  ipopt.solve(&lsqp, constraints);
 #endif
 
   std::cout << "---------- 5) Print solution..." << std::endl;
