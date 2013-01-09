@@ -82,9 +82,11 @@ int main(void)
   COMISO::ConeConstraint cc;
   cc.resize(3);
   cc.i() = 2;
-  cc.c() = 1.0;
-  cc.Q()(0,0) = 1.0;
-  cc.Q()(1,1) = 1.0;
+  cc.c() = 4.0;
+  cc.Q()(0,0) = 2.0;
+  cc.Q()(1,1) = 4.0;
+  cc.Q()(0,1) = 1.0;
+  cc.Q()(1,0) = 1.0;
 
   // fill constraint vector
   std::vector<COMISO::NConstraintInterface*> constraints;
@@ -100,16 +102,20 @@ int main(void)
   cplx.solve(&lsqp, constraints);
 #endif
 
+  std::cout << "---------- 4) Print solution CPLEX..." << std::endl;
+  for( int i=0; i<n; ++i)
+    std::cerr << "x_" << i << " = " << lsqp.x()[i] << std::endl;
+
   // check if IPOPT solver available in current configuration
 #if( COMISO_IPOPT_AVAILABLE)
-  std::cout << "---------- 3) Solve with IPOPT solver... " << std::endl;
+  std::cout << "---------- 5) Solve with IPOPT solver... " << std::endl;
 
   COMISO::IPOPTSolver ipopt;
   ipopt.app().Options()->SetStringValue("derivative_test", "second-order");
   ipopt.solve(&lsqp, constraints);
 #endif
 
-  std::cout << "---------- 5) Print solution..." << std::endl;
+  std::cout << "---------- 6) Print solution..." << std::endl;
   for( int i=0; i<n; ++i)
     std::cerr << "x_" << i << " = " << lsqp.x()[i] << std::endl;
   
