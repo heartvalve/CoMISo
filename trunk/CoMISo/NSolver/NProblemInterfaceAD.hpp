@@ -66,7 +66,7 @@ public:
     dense_hessian_(NULL),
     function_evaluated_(false),
     use_tape_(true),
-    tape_(TapeIDSingleton::Instance()->uniqueTapeID()) {
+    tape_(static_cast<short int>(TapeIDSingleton::Instance()->requestId())) {
 
         for(size_t i = 0; i < 11; ++i) tape_stats_[i] = 0;
     }
@@ -80,6 +80,8 @@ public:
             }
             delete[] dense_hessian_;
         }
+
+        TapeIDSingleton::Instance()->releaseId(static_cast<size_t>(tape_));
     }
 
     // ================================================
