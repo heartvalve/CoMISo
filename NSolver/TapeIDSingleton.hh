@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 class TapeIDSingleton {
 public:
