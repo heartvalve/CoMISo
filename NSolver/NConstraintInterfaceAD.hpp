@@ -64,13 +64,14 @@ public:
         function_evaluated_(false),
         use_tape_(true),
         constant_hessian_evaluated_(false),
-        tape_(TapeIDSingleton::Instance()->uniqueTapeID()) {
+        tape_(static_cast<short int>(TapeIDSingleton::Instance()->requestId())) {
 
         for(size_t i = 0; i < 11; ++i) tape_stats_[i] = 0;
     }
 
     /// Destructor
     virtual ~NConstraintInterfaceAD() {
+        TapeIDSingleton::Instance()->releaseId(static_cast<size_t>(tape_));
     }
 
     /**

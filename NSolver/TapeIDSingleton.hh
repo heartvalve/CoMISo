@@ -8,28 +8,49 @@
 #ifndef TAPEIDSINGLETON_HPP_
 #define TAPEIDSINGLETON_HPP_
 
-#include <string>
+#include <vector>
+#include <cassert>
 
 class TapeIDSingleton {
 public:
     static TapeIDSingleton* Instance() {
+
         if(reference_ == NULL) {
             reference_ = new TapeIDSingleton();
         }
         return reference_;
     }
 
-    short int uniqueTapeID() {
-        short int id = tape_count_;
-        ++tape_count_;
+    size_t requestId() {
+
+        // Test if previously requested id is available again
+        const size_t n = ids_.size();
+        for(size_t i = 0; i < n; ++i) {
+            if(!ids_[i]) {
+                ids_[i] = true;
+                return i;
+            }
+        }
+
+        // Request new id at the end of array
+        size_t id = ids_.size();
+        ids_.push_back(true);
         return id;
     }
+
+    void releaseId(const size_t _i) {
+
+        assert(_i < ids_.size());
+        ids_[_i] = false;
+    }
+
 private:
-    TapeIDSingleton() : tape_count_(0) {}
+
+    TapeIDSingleton() {}
     TapeIDSingleton(const TapeIDSingleton&) {}
     ~TapeIDSingleton() {}
     static TapeIDSingleton* reference_;
-    short int tape_count_;
+    std::vector<bool> ids_;
 };
 
 #endif /* TAPEIDSINGLETON_HPP_ */
