@@ -991,13 +991,14 @@ void factored_to_quadratic( MatrixT& _F, MatrixT2& _Q, VectorT& _rhs)
   gmm::resize(_Q, n-1, n-1);
   gmm::resize(_rhs, n);
 
-  // set up transposed
-  MatrixT Ft(n,m);
-  gmm::copy(gmm::transposed(_F), Ft);
+//  // set up transposed
+//  MatrixT Ft(n,m);
+//  gmm::copy(gmm::transposed(_F), Ft);
 
   // compute quadratic matrix
   MatrixT Q(n,n);
-  gmm::mult(Ft,_F,Q);
+//  gmm::mult(Ft,_F,Q);
+  gmm::mult(gmm::transposed(_F),_F,Q);
 
   // extract rhs
   gmm::copy( gmm::scaled(gmm::mat_const_row( Q, n - 1),-1.0), _rhs);
