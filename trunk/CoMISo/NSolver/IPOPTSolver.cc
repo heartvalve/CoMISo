@@ -442,6 +442,10 @@ analyze_special_properties(const NProblemInterface* _problem, const std::vector<
     if(!hessian_constant_ && !jac_c_constant_ && !jac_d_constant_)
       break;
   }
+
+  //hessian of Lagrangian is only constant, if all hessians of the constraints are zero (due to lambda multipliers)
+  if(!jac_c_constant_ || !jac_d_constant_)
+    hessian_constant_ = false;
 }
 
 
