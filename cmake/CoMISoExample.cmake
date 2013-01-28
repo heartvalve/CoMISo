@@ -1,5 +1,8 @@
+# add our macro directory to cmake search path
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
 include (ACGCommon)
-find_package(COMISO)
+find_package(CoMISo)
 
 #find_package(MUMPS)
 if (MUMPS_FOUND )
@@ -73,7 +76,28 @@ if(Eigen3_FOUND)
   list( APPEND COMISO_INCLUDE_DIRECTORIES ${Eigen3_INCLUDE_DIR})
 endif()
 
+if (CGAL_FOUND)
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${CGAL_INCLUDE_DIR} )
+  list( APPEND COMISO_LINK_DIRECTORIES   ${CGAL_LIBRARY_DIR} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${CGAL_LIBRARIES} )
+endif()
+
+if (CPLEX_FOUND)
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${CPLEX_INCLUDE_DIRS} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${CPLEX_LIBRARIES} )
+  #enable c++ support
+   add_definitions(-DIL_STD)
+endif()
+
+if (GUROBI_FOUND )
+  list( APPEND COMISO_INCLUDE_DIRECTORIES ${GUROBI_INCLUDE_DIRS} )
+  list( APPEND COMISO_LINK_LIBRARIES  ${GUROBI_LIBRARIES} )
+endif ()
+
 #MESSAGE( ${COMISO_LINK_LIBRARIES})
+
+#ToDo:
+#list( APPEND COMISO_LINK_LIBRARIES  "pthread" )
 
 include_directories (
   ..
