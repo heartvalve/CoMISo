@@ -27,7 +27,7 @@
 #include "EigenLDLTSolver.hh"
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
-#if (COMISO_Eigen3_AVAILABLE)
+#if (COMISO_EIGEN3_AVAILABLE)
 //== INCLUDES =================================================================
 
 namespace COMISO {
@@ -113,5 +113,5 @@ show_timings()
 }
 
 //=============================================================================
-#endif // COMISO_Eigen3_AVAILABLE
+#endif // COMISO_EIGEN3_AVAILABLE
 //=============================================================================

@@ -10,7 +10,7 @@
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
-#if COMISO_Eigen3_AVAILABLE
+#if COMISO_EIGEN3_AVAILABLE
 
 //== INCLUDES =================================================================
 
@@ -106,7 +106,7 @@ private:
 //=============================================================================
 } // namespace COMISO
 //=============================================================================
-#endif // COMISO_Eigen3_AVAILABLE
+#endif // COMISO_EIGEN3_AVAILABLE
 //=============================================================================
 #endif // ACG_NCONSTRAINTINTERFACE_HH defined
 //=============================================================================

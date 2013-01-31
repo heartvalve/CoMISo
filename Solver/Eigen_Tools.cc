@@ -32,7 +32,7 @@
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
-#if COMISO_Eigen3_AVAILABLE
+#if COMISO_EIGEN3_AVAILABLE
 
 
 #define COMISO_Eigen_TOOLS_C
@@ -288,7 +288,7 @@ bool is_symmetric( const MatrixT& _A)
 template< class Eigen_MatrixT, class IntT >
 void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_MatrixT& _A)
 {
-#ifdef COMISO_Eigen3_AVAILABLE
+#ifdef COMISO_EIGEN3_AVAILABLE
   typedef typename Eigen_MatrixT::Scalar Scalar;
 
   int m = _QR.innerSize();
@@ -339,7 +339,7 @@ void permute( const Eigen_MatrixT& _QR, const std::vector< IntT>& _Pvec, Eigen_M
 template<class MatrixT>
 void cholmod_to_eigen( const cholmod_sparse& _AC, MatrixT& _A)
 {
-#ifdef COMISO_Eigen3_AVAILABLE
+#ifdef COMISO_EIGEN3_AVAILABLE
   // initialize dimensions
   typedef typename MatrixT::Scalar Scalar;
   typedef Eigen::Triplet< Scalar > Triplet;
@@ -648,7 +648,7 @@ void eigen_to_cholmod_dense( const MatrixT& _A, cholmod_dense* &_AC, cholmod_com
 template<class GMM_MatrixT, class EIGEN_MatrixT>
 void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E)
 {
-#ifdef COMISO_Eigen3_AVAILABLE
+#ifdef COMISO_EIGEN3_AVAILABLE
   typedef typename EIGEN_MatrixT::Scalar Scalar;
 
   typedef typename gmm::linalg_traits<GMM_MatrixT>::const_sub_col_type ColT;
@@ -680,5 +680,5 @@ void gmm_to_eigen( const GMM_MatrixT& _G, EIGEN_MatrixT& _E)
 //=============================================================================
 
 //=============================================================================
-#endif // COMISO_Eigen3_AVAILABLE
+#endif // COMISO_EIGEN3_AVAILABLE
 //=============================================================================
