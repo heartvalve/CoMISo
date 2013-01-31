@@ -11,7 +11,7 @@
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
 #if COMISO_ADOLC_AVAILABLE
-#if COMISO_Eigen3_AVAILABLE
+#if COMISO_EIGEN3_AVAILABLE
 
 //== INCLUDES =================================================================
 
@@ -357,6 +357,6 @@ private:
 //=============================================================================
 #endif // COMISO_ADOLC_AVAILABLE
 //=============================================================================
-#endif // COMISO_Eigen3_AVAILABLE
+#endif // COMISO_EIGEN3_AVAILABLE
 //=============================================================================
 #endif /* NPROBLEMINTERFACEAD_HPP_ */
