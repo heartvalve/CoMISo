@@ -245,6 +245,7 @@ include_directories (
 # generate dllexport macros on windows
 if (WIN32)
   add_definitions(-DCOMISODLL)
+  add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
 endif ()
 
 
@@ -262,11 +263,6 @@ set (directories
   Utils
   QtWidgets
 )
-
-# generate dllexport macros on windows
-if (WIN32)
-  add_definitions(-DCOMISODLL)
-endif ()
 
 if (WIN32)
   add_definitions(
