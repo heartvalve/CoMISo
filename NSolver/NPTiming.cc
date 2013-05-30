@@ -21,7 +21,7 @@ namespace COMISO {
 //== CLASS DEFINITION =========================================================
 
 /// Default constructor
-NPTiming::NPTiming(NProblemGmmInterface* _base) : base_(_base) {start_timing();}
+NPTiming::NPTiming(NProblemInterface* _base) : base_(_base) {start_timing();}
 
 /// Destructor
 NPTiming::~NPTiming() {}
@@ -66,6 +66,17 @@ void NPTiming::store_result ( const double* _x )
   base_->store_result(_x);
   print_statistics();
 }
+
+bool NPTiming::constant_gradient() const
+{
+  return base_->constant_gradient();
+}
+
+bool NPTiming::constant_hessian()  const
+{
+  return base_->constant_hessian();
+}
+
 
 void NPTiming::start_timing()
 {
