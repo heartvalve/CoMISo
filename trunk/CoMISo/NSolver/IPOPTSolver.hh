@@ -101,7 +101,8 @@ public:
 
   // ********* CONFIGURATION ********************* //
   // access the ipopt-application (for setting parameters etc.)
-  // example: app().Options()->SetIntegerValue("max_iter", 100);
+  // examples: app().Options()->SetIntegerValue("max_iter", 100);
+  //           app().Options()->SetStringValue("derivative_test", "second-order");
   Ipopt::IpoptApplication& app() {return (*app_); }
 
 

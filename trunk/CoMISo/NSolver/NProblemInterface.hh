@@ -15,6 +15,7 @@
 
 //== INCLUDES =================================================================
 
+#include <iostream>
 
 #include <Eigen/Eigen>
 #if !(EIGEN_VERSION_AT_LEAST(3,1,0))
