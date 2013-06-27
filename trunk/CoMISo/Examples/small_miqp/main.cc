@@ -102,7 +102,7 @@ public:
   }
 
   // advanced properties
-  virtual bool   constant_hessian() { return true; }
+  virtual bool   constant_hessian() const { return true; }
 };
 
 
