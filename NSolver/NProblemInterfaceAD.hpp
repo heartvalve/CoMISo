@@ -35,6 +35,8 @@
 
 #include "TapeIDSingleton.hh"
 
+#include "NProblemInterface.hh"
+
 //== FORWARDDECLARATIONS ======================================================
 
 //== NAMESPACES ===============================================================
