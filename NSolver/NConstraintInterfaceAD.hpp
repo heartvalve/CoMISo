@@ -175,7 +175,7 @@ public:
 #endif
 
         for(int i = 0; i < n_unknowns_; ++i) {
-            _g.coeffRef(i) = grad_p[i];
+            _g.coeffRef(i) += grad_p[i];
         }
     }
 
@@ -224,7 +224,7 @@ public:
 
             for(int i = 0; i < nz; ++i) {
 
-                _H(r_ind[i], c_ind[i]) = val[i];
+                _H(r_ind[i], c_ind[i]) += val[i];
             }
 
             if(constant_hessian()) {
@@ -259,10 +259,10 @@ public:
             for(int i = 0; i < n_unknowns_; ++i) {
                 for(int j = 0; j <= i; ++j) {
 
-                    _H(i, j) = h_ptr[i][j];
+                    _H(i, j) += h_ptr[i][j];
 
                     if(i != j) {
-                        _H(j, i) = h_ptr[i][j];
+                        _H(j, i) += h_ptr[i][j];
                     }
                 }
             }
