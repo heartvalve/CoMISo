@@ -45,7 +45,7 @@ int LinearConstraint::n_unknowns()
 
 void LinearConstraint::resize(const unsigned int _n)
 {
-  coeffs_.m_size = _n;
+  coeffs_.resize(_n);
 }
 
 void LinearConstraint::clear()
