@@ -45,7 +45,22 @@ int LinearConstraint::n_unknowns()
 
 void LinearConstraint::resize(const unsigned int _n)
 {
-  coeffs_.resize(_n);
+  if(coeffs_.innerSize() != _n)
+  {
+    // resize while maintaining all values in range
+    SVectorNC coeffs_new(_n);
+    coeffs_new.setZero();
+    coeffs_new.reserve(coeffs_.nonZeros());
+
+    SVectorNC::InnerIterator it(coeffs_);
+    for(; it; ++it)
+      if(it.index() < SVectorNC::Index(_n))
+        coeffs_new.insertBack(it.index()) = it.value();
+
+    coeffs_.swap(coeffs_new);
+    //  coeffs_.m_size = _n;
+    //  coeffs_.resize(_n);
+  }
 }
 
 void LinearConstraint::clear()
