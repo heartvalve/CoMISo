@@ -54,6 +54,7 @@ public:
   virtual int n_unknowns();
 
   // resize coefficient vector = #unknowns
+  // maintain all values in range
   void  resize(const unsigned int _n);
 
   // clear to zero constraint 0 =_type 0
