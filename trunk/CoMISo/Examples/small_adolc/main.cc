@@ -1,11 +1,12 @@
 
 //== COMPILE-TIME PACKAGE REQUIREMENTS ========================================
 #include <CoMISo/Config/config.hh>
+#include <iostream>
+
 #if (COMISO_ADOLC_AVAILABLE && COMISO_EIGEN3_AVAILABLE)
 
 #include <CoMISo/Utils/StopWatch.hh>
 #include <vector>
-#include <iostream>
 #include <CoMISo/NSolver/LinearConstraint.hh>
 #include <CoMISo/NSolver/NPDerivativeChecker.hh>
 #include <CoMISo/NSolver/NProblemInterfaceADOLC.hh>
