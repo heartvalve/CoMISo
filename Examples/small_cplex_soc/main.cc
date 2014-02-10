@@ -72,6 +72,7 @@ int main(void)
 
   // set x = -3.0
   COMISO::LinearConstraint lc;
+  lc.resize(n);
   lc.coeffs().coeffRef(0) = 1.0;
   lc.b()                  = 3.0;
 
