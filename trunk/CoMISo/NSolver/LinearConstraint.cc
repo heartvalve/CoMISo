@@ -45,7 +45,7 @@ int LinearConstraint::n_unknowns()
 
 void LinearConstraint::resize(const unsigned int _n)
 {
-  if(coeffs_.innerSize() != _n)
+  if(coeffs_.innerSize() != (int)_n)
   {
     // resize while maintaining all values in range
     SVectorNC coeffs_new(_n);
