@@ -1,6 +1,6 @@
 //=============================================================================
 //
-//  CLASS NProblemGmmInterface
+//  CLASS NProblemInterface
 //
 //=============================================================================
 
@@ -35,7 +35,7 @@ namespace COMISO {
 
 	      
 
-/** \class NProblemGmmInterface NProblemGmmInterface.hh <ACG/.../NPRoblemGmmInterface.hh>
+/** \class NProblemInterface NProblemGmmInterface.hh <COMISO/NSolver/NPRoblemInterface.hh>
 
     Brief Description.
   
