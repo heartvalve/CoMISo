@@ -442,6 +442,14 @@ public:
       std::cout << "===============================================" << std::endl;
     }
 
+    void use_tape(bool _b) {
+    	always_retape_ = _b;
+    }
+
+    bool use_tape() const {
+    	return always_retape_;
+    }
+
 private:
 
     // index of tape
