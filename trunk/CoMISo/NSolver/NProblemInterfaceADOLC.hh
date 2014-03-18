@@ -443,11 +443,11 @@ public:
     }
 
     void use_tape(bool _b) {
-    	always_retape_ = _b;
+    	always_retape_ = !_b;
     }
 
     bool use_tape() const {
-    	return always_retape_;
+    	return !always_retape_;
     }
 
 private:
