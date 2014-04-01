@@ -213,7 +213,7 @@ public:
                 ec = sparse_hess(tape_, n_unknowns_, 0, _x, &nz, &r_ind, &c_ind, &val, opt);
             }
 
-            assert(*nz >= 0);
+            assert(nz >= 0);
             assert(r_ind != NULL);
             assert(c_ind != NULL);
             assert(val != NULL);
