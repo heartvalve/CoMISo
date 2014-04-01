@@ -26,22 +26,22 @@
 
 //== NAMESPACES ===============================================================
 
-namespace COMISO { 
+namespace COMISO {
 
 //== CLASS DEFINITION =========================================================
 
-	      
+
 
 /** \class NProblemGmmInterface NProblemGmmInterface.hh <ACG/.../NPRoblemGmmInterface.hh>
 
     Brief Description.
-  
+
     A more elaborate description follows.
 */
 class COMISODLLEXPORT NConstraintInterface
 {
 public:
-  
+
   // define Sparse Datatypes
   typedef Eigen::SparseVector<double> SVectorNC;
   typedef SuperSparseMatrixT<double>  SMatrixNC;
@@ -51,7 +51,7 @@ public:
 
   /// Default constructor
   NConstraintInterface(const ConstraintType _type = NC_EQUAL, double _eps = 1e-6) : type_(_type) {}
- 
+
   /// Destructor
   virtual ~NConstraintInterface() {}
 
@@ -77,6 +77,7 @@ public:
   virtual bool   is_linear()         const { return false;}
   virtual bool   constant_gradient() const { return false;}
   virtual bool   constant_hessian () const { return false;}
+  virtual bool   sparse_hessian()    const { return true; }
 
   virtual double gradient_update_factor( const double* _x, double _eps = 1e-6)
   {
