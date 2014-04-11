@@ -99,7 +99,7 @@ solve(NProblemInterface*                  _problem,
       NConstraintInterface::SVectorNC::InnerIterator v_it(gc);
       for(; v_it; ++v_it)
 //        lin_expr += v_it.value()*vars[v_it.index()];
-        lin_expr = lin_expr + vars[v_it.index()]*v_it.value();
+        lin_expr += vars[v_it.index()]*v_it.value();
 
       double b = _constraints[i]->eval_constraint(P(x));
 
