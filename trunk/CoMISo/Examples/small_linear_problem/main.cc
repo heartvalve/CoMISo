@@ -28,6 +28,7 @@
 #include <vector>
 #include <CoMISo/NSolver/LinearProblem.hh>
 #include <CoMISo/NSolver/LinearConstraint.hh>
+#include <CoMISo/NSolver/VariableType.hh>
 #include <CoMISo/NSolver/NPDerivativeChecker.hh>
 #include <CoMISo/NSolver/CPLEXSolver.hh>
 #include <CoMISo/NSolver/GUROBISolver.hh>
