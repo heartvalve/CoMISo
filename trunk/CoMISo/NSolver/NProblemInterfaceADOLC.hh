@@ -201,32 +201,32 @@ public:
 
 
         int ec = sparse_hess( tape_,
-                              this->n_unknowns(),
-                              sparsity_pattern_available,
-                              _x,
-                              &sparse_nz_,
-                              &sparse_r_ind_p_,
-                              &sparse_c_ind_p_,
-                              &sparse_val_p_,
-                              opt);
+            this->n_unknowns(),
+            sparsity_pattern_available,
+            _x,
+            &sparse_nz_,
+            &sparse_r_ind_p_,
+            &sparse_c_ind_p_,
+            &sparse_val_p_,
+            opt);
 
         if(ec < 0)
         {
 #ifdef ADOLC_RET_CODES
-          std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
 #endif
-          // Retape function if return code indicates discontinuity
-          tape_available_ = false;
-          eval_f(_x);
-          ec = sparse_hess( tape_,
-                            this->n_unknowns(),
-                            sparsity_pattern_available,
-                            _x,
-                            &sparse_nz_,
-                            &sparse_r_ind_p_,
-                            &sparse_c_ind_p_,
-                            &sparse_val_p_,
-                            opt);
+// Retape function if return code indicates discontinuity
+tape_available_ = false;
+eval_f(_x);
+ec = sparse_hess( tape_,
+    this->n_unknowns(),
+    sparsity_pattern_available,
+    _x,
+    &sparse_nz_,
+    &sparse_r_ind_p_,
+    &sparse_c_ind_p_,
+    &sparse_val_p_,
+    opt);
         }
 
         // data should be available now
@@ -294,6 +294,95 @@ public:
         _H.setFromTriplets(triplets.begin(), triplets.end());
       }
     }
+
+    // automatic evaluation of hessian
+    // this function avoids data structure conversions and gives access to the raw sparse data type
+    virtual void eval_hessian_sparse(const double* _x, int& _nz, unsigned int*& _r_idx, unsigned int*& _c_idx, double*& _val)
+    {
+      // tape update required?
+      if(!tape_available_ || always_retape_)
+        eval_f(_x);
+      int opt[2] = {0, 0};
+
+      bool sparsity_pattern_available = bool(sparse_r_ind_p_);
+
+
+      int ec = sparse_hess( tape_,
+          this->n_unknowns(),
+          sparsity_pattern_available,
+          _x,
+          &sparse_nz_,
+          &sparse_r_ind_p_,
+          &sparse_c_ind_p_,
+          &sparse_val_p_,
+          opt);
+
+      if(ec < 0)
+      {
+#ifdef ADOLC_RET_CODES
+        std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+#endif
+        // Retape function if return code indicates discontinuity
+        tape_available_ = false;
+        eval_f(_x);
+        ec = sparse_hess( tape_,
+            this->n_unknowns(),
+            sparsity_pattern_available,
+            _x,
+            &sparse_nz_,
+            &sparse_r_ind_p_,
+            &sparse_c_ind_p_,
+            &sparse_val_p_,
+            opt);
+      }
+
+      // data should be available now
+      assert(sparse_r_ind_p_ != NULL);
+      assert(sparse_c_ind_p_ != NULL);
+      assert(sparse_val_p_   != NULL);
+
+      // return result
+      _nz    = sparse_nz_;
+      _r_idx = sparse_r_ind_p_;
+      _c_idx = sparse_c_ind_p_;
+      _val   = sparse_val_p_;
+
+#ifdef ADOLC_RET_CODES
+      std::cout << "Info: sparse_hessian() returned code " << ec << std::endl;
+#endif
+    }
+
+
+    // automatic evaluation of hessian
+    // this function avoids data structure conversions and gives access to the raw dense data type
+    virtual void eval_hessian_dense(const double* _x, double**& _H)
+    {
+      // tape update required?
+      if(!tape_available_ || always_retape_)
+        eval_f(_x);
+
+      allocate_dense_hessian();
+
+      int ec = hessian(tape_, this->n_unknowns(), const_cast<double*>(_x), dense_hessian_);
+
+      if(ec < 0) {
+#ifdef ADOLC_RET_CODES
+        std::cout << __FUNCTION__ << " invokes retaping of function due to discontinuity! Return code: " << ec << std::endl;
+#endif
+        // Retape function if return code indicates discontinuity
+        tape_available_ = false;
+        eval_f(_x);
+        ec = hessian(tape_, this->n_unknowns(), const_cast<double*>(_x), dense_hessian_);
+      }
+
+      // copy pointer to result
+      _H = dense_hessian_;
+
+#ifdef ADOLC_RET_CODES
+      std::cout << "Info: hessian() returned code " << ec << std::endl;
+#endif
+    }
+
 
 private:
 
