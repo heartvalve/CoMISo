@@ -7,19 +7,49 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 include (ACGCommon)
 
-acg_qt4 ()
-# change to 0 if QT should not be used
-set( WANT_COMISO_QT 1 )
-if( QT4_FOUND)
-  #message( WARNING " QT4 FOUND" )
-  if( WANT_COMISO_QT )
-    add_definitions (-DQT4_FOUND)
-  #  message( WARNING " USING QT4" )
+
+# Flag to enable or disable QT widgets in CoMISo
+set( WANT_COMISO_QT ON CACHE BOOL "Enable Qt support in CoMISo" )
+
+
+if( WANT_COMISO_QT )
+
+  # try to use QT5 if possible otherwise stick to QT4
+  set (FORCE_QT4 ON CACHE BOOL "Use Qt4 even if Qt5 was found")
+
+  # Qt5 or Qt4?
+  if (NOT FORCE_QT4)
+    acg_qt5 ()
+  else()
+    set (QT5_FOUND false)
+  endif()
+
+  # Fallback to qt4 if not found or forced
+  if (NOT QT5_FOUND)
+    message(STATUS "Using QT4 for CoMISo")
+    acg_qt4 (4.7.0)
+  else ()
+    message(STATUS "Using QT5 for CoMISo")
   endif ()
-  set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 1" )
-else()
-  set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 0" )
-endif ()
+
+  # QT4 settings in CoMISo
+  if( QT4_FOUND)
+    add_definitions (-DQT4_FOUND)
+    set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 1" )
+  else()
+    set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 0" )
+  endif ()
+
+  # QT5 settings in CoMISo
+  if( QT5_FOUND)
+    message(WARNING "QT5 selected, but Qt5 is not supported yet!")
+    add_definitions (-DQT5_FOUND)
+    set (COMISO_QT5_CONFIG_FILE_SETTINGS "#define COMISO_QT5_AVAILABLE 1" )
+  else()
+    set (COMISO_QT5_CONFIG_FILE_SETTINGS "#define COMISO_QT5_AVAILABLE 0" )
+  endif ()
+  
+endif( WANT_COMISO_QT )
 
 acg_get_version ()
 
@@ -272,7 +302,10 @@ endif ()
 # collect all header,source and ui files
 acg_append_files (headers "*.hh" ${directories})
 acg_append_files (sources "*.cc" ${directories})
+
+if( QT4_FOUND)
 acg_append_files (ui "*.ui" ${directories})
+endif()
 
 
 macro (of_list_filter _list)
@@ -296,17 +329,17 @@ if( QT4_FOUND)
 # genereate uic and moc targets
 acg_qt4_autouic (uic_targets ${ui})
 acg_qt4_automoc (moc_targets ${headers})
+list (APPEND COMISO_LINK_LIBRARIES ${QT_LIBRARIES})
 endif()
+
 acg_add_library (CoMISo SHARED ${uic_targets} ${sources} ${headers} ${moc_targets})
 
 if (NOT APPLE)
 	target_link_libraries (CoMISo 
-	  ${QT_LIBRARIES}
 	  ${COMISO_LINK_LIBRARIES}
 	)
 else(NOT APPLE)
 	target_link_libraries (CoMISo
-	  ${QT_LIBRARIES}
 	  ${COMISO_LINK_LIBRARIES}
 	)
 endif(NOT APPLE)
