@@ -42,7 +42,6 @@ if( WANT_COMISO_QT )
 
   # QT5 settings in CoMISo
   if( QT5_FOUND)
-    message(WARNING "QT5 selected, but Qt5 is not supported yet!")
     add_definitions (-DQT5_FOUND)
     set (COMISO_QT5_CONFIG_FILE_SETTINGS "#define COMISO_QT5_AVAILABLE 1" )
   else()
