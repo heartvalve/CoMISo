@@ -329,7 +329,7 @@ if( QT4_FOUND )
 acg_qt4_autouic (uic_targets ${ui})
 acg_qt4_automoc (moc_targets ${headers})
 list (APPEND COMISO_LINK_LIBRARIES ${QT_LIBRARIES})
-elsif ( QT5_FOUND )
+elseif ( QT5_FOUND )
 # genereate uic and moc targets
 acg_qt5_autouic (uic_targets ${ui})
 acg_qt5_automoc (moc_targets ${headers})
