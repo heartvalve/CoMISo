@@ -302,7 +302,7 @@ endif ()
 acg_append_files (headers "*.hh" ${directories})
 acg_append_files (sources "*.cc" ${directories})
 
-if( QT4_FOUND)
+if( QT4_FOUND OR QT5_FOUND )
 acg_append_files (ui "*.ui" ${directories})
 endif()
 
@@ -324,10 +324,15 @@ of_list_filter  ( sources )
 # remove template cc files from source file list
 acg_drop_templates (sources)
 
-if( QT4_FOUND)
+if( QT4_FOUND )
 # genereate uic and moc targets
 acg_qt4_autouic (uic_targets ${ui})
 acg_qt4_automoc (moc_targets ${headers})
+list (APPEND COMISO_LINK_LIBRARIES ${QT_LIBRARIES})
+elsif ( QT5_FOUND )
+# genereate uic and moc targets
+acg_qt5_autouic (uic_targets ${ui})
+acg_qt5_automoc (moc_targets ${headers})
 list (APPEND COMISO_LINK_LIBRARIES ${QT_LIBRARIES})
 endif()
 
