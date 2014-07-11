@@ -32,21 +32,16 @@ if( WANT_COMISO_QT )
     message(STATUS "Using QT5 for CoMISo")
   endif ()
 
-  # QT4 settings in CoMISo
+  # QT settings in CoMISo
   if( QT4_FOUND)
     add_definitions (-DQT4_FOUND)
-    set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 1" )
-  else()
-    set (COMISO_QT4_CONFIG_FILE_SETTINGS "#define COMISO_QT4_AVAILABLE 0" )
-  endif ()
-
-  # QT5 settings in CoMISo
-  if( QT5_FOUND)
+    set (COMISO_QT_CONFIG_FILE_SETTINGS "#define COMISO_QT_AVAILABLE 1" )
+  elseif( QT5_FOUND)
     add_definitions (-DQT5_FOUND)
-    set (COMISO_QT5_CONFIG_FILE_SETTINGS "#define COMISO_QT5_AVAILABLE 1" )
+    set (COMISO_QT_CONFIG_FILE_SETTINGS "#define COMISO_QT_AVAILABLE 1" )
   else()
-    set (COMISO_QT5_CONFIG_FILE_SETTINGS "#define COMISO_QT5_AVAILABLE 0" )
-  endif ()
+    set (COMISO_QT_CONFIG_FILE_SETTINGS "#define COMISO_QT_AVAILABLE 0" )
+  endif()
   
 endif( WANT_COMISO_QT )
 

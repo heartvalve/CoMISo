@@ -385,7 +385,7 @@ private:
 
   bool use_constraint_reordering_;
 
-#if(COMISO_QT4_AVAILABLE)
+#if(COMISO_QT_AVAILABLE)
   friend class COMISO::MISolverDialog;
 #endif
 };
