@@ -26,7 +26,7 @@
 #include <CoMISo/Config/config.hh>
 #include "MISolver.hh"
 
-#if(COMISO_QT4_AVAILABLE)
+#if(COMISO_QT_AVAILABLE)
 #include <CoMISo/QtWidgets/MISolverDialogUI.hh>
 #endif
 
@@ -725,7 +725,7 @@ void
 MISolver::
 show_options_dialog()
 {
-#if(COMISO_QT4_AVAILABLE)
+#if(COMISO_QT_AVAILABLE)
   MISolverDialog* pd = new MISolverDialog(*this);
   pd->exec();
 #else

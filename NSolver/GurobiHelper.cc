@@ -9,7 +9,7 @@
 
 #if (COMISO_GUROBI_AVAILABLE && COMISO_BOOST_AVAILABLE)
 
-#if (COMISO_QT4_AVAILABLE)
+#if (COMISO_QT_AVAILABLE)
   #include <QTemporaryFile>
   #include <QFileInfo>
 #endif
@@ -85,7 +85,7 @@ void GurobiHelper::outputModelToMpsGz(GRBModel &model, const std::string &proble
 #if OUTPUT_UNCOMPRESSED_WITH_CONSTANT_COMMENT
     boost::scoped_ptr<TempFileGuard> tempFileGuard;
     {
-#if (COMISO_QT4_AVAILABLE)
+#if (COMISO_QT_AVAILABLE)
         QTemporaryFile tempFile("XXXXXX.mps");
         tempFile.setAutoRemove(false);
         tempFile.open();
@@ -133,7 +133,7 @@ void GurobiHelper::outputModelToMpsGz(GRBModel &model, const std::string &proble
 void GurobiHelper::importInitialSolutionIntoModel(GRBModel &model, const std::string &solution_path_) {
     boost::scoped_ptr<TempFileGuard> tempFileGuard;
     {
-#if (COMISO_QT4_AVAILABLE)
+#if (COMISO_QT_AVAILABLE)
         QTemporaryFile tempFile("XXXXXX.mst");
         tempFile.setAutoRemove(false);
         tempFile.open();
