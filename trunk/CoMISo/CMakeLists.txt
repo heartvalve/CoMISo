@@ -412,4 +412,7 @@ endif()
 if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/small_linear_problem/CMakeLists.txt" )
 	add_subdirectory (Examples/small_linear_problem)
 endif()
+if( EXISTS "${CMAKE_SOURCE_DIR}/Examples/crossfield3d/CMakeLists.txt" )
+	add_subdirectory (Examples/crossfield3d)
+endif()
 
