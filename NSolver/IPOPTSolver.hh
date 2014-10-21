@@ -106,6 +106,12 @@ public:
   Ipopt::IpoptApplication& app() {return (*app_); }
 
 
+  void set_print_level(const int _level)
+  {
+    app().Options()->SetIntegerValue("print_level", _level);
+    print_level_ = _level;
+  }
+
 protected:
   double* P(std::vector<double>& _v)
   {
@@ -119,6 +125,8 @@ private:
 
   // smart pointer to IpoptApplication to set options etc.
   Ipopt::SmartPtr<Ipopt::IpoptApplication> app_;
+
+  int print_level_;
 };
 
 
@@ -142,8 +150,8 @@ public:
   typedef NProblemInterface::SMatrixNP    SMatrixNP;
 
   /** default constructor */
-  NProblemIPOPT(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _constraints)
-   : problem_(_problem), store_solution_(false) { split_constraints(_constraints); analyze_special_properties(_problem, _constraints);}
+  NProblemIPOPT(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _constraints, const bool _hessian_approximation = false)
+   : problem_(_problem), store_solution_(false), hessian_approximation_(_hessian_approximation) { split_constraints(_constraints); analyze_special_properties(_problem, _constraints);}
 
   /** default destructor */
   virtual ~NProblemIPOPT() {};
@@ -258,6 +266,8 @@ private:
 
   bool store_solution_;
   std::vector<double> x_;
+
+  bool hessian_approximation_;
 };
 
 

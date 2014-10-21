@@ -45,6 +45,7 @@ IPOPTSolver()
   //  app->Options()->SetIntegerValue("print_level", 0);
   //  app->Options()->SetStringValue("expect_infeasible_problem", "yes");
 
+  print_level_ = 5;
 }
 
 
@@ -57,34 +58,53 @@ IPOPTSolver::
 solve(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _constraints)
 {
   //----------------------------------------------------------------------------
+  // 0. Check whether hessian_approximation is active
+  //----------------------------------------------------------------------------
+  bool hessian_approximation = false;
+  std::string ha, p;
+  app().Options()->GetStringValue("hessian_approximation", ha, p);
+  if(ha != "exact")
+  {
+    if(print_level_>=2)
+      std::cerr << "Hessian approximation is enabled" << std::endl;
+    hessian_approximation = true;
+  }
+
+  //----------------------------------------------------------------------------
   // 1. Create an instance of IPOPT NLP
   //----------------------------------------------------------------------------
-  Ipopt::SmartPtr<Ipopt::TNLP> np = new NProblemIPOPT(_problem, _constraints);
+  Ipopt::SmartPtr<Ipopt::TNLP> np = new NProblemIPOPT(_problem, _constraints, hessian_approximation);
   NProblemIPOPT* np2 = dynamic_cast<NProblemIPOPT*> (Ipopt::GetRawPtr(np));
 
   //----------------------------------------------------------------------------
   // 2. exploit special characteristics of problem
   //----------------------------------------------------------------------------
 
-  std::cerr << "exploit detected special properties: ";
+  if(print_level_>=2)
+    std::cerr << "exploit detected special properties: ";
   if(np2->hessian_constant())
   {
-    std::cerr << "*constant hessian* ";
+    if(print_level_>=2)
+      std::cerr << "*constant hessian* ";
     app().Options()->SetStringValue("hessian_constant", "yes");
   }
 
   if(np2->jac_c_constant())
   {
-    std::cerr << "*constant jacobian of equality constraints* ";
+    if(print_level_>=2)
+      std::cerr << "*constant jacobian of equality constraints* ";
     app().Options()->SetStringValue("jac_c_constant", "yes");
   }
 
   if(np2->jac_d_constant())
   {
-    std::cerr << "*constant jacobian of in-equality constraints*";
+    if(print_level_>=2)
+      std::cerr << "*constant jacobian of in-equality constraints*";
     app().Options()->SetStringValue("jac_d_constant", "yes");
   }
-  std::cerr << std::endl;
+
+  if(print_level_>=2)
+    std::cerr << std::endl;
 
   //----------------------------------------------------------------------------
   // 3. solve problem
@@ -95,7 +115,8 @@ solve(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _co
   status = app_->Initialize();
   if (status != Ipopt::Solve_Succeeded)
   {
-    printf("\n\n*** Error IPOPT during initialization!\n");
+    if(print_level_>=2)
+      printf("\n\n*** Error IPOPT during initialization!\n");
   }
 
   status = app_->OptimizeTNLP( np);
@@ -103,15 +124,16 @@ solve(NProblemInterface* _problem, const std::vector<NConstraintInterface*>& _co
   //----------------------------------------------------------------------------
   // 4. output statistics
   //----------------------------------------------------------------------------
-  if (status == Ipopt::Solve_Succeeded || status == Ipopt::Solved_To_Acceptable_Level)
-  {
-    // Retrieve some statistics about the solve
-    Ipopt::Index iter_count = app_->Statistics()->IterationCount();
-    printf("\n\n*** IPOPT: The problem solved in %d iterations!\n", iter_count);
+  if(print_level_>=2)
+    if (status == Ipopt::Solve_Succeeded || status == Ipopt::Solved_To_Acceptable_Level)
+    {
+      // Retrieve some statistics about the solve
+      Ipopt::Index iter_count = app_->Statistics()->IterationCount();
+      printf("\n\n*** IPOPT: The problem solved in %d iterations!\n", iter_count);
 
-    Ipopt::Number final_obj = app_->Statistics()->FinalObjective();
-    printf("\n\n*** IPOPT: The final value of the objective function is %e.\n", final_obj);
-  }
+      Ipopt::Number final_obj = app_->Statistics()->FinalObjective();
+      printf("\n\n*** IPOPT: The final value of the objective function is %e.\n", final_obj);
+    }
 
   return status;
 }
@@ -129,6 +151,18 @@ solve(NProblemInterface*                        _problem,
       const double                              _almost_infeasible,
       const int                                 _max_passes        )
 {
+  //----------------------------------------------------------------------------
+  // 0. Check whether hessian_approximation is active
+  //----------------------------------------------------------------------------
+  bool hessian_approximation = false;
+  std::string ha, p;
+  app().Options()->GetStringValue("hessian_approximation", ha, p);
+  if(ha != "exact")
+  {
+    std::cerr << "Hessian approximation is enabled" << std::endl;
+    hessian_approximation = true;
+  }
+
   //----------------------------------------------------------------------------
   // 0. Initialize IPOPT Applicaiton
   //----------------------------------------------------------------------------
@@ -160,7 +194,7 @@ solve(NProblemInterface*                        _problem,
     //----------------------------------------------------------------------------
     // 1. Create an instance of current IPOPT NLP
     //----------------------------------------------------------------------------
-    Ipopt::SmartPtr<Ipopt::TNLP> np = new NProblemIPOPT(_problem, constraints);
+    Ipopt::SmartPtr<Ipopt::TNLP> np = new NProblemIPOPT(_problem, constraints, hessian_approximation);
     NProblemIPOPT* np2 = dynamic_cast<NProblemIPOPT*> (Ipopt::GetRawPtr(np));
     // enable caching of solution
     np2->store_solution() = true;
@@ -469,17 +503,21 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
   std::vector<double> x(n);
   problem_->initial_x(P(x));
 
+
   // nonzeros in the jacobian of C_ and the hessian of the lagrangian
   SMatrixNP HP;
   SVectorNC g;
   SMatrixNC H;
-  problem_->eval_hessian(P(x), HP);
+  if(!hessian_approximation_)
+  {
+    problem_->eval_hessian(P(x), HP);
 
-  // get nonzero structure of hessian of problem
-  for(int i=0; i<HP.outerSize(); ++i)
-    for (SMatrixNP::InnerIterator it(HP,i); it; ++it)
-      if(it.row() >= it.col())
-        ++nnz_h_lag;
+    // get nonzero structure of hessian of problem
+    for(int i=0; i<HP.outerSize(); ++i)
+      for (SMatrixNP::InnerIterator it(HP,i); it; ++it)
+        if(it.row() >= it.col())
+          ++nnz_h_lag;
+  }
 
   // get nonzero structure of constraints
   for( int i=0; i<m; ++i)
@@ -488,13 +526,16 @@ bool NProblemIPOPT::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 
     nnz_jac_g += g.nonZeros();
 
-    // count lower triangular elements
-    constraints_[i]->eval_hessian (P(x),H);
+    if(!hessian_approximation_)
+    {
+      // count lower triangular elements
+      constraints_[i]->eval_hessian (P(x),H);
 
-    SMatrixNC::iterator m_it = H.begin();
-    for(; m_it != H.end(); ++m_it)
-      if( m_it.row() >= m_it.col())
-        ++nnz_h_lag;
+      SMatrixNC::iterator m_it = H.begin();
+      for(; m_it != H.end(); ++m_it)
+        if( m_it.row() >= m_it.col())
+          ++nnz_h_lag;
+    }
   }
 
   // We use the standard fortran index style for row/col entries

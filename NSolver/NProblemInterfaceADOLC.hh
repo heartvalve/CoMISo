@@ -122,6 +122,7 @@ public:
       }
       else
       {
+        std::cerr << "re-tape..." << std::endl;
         adouble y_d = 0.0;
 
         adouble* xa = new adouble[this->n_unknowns()];
