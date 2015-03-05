@@ -159,7 +159,8 @@ solve(NProblemInterface*                        _problem,
   app().Options()->GetStringValue("hessian_approximation", ha, p);
   if(ha != "exact")
   {
-    std::cerr << "Hessian approximation is enabled" << std::endl;
+    if(print_level_>=2)
+      std::cerr << "Hessian approximation is enabled" << std::endl;
     hessian_approximation = true;
   }
 
@@ -203,25 +204,25 @@ solve(NProblemInterface*                        _problem,
     // 2. exploit special characteristics of problem
     //----------------------------------------------------------------------------
 
-    std::cerr << "detected special properties which will be exploit: ";
+    if(print_level_>=2) std::cerr << "detected special properties which will be exploit: ";
     if(np2->hessian_constant())
     {
-      std::cerr << "*constant hessian* ";
+      if(print_level_>=2) std::cerr << "*constant hessian* ";
       app().Options()->SetStringValue("hessian_constant", "yes");
     }
 
     if(np2->jac_c_constant())
     {
-      std::cerr << "*constant jacobian of equality constraints* ";
+      if(print_level_>=2) std::cerr << "*constant jacobian of equality constraints* ";
       app().Options()->SetStringValue("jac_c_constant", "yes");
     }
 
     if(np2->jac_d_constant())
     {
-      std::cerr << "*constant jacobian of in-equality constraints*";
+      if(print_level_>=2) std::cerr << "*constant jacobian of in-equality constraints*";
       app().Options()->SetStringValue("jac_d_constant", "yes");
     }
-    std::cerr << std::endl;
+    if(print_level_>=2) std::cerr << std::endl;
 
     //----------------------------------------------------------------------------
     // 3. solve problem
@@ -311,25 +312,25 @@ solve(NProblemInterface*                        _problem,
     // 2. exploit special characteristics of problem
     //----------------------------------------------------------------------------
 
-    std::cerr << "exploit detected special properties: ";
+    if(print_level_>=2) std::cerr << "exploit detected special properties: ";
     if(np2->hessian_constant())
     {
-      std::cerr << "*constant hessian* ";
+      if(print_level_>=2) std::cerr << "*constant hessian* ";
       app().Options()->SetStringValue("hessian_constant", "yes");
     }
 
     if(np2->jac_c_constant())
     {
-      std::cerr << "*constant jacobian of equality constraints* ";
+      if(print_level_>=2) std::cerr << "*constant jacobian of equality constraints* ";
       app().Options()->SetStringValue("jac_c_constant", "yes");
     }
 
     if(np2->jac_d_constant())
     {
-      std::cerr << "*constant jacobian of in-equality constraints*";
+      if(print_level_>=2) std::cerr << "*constant jacobian of in-equality constraints*";
       app().Options()->SetStringValue("jac_d_constant", "yes");
     }
-    std::cerr << std::endl;
+    if(print_level_>=2) std::cerr << std::endl;
 
     //----------------------------------------------------------------------------
     // 3. solve problem
@@ -344,19 +345,25 @@ solve(NProblemInterface*                        _problem,
   //----------------------------------------------------------------------------
   if (status == Ipopt::Solve_Succeeded || status == Ipopt::Solved_To_Acceptable_Level)
   {
-    // Retrieve some statistics about the solve
-    Ipopt::Index iter_count = app_->Statistics()->IterationCount();
-    printf("\n\n*** IPOPT: The problem solved in %d iterations!\n", iter_count);
+    if(print_level_>=2)
+    {
+      // Retrieve some statistics about the solve
+      Ipopt::Index iter_count = app_->Statistics()->IterationCount();
+      printf("\n\n*** IPOPT: The problem solved in %d iterations!\n", iter_count);
 
-    Ipopt::Number final_obj = app_->Statistics()->FinalObjective();
-    printf("\n\n*** IPOPT: The final value of the objective function is %e.\n", final_obj);
+      Ipopt::Number final_obj = app_->Statistics()->FinalObjective();
+      printf("\n\n*** IPOPT: The final value of the objective function is %e.\n", final_obj);
+    }
   }
 
-  std::cerr <<"############# IPOPT with lazy constraints statistics ###############" << std::endl;
-  std::cerr << "overall time: " << overall_time << "s" << std::endl;
-  std::cerr << "#passes     : " << cur_pass << "( of " << _max_passes << ")" << std::endl;
-  for(unsigned int i=0; i<n_inf.size(); ++i)
-    std::cerr << "pass " << i << " induced " << n_inf[i] << " infeasible and " << n_almost_inf[i] << " almost infeasible" << std::endl;
+  if(print_level_>=2)
+  {
+    std::cerr <<"############# IPOPT with lazy constraints statistics ###############" << std::endl;
+    std::cerr << "overall time: " << overall_time << "s" << std::endl;
+    std::cerr << "#passes     : " << cur_pass << "( of " << _max_passes << ")" << std::endl;
+    for(unsigned int i=0; i<n_inf.size(); ++i)
+      std::cerr << "pass " << i << " induced " << n_inf[i] << " infeasible and " << n_almost_inf[i] << " almost infeasible" << std::endl;
+  }
 
   return status;
 }
