@@ -40,16 +40,24 @@ if( WIN32 )
 else( WIN32 )
    IF( APPLE)
 	   FIND_PATH( CHOLMOD_INCLUDE_DIR cholmod.h
-        	      PATHS  /opt/local/include/ufsparse )
+        	      PATHS  /opt/local/include/ufsparse
+                       /usr/local/include
+                       /usr/include
+                       /usr/include/suitesparse/
+                       ${CMAKE_SOURCE_DIR}/MacOS/Libs/cholmod
+                       PATH_SUFFIXES cholmod/ CHOLMOD/ )
 
            FIND_PATH( SUITESPARSE_LIBRARY_DIR
-                      NAMES libSuiteSparse.dylib
-                      PATHS /opt/local/lib )
+                      #NAMES libSuiteSparse.dylib
+                      NAMES libcholmod.a 
+                      PATHS /opt/local/lib
+                            /usr/local/lib
+                            /usr/lib
+                            /usr/lib64 )
 
            list ( APPEND SUITESPARSE_LIBRARY_DIRS ${SUITESPARSE_LIBRARY_DIR} )
 
-           list ( APPEND SUITESPARSE_LIBRARIES SuiteSparse)
-
+#           list ( APPEND SUITESPARSE_LIBRARIES SuiteSparse)
    ELSE(APPLE)
 	   FIND_PATH( CHOLMOD_INCLUDE_DIR cholmod.h
         	      PATHS /usr/local/include 
@@ -78,7 +86,7 @@ else( WIN32 )
    IF ( SUITESPARSE_LIBRARY_DIR )
 
        # Skipped, as this is set for apple in the block above
-       if (NOT APPLE)
+#       if (NOT APPLE)
          list ( APPEND SUITESPARSE_LIBRARIES amd)
          list ( APPEND SUITESPARSE_LIBRARIES btf)
          list ( APPEND SUITESPARSE_LIBRARIES camd)
@@ -88,9 +96,14 @@ else( WIN32 )
  #       list ( APPEND SUITESPARSE_LIBRARIES csparse)
          list ( APPEND SUITESPARSE_LIBRARIES cxsparse)
          list ( APPEND SUITESPARSE_LIBRARIES klu)
- #       list ( APPEND SUITESPARSE_LIBRARIES spqr)
+         list ( APPEND SUITESPARSE_LIBRARIES ldl)
+         list ( APPEND SUITESPARSE_LIBRARIES rbio)
+         list ( APPEND SUITESPARSE_LIBRARIES suitesparseconfig)
+         list ( APPEND SUITESPARSE_LIBRARIES spqr)
          list ( APPEND SUITESPARSE_LIBRARIES umfpack)
-       endif()
+         # should find TBB separately and check if suitesparse was linked with it first, but this is easier for now
+         list ( APPEND SUITESPARSE_LIBRARIES tbb)
+#       endif()
    
        # Metis and spqr are optional
        FIND_LIBRARY( SUITESPARSE_METIS_LIBRARY
