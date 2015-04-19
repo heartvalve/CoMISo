@@ -8,7 +8,7 @@ endif ()
 option (
   BLOCK_IN_SOURCE_BUILD
   "Disable building inside the source tree"
-  ON
+  OFF
 )
 
 if ( BLOCK_IN_SOURCE_BUILD )
