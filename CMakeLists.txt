@@ -358,8 +358,11 @@ endif(NOT APPLE)
 acg_print_configure_header (COMISO "CoMISo")
 
 # write config file
-configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
-     "${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh" @ONLY IMMEDIATE)
+#configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh.in"
+#     "${CMAKE_CURRENT_SOURCE_DIR}/Config/config.hh" @ONLY IMMEDIATE)
+# new include directory structure (name of top-level-directory should not have to be CoMISo!)
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Config/config.hh.in"
+     "${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Config/config.hh" @ONLY IMMEDIATE)
      
      
      
