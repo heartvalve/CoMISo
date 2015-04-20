@@ -378,24 +378,31 @@ configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Config/config.hh.in"
 #"${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Utils/*.hh"
 
 acg_append_files (solver_headers "*.hh" "CoMISo/Solver")
+acg_append_files (solver_sources "*.cc" "CoMISo/Solver")
 acg_append_files (nsolver_headers "*.hh" "CoMISo/NSolver")
+acg_append_files (nsolver_sources "*.cc" "CoMISo/NSolver")
 acg_append_files (eigensolver_headers "*.hh" "CoMISo/EigenSolver")
+acg_append_files (eigensolver_sources "*.cc" "CoMISo/EigenSolver")
 acg_append_files (config_headers "*.hh" "CoMISo/Config")
 acg_append_files (utils_headers "*.hh" "CoMISo/Utils")
 acg_append_files (qtwidgets_headers "*.hh" "CoMISo/QtWidgets")
+acg_append_files (qtwidgets_sources "*.cc" "CoMISo/QtWidgets")
 
 #of_list_filter
 
 install (FILES
   ${solver_headers}
+  ${solver_sources}
   DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/Solver"
 )
 install (FILES
   ${nsolver_headers}
+  ${nsolver_sources}
   DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/NSolver"
 )
 install (FILES
   ${eigensolver_headers}
+  ${eigensolver_sources}
   DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/EigenSolver"
 )
 install (FILES
@@ -408,6 +415,7 @@ install (FILES
 )
 install (FILES
   ${qtwidgets_headers}
+  ${qtwidgets_sources}
   DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/QtWidgets"
 )
      
