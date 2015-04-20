@@ -271,6 +271,7 @@ endif ()
 include_directories (
   ..
   ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/
   ${CMAKE_CURRENT_SOURCE_DIR}/../
   ${CMAKE_CURRENT_BINARY_DIR}
   ${COMISO_INCLUDE_DIRECTORIES}
@@ -290,12 +291,12 @@ link_directories (
 # source code directories
 set (directories 
   .
-  Solver
-  NSolver
-  EigenSolver
-  Config
-  Utils
-  QtWidgets
+  CoMISo/Solver
+  CoMISo/NSolver
+  CoMISo/EigenSolver
+  CoMISo/Config
+  CoMISo/Utils
+  CoMISo/QtWidgets
 )
 
 if (WIN32)
