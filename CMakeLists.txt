@@ -364,7 +364,52 @@ acg_print_configure_header (COMISO "CoMISo")
 # new include directory structure (name of top-level-directory should not have to be CoMISo!)
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Config/config.hh.in"
      "${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Config/config.hh" @ONLY IMMEDIATE)
-     
+
+#INSTALL(
+#  TARGETS CoMISo
+#  ARCHIVE DESTINATION lib
+#  LIBRARY DESTINATION lib
+#  COMPONENT library
+#)
+
+#"${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Solver/*.hh"
+#"${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/NSolver/*.hh"
+#"${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/EigenSolver/*.hh"
+#"${CMAKE_CURRENT_SOURCE_DIR}/CoMISo/Utils/*.hh"
+
+acg_append_files (solver_headers "*.hh" "CoMISo/Solver")
+acg_append_files (nsolver_headers "*.hh" "CoMISo/NSolver")
+acg_append_files (eigensolver_headers "*.hh" "CoMISo/EigenSolver")
+acg_append_files (config_headers "*.hh" "CoMISo/Config")
+acg_append_files (utils_headers "*.hh" "CoMISo/Utils")
+acg_append_files (qtwidgets_headers "*.hh" "CoMISo/QtWidgets")
+
+#of_list_filter
+
+install (FILES
+  ${solver_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/Solver"
+)
+install (FILES
+  ${nsolver_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/NSolver"
+)
+install (FILES
+  ${eigensolver_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/EigenSolver"
+)
+install (FILES
+  ${config_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/Config"
+)
+install (FILES
+  ${utils_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/Utils"
+)
+install (FILES
+  ${qtwidgets_headers}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CoMISo/QtWidgets"
+)
      
      
 #######################################################################
